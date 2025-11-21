@@ -14,8 +14,8 @@ export async function POST(req: Request) {
         const settingsUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
         const stripeSession = await stripe.checkout.sessions.create({
-            success_url: `${settingsUrl}/dashboard`,
-            cancel_url: `${settingsUrl}/pricing`,
+            success_url: `${settingsUrl}/success`,
+            cancel_url: `${settingsUrl}/canceled`,
             payment_method_types: ["card"],
             mode: "subscription",
             billing_address_collection: "auto",
