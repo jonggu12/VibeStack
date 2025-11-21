@@ -3,7 +3,7 @@
 import { OnboardingStepper } from "@/components/onboarding/onboarding-stepper";
 import { ProjectSelection } from "@/components/onboarding/project-selection";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -46,7 +46,7 @@ export default function OnboardingPage() {
             <div className="w-full max-w-4xl space-y-8">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900">Create New Project</h1>
-                    <p className="mt-2 text-gray-600">Let's get your new project set up in minutes.</p>
+                    <p className="mt-2 text-gray-600">Let&apos;s get your new project set up in minutes.</p>
                 </div>
 
                 <OnboardingStepper steps={steps} currentStep={currentStep} />
