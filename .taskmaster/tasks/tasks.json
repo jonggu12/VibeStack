@@ -79,7 +79,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -98,7 +98,7 @@
               1
             ],
             "details": "Use Clerk's SDK to implement the sign-up process. Ensure the form captures necessary user information and handles errors gracefully.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test sign-up with various inputs to ensure proper validation and error handling."
           },
           {
@@ -109,7 +109,7 @@
               2
             ],
             "details": "Utilize Clerk's SDK to implement login and logout. Ensure secure session management and user feedback on login status.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test login/logout flows with valid and invalid credentials to ensure security and usability."
           },
           {
@@ -120,7 +120,7 @@
               3
             ],
             "details": "Configure Clerk to manage user sessions securely. Implement session timeout and renewal strategies to enhance security.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simulate session expiration and renewal to verify security measures."
           },
           {
@@ -131,7 +131,7 @@
               4
             ],
             "details": "Design and integrate UI components for sign-up, login, and logout. Ensure they are responsive and user-friendly.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Conduct UI testing to ensure components render correctly across devices."
           }
         ]
@@ -146,7 +146,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -154,7 +154,7 @@
             "description": "Create a Stripe account and obtain API keys for integration.",
             "dependencies": [],
             "details": "Sign up for a Stripe account and generate the necessary API keys for development and production environments.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify API key access by making a test API call."
           },
           {
@@ -165,7 +165,7 @@
               1
             ],
             "details": "Use Stripe's SDK to integrate the payment gateway, allowing users to make payments securely.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Perform test transactions using Stripe's test mode to ensure payment processing works."
           },
           {
@@ -176,7 +176,7 @@
               2
             ],
             "details": "Define subscription plans in Stripe and integrate subscription management features into the application.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test subscription creation, updates, and cancellations in test mode."
           },
           {
@@ -187,7 +187,7 @@
               2
             ],
             "details": "Use Stripe's security features like webhooks and tokenization to ensure secure transactions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Conduct security audits and test webhook handling."
           },
           {
@@ -199,7 +199,7 @@
               4
             ],
             "details": "Design and implement UI components for users to manage payments and subscriptions easily.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "User testing to ensure the interface is intuitive and functional."
           }
         ]
@@ -222,7 +222,7 @@
             "description": "Create wireframes for the project selection interface.",
             "dependencies": [],
             "details": "Use design tools to create wireframes focusing on user flow and layout.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review wireframes with stakeholders for feedback."
           },
           {
@@ -233,7 +233,7 @@
               1
             ],
             "details": "Translate wireframes into code using React and Tailwind CSS for styling.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Conduct cross-browser testing to ensure consistent appearance."
           },
           {
@@ -242,7 +242,7 @@
             "description": "Create wireframes for the onboarding process.",
             "dependencies": [],
             "details": "Focus on user experience and clarity in the onboarding steps.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Gather feedback from potential users on the wireframes."
           },
           {
@@ -253,7 +253,7 @@
               3
             ],
             "details": "Use React and Tailwind CSS to build a responsive onboarding UI.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test responsiveness on various devices and screen sizes."
           },
           {
@@ -265,7 +265,7 @@
               4
             ],
             "details": "Connect the project selection and onboarding components to provide a smooth user experience.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Conduct user testing to ensure intuitive navigation between components."
           }
         ]
