@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { loadTossPayments } from '@tosspayments/tosspayments-sdk'
 import {
     Dialog,
     DialogContent,
@@ -13,90 +13,101 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, CreditCard, Sparkles, Users, Check } from 'lucide-react'
 
-// 지원하는 통화 및 가격
-const PRICES = {
-    USD: { pro: 12, team: 50, single: 12, symbol: '$', name: 'USD' },
-    KRW: { pro: 15000, team: 65000, single: 15000, symbol: '₩', name: 'KRW' },
-    EUR: { pro: 11, team: 45, single: 11, symbol: '€', name: 'EUR' },
-    JPY: { pro: 1800, team: 7500, single: 1800, symbol: '¥', name: 'JPY' },
+// 가격 정보
+const PRICING = {
+    pro: { amount: 15000, name: 'Pro', period: '/월' },
+    team: { amount: 65000, name: 'Team', period: '/월' },
+    single: { amount: 15000, name: '단건 구매', period: '' },
 } as const
 
-type Currency = keyof typeof PRICES
-type Plan = 'pro' | 'team' | 'single'
+type PlanType = 'pro' | 'team' | 'single'
 
-interface PaymentModalProps {
+interface TossPaymentModalProps {
     isOpen: boolean
     onClose: () => void
-    defaultPlan?: Plan
-    contentId?: string // 단건 구매 시 콘텐츠 ID
-    contentTitle?: string // 단건 구매 시 콘텐츠 제목
+    defaultPlan?: PlanType
+    contentId?: string
+    contentTitle?: string
 }
 
-export function PaymentModal({
+export function TossPaymentModal({
     isOpen,
     onClose,
     defaultPlan = 'pro',
     contentId,
     contentTitle,
-}: PaymentModalProps) {
-    const router = useRouter()
+}: TossPaymentModalProps) {
     const [isLoading, setIsLoading] = useState(false)
-    const [selectedPlan, setSelectedPlan] = useState<Plan>(contentId ? 'single' : defaultPlan)
-    const [selectedCurrency, setSelectedCurrency] = useState<Currency>('USD')
+    const [selectedPlan, setSelectedPlan] = useState<PlanType>(contentId ? 'single' : defaultPlan)
+    const [error, setError] = useState<string | null>(null)
 
-    // 사용자 국가 감지 (브라우저 언어 기반)
-    useState(() => {
-        if (typeof window !== 'undefined') {
-            const language = navigator.language
-            if (language.includes('ko')) setSelectedCurrency('KRW')
-            else if (language.includes('ja')) setSelectedCurrency('JPY')
-            else if (language.includes('de') || language.includes('fr') || language.includes('es'))
-                setSelectedCurrency('EUR')
+    // contentId가 변경되면 plan 업데이트
+    useEffect(() => {
+        if (contentId) {
+            setSelectedPlan('single')
         }
-    })
+    }, [contentId])
 
-    const handleCheckout = async () => {
+    const handlePayment = async () => {
         try {
             setIsLoading(true)
+            setError(null)
 
-            const response = await fetch('/api/stripe/checkout', {
+            // 1. 서버에서 결제 정보 가져오기
+            const response = await fetch('/api/toss/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     plan: selectedPlan,
-                    currency: selectedCurrency,
                     contentId: selectedPlan === 'single' ? contentId : undefined,
+                    contentTitle,
                 }),
             })
 
-            const data = await response.json()
-
-            if (data.url) {
-                router.push(data.url)
-            } else {
-                throw new Error('Failed to create checkout session')
+            if (!response.ok) {
+                throw new Error('결제 정보를 가져오는데 실패했습니다')
             }
-        } catch (error) {
-            console.error('Checkout error:', error)
+
+            const paymentData = await response.json()
+
+            // 2. 토스페이먼츠 SDK 로드
+            const tossPayments = await loadTossPayments(paymentData.clientKey)
+
+            // 3. 결제창 열기
+            const payment = tossPayments.payment({ customerKey: paymentData.customerKey })
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (payment as any).requestPayment({
+                method: 'CARD',
+                amount: {
+                    value: paymentData.amount,
+                    currency: 'KRW',
+                },
+                orderId: paymentData.orderId,
+                orderName: paymentData.orderName,
+                customerEmail: paymentData.customerEmail,
+                customerName: paymentData.customerName,
+                successUrl: paymentData.successUrl,
+                failUrl: paymentData.failUrl,
+            })
+        } catch (err) {
+            console.error('Payment error:', err)
+            setError(err instanceof Error ? err.message : '결제 중 오류가 발생했습니다')
         } finally {
             setIsLoading(false)
         }
     }
 
-    const formatPrice = (plan: Plan) => {
-        const price = PRICES[selectedCurrency][plan]
-        const symbol = PRICES[selectedCurrency].symbol
-
-        // 한국 원화는 천 단위 콤마
-        if (selectedCurrency === 'KRW' || selectedCurrency === 'JPY') {
-            return `${symbol}${price.toLocaleString()}`
-        }
-        return `${symbol}${price}`
+    const formatPrice = (amount: number) => {
+        return new Intl.NumberFormat('ko-KR', {
+            style: 'currency',
+            currency: 'KRW',
+        }).format(amount)
     }
 
     const plans = [
         {
-            id: 'pro' as Plan,
+            id: 'pro' as PlanType,
             name: 'Pro',
             description: '개인 개발자를 위한 무제한 액세스',
             icon: Sparkles,
@@ -107,10 +118,9 @@ export function PaymentModal({
                 '프로젝트 맵 기능',
             ],
             popular: true,
-            period: '/월',
         },
         {
-            id: 'team' as Plan,
+            id: 'team' as PlanType,
             name: 'Team',
             description: '팀을 위한 협업 플랜 (5석)',
             icon: Users,
@@ -121,11 +131,10 @@ export function PaymentModal({
                 '우선 지원',
             ],
             popular: false,
-            period: '/월',
         },
     ]
 
-    // 단건 구매인 경우
+    // 단건 구매 모달
     if (contentId) {
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
@@ -138,23 +147,11 @@ export function PaymentModal({
                     </DialogHeader>
 
                     <div className="space-y-4 py-4">
-                        {/* 통화 선택 */}
-                        <div className="flex gap-2 justify-center">
-                            {(Object.keys(PRICES) as Currency[]).map((currency) => (
-                                <Button
-                                    key={currency}
-                                    variant={selectedCurrency === currency ? 'default' : 'outline'}
-                                    size="sm"
-                                    onClick={() => setSelectedCurrency(currency)}
-                                >
-                                    {PRICES[currency].symbol} {currency}
-                                </Button>
-                            ))}
-                        </div>
-
                         {/* 가격 표시 */}
                         <div className="text-center py-6 bg-muted rounded-lg">
-                            <div className="text-4xl font-bold">{formatPrice('single')}</div>
+                            <div className="text-4xl font-bold">
+                                {formatPrice(PRICING.single.amount)}
+                            </div>
                             <div className="text-sm text-muted-foreground mt-1">일회성 결제</div>
                         </div>
 
@@ -177,10 +174,14 @@ export function PaymentModal({
                             </ul>
                         </div>
 
+                        {error && (
+                            <div className="text-sm text-red-500 text-center">{error}</div>
+                        )}
+
                         <Button
                             className="w-full"
                             size="lg"
-                            onClick={handleCheckout}
+                            onClick={handlePayment}
                             disabled={isLoading}
                         >
                             {isLoading ? (
@@ -192,7 +193,7 @@ export function PaymentModal({
                         </Button>
 
                         <p className="text-xs text-center text-muted-foreground">
-                            Stripe를 통한 안전한 결제 • 카카오페이, 네이버페이 지원
+                            토스페이먼츠를 통한 안전한 결제
                         </p>
                     </div>
                 </DialogContent>
@@ -200,7 +201,7 @@ export function PaymentModal({
         )
     }
 
-    // 구독 플랜 선택
+    // 구독 플랜 선택 모달
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-2xl">
@@ -212,25 +213,12 @@ export function PaymentModal({
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
-                    {/* 통화 선택 */}
-                    <div className="flex gap-2 justify-center">
-                        {(Object.keys(PRICES) as Currency[]).map((currency) => (
-                            <Button
-                                key={currency}
-                                variant={selectedCurrency === currency ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setSelectedCurrency(currency)}
-                            >
-                                {PRICES[currency].symbol} {currency}
-                            </Button>
-                        ))}
-                    </div>
-
                     {/* 플랜 카드 */}
                     <div className="grid md:grid-cols-2 gap-4">
                         {plans.map((plan) => {
                             const Icon = plan.icon
                             const isSelected = selectedPlan === plan.id
+                            const pricing = PRICING[plan.id]
 
                             return (
                                 <div
@@ -255,9 +243,9 @@ export function PaymentModal({
 
                                     <div className="mb-2">
                                         <span className="text-2xl font-bold">
-                                            {formatPrice(plan.id)}
+                                            {formatPrice(pricing.amount)}
                                         </span>
-                                        <span className="text-muted-foreground">{plan.period}</span>
+                                        <span className="text-muted-foreground">{pricing.period}</span>
                                     </div>
 
                                     <p className="text-sm text-muted-foreground mb-4">
@@ -277,10 +265,14 @@ export function PaymentModal({
                         })}
                     </div>
 
+                    {error && (
+                        <div className="text-sm text-red-500 text-center">{error}</div>
+                    )}
+
                     <Button
                         className="w-full"
                         size="lg"
-                        onClick={handleCheckout}
+                        onClick={handlePayment}
                         disabled={isLoading}
                     >
                         {isLoading ? (
@@ -288,11 +280,11 @@ export function PaymentModal({
                         ) : (
                             <CreditCard className="h-4 w-4 mr-2" />
                         )}
-                        {isLoading ? '처리 중...' : `${selectedPlan === 'pro' ? 'Pro' : 'Team'} 시작하기`}
+                        {isLoading ? '처리 중...' : `${PRICING[selectedPlan].name} 시작하기`}
                     </Button>
 
                     <p className="text-xs text-center text-muted-foreground">
-                        언제든 취소 가능 • Stripe를 통한 안전한 결제 • 카카오페이, 네이버페이 지원
+                        언제든 취소 가능 • 토스페이먼츠를 통한 안전한 결제
                     </p>
                 </div>
             </DialogContent>

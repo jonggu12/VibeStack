@@ -214,7 +214,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -280,7 +280,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -288,7 +288,7 @@
             "description": "Create an Algolia account and obtain the API key for integration.",
             "dependencies": [],
             "details": "Sign up for Algolia and generate the necessary API keys to enable integration with the application.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify API key access by making a test request."
           },
           {
@@ -299,7 +299,7 @@
               1
             ],
             "details": "Install the Algolia SDK using npm and configure it within the application to prepare for indexing and search operations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Ensure the SDK is correctly installed and initialized by checking console logs."
           },
           {
@@ -310,7 +310,7 @@
               2
             ],
             "details": "Define the schema and configure indexing settings for documents, tutorials, and snippets to ensure they are searchable.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Perform indexing and verify data is correctly stored in Algolia."
           },
           {
@@ -321,7 +321,7 @@
               3
             ],
             "details": "Write search queries that leverage Algolia's natural language processing capabilities to return relevant results.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test search queries with different natural language inputs to ensure relevance."
           },
           {
@@ -332,7 +332,7 @@
               4
             ],
             "details": "Adjust ranking and relevance settings in Algolia to improve search result accuracy and performance.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Conduct performance tests and analyze search result accuracy with various queries."
           }
         ]
@@ -676,11 +676,111 @@
             "testStrategy": "Review feedback analysis to ensure all critical issues are addressed."
           }
         ]
+      },
+      {
+        "id": 11,
+        "title": "Implement Payment System with Toss Payments (Korea)",
+        "description": "Set up payment processing using Toss Payments for Korean domestic users. This will be the primary payment system for Korean market before global expansion.",
+        "details": "Integrate Toss Payments SDK for handling payments in Korea. Implement one-time payments and subscription (billing) management. Support all Korean payment methods including credit cards, Kakao Pay, Naver Pay, Toss Pay, and bank transfers. Design the system to coexist with Stripe for future global expansion.",
+        "testStrategy": "Perform test transactions using Toss Payments test mode (sandbox) to ensure all payment flows work correctly. Test with various Korean payment methods.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set Up Toss Payments Account and Configure API Keys",
+            "description": "Create a Toss Payments developer account and configure API keys for integration.",
+            "dependencies": [],
+            "details": "Register at https://developers.tosspayments.com and obtain test Client Key and Secret Key. Store keys securely in environment variables.",
+            "status": "done",
+            "testStrategy": "Verify API key access by making a test API call to Toss Payments sandbox."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Toss Payments SDK and Client Setup",
+            "description": "Install and configure the Toss Payments JavaScript SDK in the Next.js application.",
+            "dependencies": [
+              1
+            ],
+            "details": "Install @tosspayments/payment-sdk package. Create lib/toss-payments.ts client configuration. Set up environment variables for test and production modes.",
+            "status": "done",
+            "testStrategy": "Run SDK initialization tests to confirm successful integration."
+          },
+          {
+            "id": 3,
+            "title": "Implement One-Time Payment Checkout",
+            "description": "Develop the one-time payment checkout process for single content purchases.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create /api/toss/checkout route to initiate payments. Implement payment widget with support for cards, Kakao Pay, Naver Pay, Toss Pay. Handle payment request with orderId, amount, and orderName.",
+            "status": "done",
+            "testStrategy": "Perform test transactions using Toss Payments sandbox to validate checkout flow."
+          },
+          {
+            "id": 4,
+            "title": "Develop Payment Confirmation API",
+            "description": "Implement server-side payment confirmation/approval API endpoint.",
+            "dependencies": [
+              3
+            ],
+            "details": "Create /api/toss/confirm route to verify and approve payments using paymentKey. Implement idempotency handling. Update database with payment records on success.",
+            "status": "done",
+            "testStrategy": "Test API with various payment scenarios including success, failure, and timeout cases."
+          },
+          {
+            "id": 5,
+            "title": "Create Webhook Handler for Payment Events",
+            "description": "Set up webhook endpoint to receive and process payment status updates from Toss Payments.",
+            "dependencies": [
+              4
+            ],
+            "details": "Create /api/toss/webhook route. Handle events: DONE, CANCELED, PARTIAL_CANCELED, ABORTED, EXPIRED. Verify webhook signature for security. Update subscription and purchase records accordingly.",
+            "status": "done",
+            "testStrategy": "Simulate webhook events in sandbox environment to verify handler functionality."
+          },
+          {
+            "id": 6,
+            "title": "Implement Subscription Billing for Recurring Payments",
+            "description": "Develop subscription billing management using Toss Payments Billing feature.",
+            "dependencies": [
+              5
+            ],
+            "details": "Implement billing key issuance for recurring payments. Create subscription management: create, update, cancel. Handle automatic billing on renewal dates. Support Pro ($15,000/month) and Team ($65,000/month) plans.",
+            "status": "done",
+            "testStrategy": "Test subscription lifecycle: creation, renewal, cancellation in sandbox."
+          },
+          {
+            "id": 7,
+            "title": "Develop Payment UI Components",
+            "description": "Create user-friendly payment UI components integrated with Toss Payments.",
+            "dependencies": [
+              3
+            ],
+            "details": "Build PaymentModal component with plan selection. Implement TossPaymentWidget wrapper. Add loading states, error handling, and success feedback. Ensure mobile-responsive design with Korean localization.",
+            "status": "done",
+            "testStrategy": "Conduct UI testing across devices and browsers. Test all payment method selections."
+          },
+          {
+            "id": 8,
+            "title": "Update Database Schema for Toss Payment Records",
+            "description": "Extend Supabase database schema to support Toss Payments alongside Stripe.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add columns: toss_payment_key, toss_order_id, toss_billing_key to purchases and subscriptions tables. Create payment_provider enum (stripe, toss). Ensure backward compatibility with existing Stripe data.",
+            "status": "done",
+            "testStrategy": "Run migration and verify data integrity. Test CRUD operations with new schema."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-11-21T04:41:42.478Z",
-      "updated": "2025-11-21T06:24:12.709Z",
+      "updated": "2025-11-22T10:53:17.226Z",
       "description": "Tasks for master context"
     }
   }
