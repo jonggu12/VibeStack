@@ -1,13 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { indexContent, indexContents, AlgoliaContentRecord } from '@/lib/algolia'
 
-// Supabase Admin Client (Service Role)
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Supabase Admin Client (Service Role) - Lazy initialization
+let supabaseAdmin: SupabaseClient | null = null
+
+function getSupabaseAdmin(): SupabaseClient | null {
+    if (supabaseAdmin) return supabaseAdmin
+
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!url || !key) {
+        console.warn('Supabase credentials not configured')
+        return null
+    }
+
+    supabaseAdmin = createClient(url, key)
+    return supabaseAdmin
+}
 
 // Convert DB content to Algolia record
 function toAlgoliaRecord(content: {
@@ -60,12 +72,17 @@ export async function POST(req: NextRequest) {
         // TODO: Check if user is admin
         // For now, allow authenticated users to trigger indexing
 
+        const supabase = getSupabaseAdmin()
+        if (!supabase) {
+            return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 })
+        }
+
         const body = await req.json()
         const { contentId, indexAll } = body
 
         if (indexAll) {
             // Index all published contents
-            const { data: contents, error } = await supabaseAdmin
+            const { data: contents, error } = await supabase
                 .from('contents')
                 .select(`
                     id,
@@ -118,7 +135,7 @@ export async function POST(req: NextRequest) {
 
         if (contentId) {
             // Index single content
-            const { data: content, error } = await supabaseAdmin
+            const { data: content, error } = await supabase
                 .from('contents')
                 .select(`
                     id,
