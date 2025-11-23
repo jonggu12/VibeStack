@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { searchContents, SearchOptions } from '@/lib/algolia'
+import { searchContents, SearchOptions, searchClient } from '@/lib/algolia'
 
 export async function GET(req: NextRequest) {
+    // Algolia 클라이언트가 초기화되지 않은 경우 빈 결과 반환
+    if (!searchClient) {
+        console.warn('Search API: Algolia client not initialized. Check NEXT_PUBLIC_ALGOLIA_APP_ID and NEXT_PUBLIC_ALGOLIA_SEARCH_KEY')
+        return NextResponse.json({
+            hits: [],
+            nbHits: 0,
+            nbPages: 0,
+            page: 0,
+            processingTimeMS: 0,
+            query: req.nextUrl.searchParams.get('q') || '',
+        })
+    }
+
     const searchParams = req.nextUrl.searchParams
 
     const query = searchParams.get('q') || ''
@@ -29,9 +42,15 @@ export async function GET(req: NextRequest) {
         return NextResponse.json(results)
     } catch (error) {
         console.error('Search API error:', error)
-        return NextResponse.json(
-            { error: 'Search failed' },
-            { status: 500 }
-        )
+        // 에러 시에도 빈 결과 반환 (500 에러 대신)
+        return NextResponse.json({
+            hits: [],
+            nbHits: 0,
+            nbPages: 0,
+            page: 0,
+            processingTimeMS: 0,
+            query,
+            error: error instanceof Error ? error.message : 'Search failed',
+        })
     }
 }

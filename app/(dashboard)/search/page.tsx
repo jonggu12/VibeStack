@@ -27,14 +27,16 @@ function SearchContent() {
 
     const [filters, setFilters] = useState<SearchFiltersState>({})
     const [showFilters, setShowFilters] = useState(false)
+    const [hasInitialSearched, setHasInitialSearched] = useState(false)
 
-    // Initial search on mount if query exists
+    // Initial search on mount if query exists (only once)
     useEffect(() => {
-        if (initialQuery) {
+        if (initialQuery && !hasInitialSearched) {
             search(initialQuery, filters)
+            setHasInitialSearched(true)
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialQuery])
+    }, [initialQuery, hasInitialSearched])
 
     const handleSearch = (newQuery: string) => {
         search(newQuery, filters)
@@ -62,7 +64,6 @@ function SearchContent() {
                         onSearch={handleSearch}
                         placeholder="문서, 튜토리얼, 스니펫 검색..."
                         autoFocus
-                        showInstantResults
                     />
                     <Button
                         variant="outline"

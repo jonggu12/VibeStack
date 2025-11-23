@@ -139,6 +139,18 @@ export async function searchContents(options: SearchOptions): Promise<SearchResu
             query: options.query,
         }
     } catch (error) {
+        // 인덱스가 없는 경우 빈 결과 반환 (에러 로그 한번만)
+        if (error instanceof Error && error.message.includes('does not exist')) {
+            // 인덱스가 없으면 조용히 빈 결과 반환
+            return {
+                hits: [],
+                nbHits: 0,
+                nbPages: 0,
+                page: 0,
+                processingTimeMS: 0,
+                query: options.query,
+            }
+        }
         console.error('Algolia search error:', error)
         return {
             hits: [],
@@ -242,9 +254,14 @@ export async function configureIndex(): Promise<boolean> {
                 ],
                 highlightPreTag: '<mark>',
                 highlightPostTag: '</mark>',
+                // 한국어 검색 최적화
+                queryLanguages: ['ko', 'en'],           // 한국어 + 영어 쿼리 지원
+                indexLanguages: ['ko', 'en'],           // 한국어 + 영어 인덱싱
+                ignorePlurals: ['en'],                   // 영어만 복수형 무시
+                removeStopWords: ['en'],                 // 영어만 불용어 제거
                 typoTolerance: true,
-                minWordSizefor1Typo: 3,
-                minWordSizefor2Typos: 7,
+                minWordSizefor1Typo: 2,                  // 한글은 2글자부터 오타 허용
+                minWordSizefor2Typos: 5,
             },
         })
 

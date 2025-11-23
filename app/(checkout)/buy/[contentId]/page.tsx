@@ -1,8 +1,16 @@
-export default function BuyContentPage({ params }: { params: { contentId: string } }) {
-  return (
-    <div>
-      <h1>Purchase Content</h1>
-      <p>Content ID: {params.contentId}</p>
-    </div>
-  )
+import { use } from 'react'
+
+export default function BuyContentPage({
+    params
+}: {
+    params: Promise<{ contentId: string }>
+}) {
+    const { contentId } = use(params)
+
+    return (
+        <div>
+            <h1>Purchase Content</h1>
+            <p>Content ID: {contentId}</p>
+        </div>
+    )
 }

@@ -27,15 +27,16 @@ export function SearchBar({
     const initialQuery = searchParams.get('q') || ''
     const [query, setQuery] = useState(initialQuery)
     const [isSearching, setIsSearching] = useState(false)
+    const [hasUserTyped, setHasUserTyped] = useState(false)
 
     const debouncedQuery = useDebounce(query, 300)
 
-    // Instant search callback
+    // Instant search callback - 유저가 타이핑한 경우에만 실행
     useEffect(() => {
-        if (showInstantResults && onSearch && debouncedQuery !== initialQuery) {
+        if (showInstantResults && onSearch && hasUserTyped && debouncedQuery.trim()) {
             onSearch(debouncedQuery)
         }
-    }, [debouncedQuery, showInstantResults, onSearch, initialQuery])
+    }, [debouncedQuery, showInstantResults, onSearch, hasUserTyped])
 
     const handleSubmit = useCallback(
         (e: React.FormEvent) => {
@@ -84,7 +85,10 @@ export function SearchBar({
                     ref={inputRef}
                     type="search"
                     value={query}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setQuery(e.target.value)
+                        setHasUserTyped(true)
+                    }}
                     placeholder={placeholder}
                     className="pl-10 pr-20"
                     autoFocus={autoFocus}
