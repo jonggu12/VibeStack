@@ -1,17 +1,20 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { currentUser } from '@clerk/nextjs/server'
 import { configureIndex } from '@/lib/algolia'
 
 // POST: Configure Algolia index settings (run once during setup)
 export async function POST() {
     try {
         // Admin only
-        const { userId } = await auth()
-        if (!userId) {
+        const user = await currentUser()
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // TODO: Check if user is admin
+        // Admin check via Clerk metadata
+        if (user.publicMetadata?.role !== 'admin') {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        }
 
         const success = await configureIndex()
 

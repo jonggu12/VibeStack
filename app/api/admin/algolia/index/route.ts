@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { currentUser } from '@clerk/nextjs/server'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { indexContent, indexContents, AlgoliaContentRecord } from '@/lib/algolia'
 
@@ -64,13 +64,15 @@ function toAlgoliaRecord(content: {
 export async function POST(req: NextRequest) {
     try {
         // Admin only
-        const { userId } = await auth()
-        if (!userId) {
+        const user = await currentUser()
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // TODO: Check if user is admin
-        // For now, allow authenticated users to trigger indexing
+        // Admin check via Clerk metadata
+        if (user.publicMetadata?.role !== 'admin') {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        }
 
         const supabase = getSupabaseAdmin()
         if (!supabase) {
