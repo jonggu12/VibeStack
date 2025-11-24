@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
+import { marked } from 'marked'
 
 export async function POST(request: NextRequest) {
     // 관리자 인증 체크
@@ -17,9 +18,6 @@ export async function POST(request: NextRequest) {
         if (!content || typeof content !== 'string') {
             return NextResponse.json({ error: '콘텐츠가 필요합니다' }, { status: 400 })
         }
-
-        // MDX를 간단한 HTML로 변환 (marked 사용)
-        const { marked } = await import('marked')
 
         // MDX 컴포넌트 태그를 HTML로 변환
         let processedContent = content

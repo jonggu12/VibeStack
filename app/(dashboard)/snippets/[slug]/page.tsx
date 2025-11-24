@@ -4,6 +4,9 @@ import { compileMDXContent } from '@/lib/mdx'
 import { Badge } from '@/components/ui/badge'
 import { Eye } from 'lucide-react'
 
+// 캐싱 방지 - 항상 최신 데이터 표시
+export const dynamic = 'force-dynamic'
+
 interface SnippetPageProps {
     params: Promise<{ slug: string }>
 }

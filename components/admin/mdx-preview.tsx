@@ -29,11 +29,12 @@ export function MDXPreview({ content }: MDXPreviewProps) {
                     body: JSON.stringify({ content }),
                 })
 
+                const data = await response.json()
+
                 if (!response.ok) {
-                    throw new Error('미리보기 생성 실패')
+                    throw new Error(data.error || `미리보기 생성 실패 (${response.status})`)
                 }
 
-                const data = await response.json()
                 setHtml(data.html)
             } catch (err) {
                 setError(err instanceof Error ? err.message : '알 수 없는 오류')

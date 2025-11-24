@@ -2,6 +2,8 @@ import { getContents } from '@/app/actions/content'
 import { Badge } from '@/components/ui/badge'
 import { Plus, FileText, BookOpen, Code } from 'lucide-react'
 import Link from 'next/link'
+import { currentUser } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 
 // 빌드 시 정적 생성 방지 (DB 의존성)
 export const dynamic = 'force-dynamic'
@@ -25,6 +27,12 @@ const statusColors = {
 }
 
 export default async function AdminContentPage() {
+    // 관리자 권한 체크
+    const user = await currentUser()
+    if (!user || user.publicMetadata?.role !== 'admin') {
+        redirect('/')
+    }
+
     // 모든 콘텐츠 조회 (draft 포함)
     const contents = await getContents({ status: 'published', limit: 50 })
     const drafts = await getContents({ status: 'draft', limit: 50 })

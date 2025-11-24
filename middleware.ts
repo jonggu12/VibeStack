@@ -8,6 +8,7 @@ const isProtectedRoute = createRouteMatcher([
   '/onboarding(.*)',                    // 온보딩
   '/tools/(ai-chat|project-map)(.*)',   // Pro 기능 도구
   '/checkout(.*)',                       // 결제 페이지
+  '/admin(.*)',                          // 관리자 페이지
 ]);
 
 // =======================

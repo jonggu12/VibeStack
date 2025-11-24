@@ -1,6 +1,7 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getContent } from '@/app/actions/content'
 import { ContentEditor } from '@/components/admin/content-editor'
+import { currentUser } from '@clerk/nextjs/server'
 
 // 빌드 시 정적 생성 방지 (DB 의존성)
 export const dynamic = 'force-dynamic'
@@ -10,6 +11,12 @@ interface EditContentPageProps {
 }
 
 export default async function EditContentPage({ params }: EditContentPageProps) {
+    // 관리자 권한 체크
+    const user = await currentUser()
+    if (!user || user.publicMetadata?.role !== 'admin') {
+        redirect('/')
+    }
+
     const { id } = await params
 
     // 새 콘텐츠 생성

@@ -1,6 +1,7 @@
 'use server'
 
 import { supabase } from '@/lib/supabase'
+import { revalidatePath } from 'next/cache'
 import type { ContentType, DifficultyLevel, ContentStatus } from '@/types/content'
 
 // DB에서 가져온 콘텐츠 타입
@@ -200,6 +201,9 @@ export async function createContent(input: ContentInput): Promise<{ success: boo
         return { success: false, error: error.message }
     }
 
+    // 캐시 무효화
+    revalidatePath('/admin/content')
+
     return { success: true, id: data.id }
 }
 
@@ -228,6 +232,15 @@ export async function updateContent(
     if (error) {
         console.error('Error updating content:', error)
         return { success: false, error: error.message }
+    }
+
+    // 캐시 무효화 - 콘텐츠 페이지 새로고침
+    const content = await getContent(id)
+    if (content) {
+        revalidatePath(`/docs/${content.slug}`)
+        revalidatePath(`/tutorials/${content.slug}`)
+        revalidatePath(`/snippets/${content.slug}`)
+        revalidatePath('/admin/content')
     }
 
     return { success: true }

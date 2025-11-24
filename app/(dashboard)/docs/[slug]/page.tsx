@@ -4,6 +4,9 @@ import { compileMDXContent, extractTOC, calculateReadingTime } from '@/lib/mdx'
 import { Badge } from '@/components/ui/badge'
 import { Clock, Eye, BookOpen } from 'lucide-react'
 
+// 캐싱 방지 - 항상 최신 데이터 표시
+export const dynamic = 'force-dynamic'
+
 interface DocPageProps {
     params: Promise<{ slug: string }>
 }

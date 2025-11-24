@@ -36,13 +36,19 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
 
     // 제목에서 slug 자동 생성
     const generateSlug = () => {
+        if (!title.trim()) return
+
         const newSlug = title
             .toLowerCase()
-            .replace(/[^a-z0-9가-힣\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
+            .replace(/[가-힣]/g, '') // 한글 제거 (URL 친화적)
+            .replace(/[^a-z0-9\s-]/g, '') // 영문, 숫자, 공백, 하이픈만 허용
+            .replace(/\s+/g, '-') // 공백을 하이픈으로
+            .replace(/-+/g, '-') // 연속 하이픈 정리
+            .replace(/^-|-$/g, '') // 앞뒤 하이픈 제거
             .trim()
-        setSlug(newSlug)
+
+        // slug가 비어있으면 타임스탬프 기반으로 생성
+        setSlug(newSlug || `content-${Date.now()}`)
     }
 
     // 저장 핸들러
