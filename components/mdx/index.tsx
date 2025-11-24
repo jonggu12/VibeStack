@@ -17,23 +17,53 @@ import { Quiz } from './quiz'
 import { Step, Steps } from './step'
 import { PreBlock } from './pre-block'
 
+// children에서 텍스트 추출하여 slug 생성
+function getTextFromChildren(children: React.ReactNode): string {
+    if (typeof children === 'string') return children
+    if (typeof children === 'number') return String(children)
+    if (Array.isArray(children)) return children.map(getTextFromChildren).join('')
+    if (React.isValidElement(children) && children.props?.children) {
+        return getTextFromChildren(children.props.children)
+    }
+    return ''
+}
+
+function generateSlug(text: string): string {
+    return text
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w가-힣-]/g, '')
+}
+
 // 기본 HTML 요소 스타일링
 const htmlComponents = {
-    h1: ({ children }: { children?: React.ReactNode }) => (
-        <h1 className="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-gray-100">
-            {children}
-        </h1>
-    ),
-    h2: ({ children }: { children?: React.ReactNode }) => (
-        <h2 className="text-2xl font-semibold mt-6 mb-3 text-gray-800 dark:text-gray-200 border-b pb-2">
-            {children}
-        </h2>
-    ),
-    h3: ({ children }: { children?: React.ReactNode }) => (
-        <h3 className="text-xl font-medium mt-4 mb-2 text-gray-700 dark:text-gray-300">
-            {children}
-        </h3>
-    ),
+    h1: ({ children }: { children?: React.ReactNode }) => {
+        const text = getTextFromChildren(children)
+        const id = generateSlug(text)
+        return (
+            <h1 id={id} className="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-gray-100 scroll-mt-20">
+                {children}
+            </h1>
+        )
+    },
+    h2: ({ children }: { children?: React.ReactNode }) => {
+        const text = getTextFromChildren(children)
+        const id = generateSlug(text)
+        return (
+            <h2 id={id} className="text-2xl font-semibold mt-6 mb-3 text-gray-800 dark:text-gray-200 border-b pb-2 scroll-mt-20">
+                {children}
+            </h2>
+        )
+    },
+    h3: ({ children }: { children?: React.ReactNode }) => {
+        const text = getTextFromChildren(children)
+        const id = generateSlug(text)
+        return (
+            <h3 id={id} className="text-xl font-medium mt-4 mb-2 text-gray-700 dark:text-gray-300 scroll-mt-20">
+                {children}
+            </h3>
+        )
+    },
     p: ({ children }: { children?: React.ReactNode }) => (
         <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
             {children}
