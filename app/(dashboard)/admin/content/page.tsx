@@ -3,6 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import { Plus, FileText, BookOpen, Code } from 'lucide-react'
 import Link from 'next/link'
 
+// 빌드 시 정적 생성 방지 (DB 의존성)
+export const dynamic = 'force-dynamic'
+
 const typeIcons = {
     doc: FileText,
     tutorial: BookOpen,
@@ -86,10 +89,10 @@ export default async function AdminContentPage() {
                                             </Badge>
                                         </td>
                                         <td className="p-4 text-gray-600">
-                                            {content.view_count.toLocaleString()}
+                                            {(content.view_count ?? 0).toLocaleString()}
                                         </td>
                                         <td className="p-4 text-sm text-gray-500">
-                                            {new Date(content.updated_at).toLocaleDateString('ko-KR')}
+                                            {content.updated_at ? new Date(content.updated_at).toLocaleDateString('ko-KR') : '-'}
                                         </td>
                                         <td className="p-4 text-right">
                                             <Link

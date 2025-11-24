@@ -92,7 +92,7 @@ export default async function DocDetailPage({ params }: DocPageProps) {
                             </span>
                             <span className="flex items-center gap-1">
                                 <Eye className="w-4 h-4" />
-                                {content.view_count.toLocaleString()}회
+                                {(content.view_count ?? 0).toLocaleString()}회
                             </span>
                             {content.published_at && (
                                 <span>

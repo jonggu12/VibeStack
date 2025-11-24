@@ -92,11 +92,11 @@ export default async function TutorialDetailPage({ params }: TutorialPageProps) 
                             </span>
                             <span className="flex items-center gap-1">
                                 <Eye className="w-4 h-4" />
-                                {content.view_count.toLocaleString()}회
+                                {(content.view_count ?? 0).toLocaleString()}회
                             </span>
                             <span className="flex items-center gap-1">
                                 <CheckCircle className="w-4 h-4" />
-                                {content.completion_count.toLocaleString()}명 완료
+                                {(content.completion_count ?? 0).toLocaleString()}명 완료
                             </span>
                         </div>
 

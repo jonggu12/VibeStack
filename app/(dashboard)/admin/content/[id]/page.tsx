@@ -2,6 +2,9 @@ import { notFound } from 'next/navigation'
 import { getContent } from '@/app/actions/content'
 import { ContentEditor } from '@/components/admin/content-editor'
 
+// 빌드 시 정적 생성 방지 (DB 의존성)
+export const dynamic = 'force-dynamic'
+
 interface EditContentPageProps {
     params: Promise<{ id: string }>
 }

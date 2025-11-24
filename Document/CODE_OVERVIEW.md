@@ -13,6 +13,7 @@
 5. [데이터베이스](#5-데이터베이스)
 6. [보안 설정](#6-보안-설정)
 7. [관리자 기능](#7-관리자-기능)
+8. [콘텐츠 관리 시스템 (CMS)](#8-콘텐츠-관리-시스템-cms)
 
 ---
 
@@ -371,6 +372,148 @@ app/api/
 ├── auth/             # 인증 webhook
 └── rating/           # 평점 처리
 ```
+
+---
+
+## 8. 콘텐츠 관리 시스템 (CMS)
+
+### MDX란?
+
+**MDX** = Markdown + JSX (React 컴포넌트)
+
+일반 마크다운에 React 컴포넌트를 넣을 수 있는 형식입니다.
+
+```
+일반 마크다운:
+# 제목
+이것은 **굵은** 글씨입니다.
+
+MDX:
+# 제목
+이것은 **굵은** 글씨입니다.
+<Callout type="warning">주의하세요!</Callout>  ← React 컴포넌트
+```
+
+### 콘텐츠 저장 구조
+
+```
+1. 작성자가 MDX 형식으로 콘텐츠 작성
+     ↓
+2. 데이터베이스(Supabase)에 저장
+     ↓
+3. 사용자가 페이지 방문
+     ↓
+4. 서버에서 MDX를 HTML로 변환 (렌더링)
+     ↓
+5. 사용자 화면에 표시
+```
+
+### 사용 가능한 MDX 컴포넌트
+
+콘텐츠 작성 시 사용할 수 있는 특수 컴포넌트들:
+
+| 컴포넌트 | 용도 | 예시 |
+|----------|------|------|
+| `<Callout>` | 주의/팁/정보 박스 | 중요한 안내 표시 |
+| `<CodeBlock>` | 코드 블록 (복사 버튼 포함) | 예제 코드 표시 |
+| `<Checkpoint>` | 학습 진행 체크 | "여기까지 완료했다면 체크" |
+| `<Quiz>` | 퀴즈 문제 | 이해도 확인 |
+| `<Steps>` / `<Step>` | 단계별 안내 | 튜토리얼 순서 |
+
+### Callout 종류
+
+```mdx
+<Callout type="info">일반 정보</Callout>
+<Callout type="tip">유용한 팁</Callout>
+<Callout type="warning">주의 사항</Callout>
+<Callout type="error">위험/에러</Callout>
+<Callout type="success">성공/완료</Callout>
+```
+
+### 콘텐츠 타입별 페이지
+
+| 타입 | URL | 용도 |
+|------|-----|------|
+| 문서 (Doc) | `/docs/[slug]` | 개념 설명 (5-10분) |
+| 튜토리얼 | `/tutorials/[slug]` | 프로젝트 완성 (30분-3시간) |
+| 스니펫 | `/snippets/[slug]` | 코드 조각 (복붙용) |
+
+### 관리자 기능
+
+관리자만 접근할 수 있는 콘텐츠 관리 페이지:
+
+| 페이지 | URL | 기능 |
+|--------|-----|------|
+| 콘텐츠 목록 | `/admin/content` | 전체 콘텐츠 조회/검색 |
+| 콘텐츠 편집 | `/admin/content/[id]` | MDX 편집기 |
+
+### MDX 편집기 기능
+
+```
+┌─────────────────────────────────────────────┐
+│ 기본 정보                                    │
+│ ┌─────────────────────────────────────────┐ │
+│ │ 제목: [Next.js 14 시작하기          ]   │ │
+│ │ Slug: [nextjs-14-getting-started    ]   │ │
+│ │ 설명: [Next.js 14의 새로운 기능...  ]   │ │
+│ └─────────────────────────────────────────┘ │
+│                                             │
+│ 타입: [문서] [튜토리얼] [스니펫]             │
+│ 난이도: [초급] [중급] [고급]                 │
+│ 상태: [초안 ▼]  접근: [🌐 무료 공개]         │
+├─────────────────────────────────────────────┤
+│ 콘텐츠 (MDX)                    [미리보기]   │
+│ ┌─────────────────────────────────────────┐ │
+│ │ ---                                     │ │
+│ │ title: Next.js 14 시작하기              │ │
+│ │ ---                                     │ │
+│ │                                         │ │
+│ │ # 시작하기                              │ │
+│ │ ...                                     │ │
+│ └─────────────────────────────────────────┘ │
+│                         [취소] [💾 저장]     │
+└─────────────────────────────────────────────┘
+```
+
+### 관련 파일
+
+| 파일 | 역할 |
+|------|------|
+| `lib/mdx.ts` | MDX 컴파일 및 유틸리티 함수 |
+| `components/mdx/` | MDX 컴포넌트들 (Callout, Quiz 등) |
+| `components/admin/content-editor.tsx` | MDX 편집기 UI |
+| `app/(dashboard)/admin/content/` | 관리자 콘텐츠 페이지 |
+| `app/(dashboard)/docs/[slug]/page.tsx` | 문서 상세 페이지 |
+| `app/(dashboard)/tutorials/[slug]/page.tsx` | 튜토리얼 상세 페이지 |
+| `app/(dashboard)/snippets/[slug]/page.tsx` | 스니펫 상세 페이지 |
+| `app/actions/content.ts` | 콘텐츠 CRUD 서버 액션 |
+
+### 프론트매터 (Frontmatter)
+
+MDX 파일 최상단에 메타데이터를 정의합니다:
+
+```mdx
+---
+title: Supabase 인증 구현하기
+description: Next.js 앱에 Supabase 인증을 구현합니다.
+difficulty: intermediate
+estimatedTime: 30
+tags:
+  - Supabase
+  - Auth
+  - Next.js
+---
+
+# 본문 시작...
+```
+
+| 필드 | 설명 |
+|------|------|
+| `title` | 제목 |
+| `description` | 짧은 설명 |
+| `difficulty` | 난이도 (beginner/intermediate/advanced) |
+| `estimatedTime` | 예상 소요 시간 (분) |
+| `tags` | 관련 태그 목록 |
 
 ---
 
