@@ -1,0 +1,175 @@
+---
+title: Supabase 인증 구현하기
+description: Next.js 앱에 Supabase를 이용한 이메일 인증을 구현합니다.
+difficulty: intermediate
+estimatedTime: 30
+tags:
+  - Supabase
+  - Auth
+  - Next.js
+---
+
+# Supabase 인증 구현하기
+
+이 튜토리얼에서는 Next.js 앱에 Supabase 인증을 구현합니다. 이메일/비밀번호 로그인, 소셜 로그인, 세션 관리를 다룹니다.
+
+## 사전 준비
+
+시작하기 전에 다음이 필요합니다:
+
+- Next.js 14 프로젝트
+- Supabase 계정 (무료)
+- 기본적인 React 지식
+
+<Callout type="warning">
+이 튜토리얼은 App Router를 사용합니다. Pages Router를 사용하는 경우 코드가 다를 수 있습니다.
+</Callout>
+
+## Step 1: Supabase 프로젝트 생성
+
+<Steps>
+<Step number={1} title="Supabase 대시보드 접속">
+[supabase.com](https://supabase.com)에 접속하여 로그인합니다.
+</Step>
+
+<Step number={2} title="새 프로젝트 생성">
+"New Project" 버튼을 클릭하고 프로젝트 정보를 입력합니다.
+
+- **Name**: 프로젝트 이름
+- **Database Password**: 안전한 비밀번호 설정
+- **Region**: 가장 가까운 지역 선택 (Seoul 권장)
+</Step>
+
+<Step number={3} title="API 키 확인">
+프로젝트 생성 후 Settings > API에서 다음 정보를 확인합니다:
+
+- `Project URL`
+- `anon` public key
+</Step>
+</Steps>
+
+<Checkpoint id="supabase-setup" title="Supabase 프로젝트 생성 완료">
+API 키를 확인했다면 체크하세요.
+</Checkpoint>
+
+## Step 2: 패키지 설치
+
+프로젝트에 Supabase 클라이언트를 설치합니다:
+
+```bash
+npm install @supabase/supabase-js @supabase/auth-helpers-nextjs
+```
+
+## Step 3: 환경 변수 설정
+
+`.env.local` 파일을 생성하고 API 키를 추가합니다:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+<Callout type="error" title="보안 주의">
+`.env.local` 파일은 절대 Git에 커밋하지 마세요! `.gitignore`에 추가되어 있는지 확인하세요.
+</Callout>
+
+## Step 4: Supabase 클라이언트 생성
+
+`lib/supabase.ts` 파일을 생성합니다:
+
+```typescript
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+```
+
+<Checkpoint id="client-setup" title="Supabase 클라이언트 설정 완료">
+클라이언트 파일을 생성했다면 체크하세요.
+</Checkpoint>
+
+## Step 5: 로그인 폼 만들기
+
+`components/LoginForm.tsx` 파일을 생성합니다:
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
+
+export function LoginForm() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      alert(error.message)
+    } else {
+      window.location.href = '/dashboard'
+    }
+
+    setLoading(false)
+  }
+
+  return (
+    <form onSubmit={handleLogin}>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="이메일"
+        required
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="비밀번호"
+        required
+      />
+      <button type="submit" disabled={loading}>
+        {loading ? '로그인 중...' : '로그인'}
+      </button>
+    </form>
+  )
+}
+```
+
+<Checkpoint id="login-form" title="로그인 폼 구현 완료">
+로그인 폼이 정상적으로 작동하면 체크하세요.
+</Checkpoint>
+
+## 퀴즈
+
+<Quiz
+  question="Supabase의 anon key는 어디에 저장해야 하나요?"
+  options={[
+    { text: "코드에 직접 작성", correct: false },
+    { text: "환경 변수 (.env.local)", correct: true },
+    { text: "public 폴더", correct: false },
+    { text: "어디든 상관없음", correct: false }
+  ]}
+  explanation="API 키는 항상 환경 변수에 저장해야 합니다. NEXT_PUBLIC_ 접두사가 있어도 서버 사이드에서 관리되어야 안전합니다."
+/>
+
+## 완료
+
+축하합니다! 🎉 Supabase 인증 구현이 완료되었습니다.
+
+다음으로 배울 내용:
+- 소셜 로그인 (Google, GitHub)
+- 비밀번호 재설정
+- 세션 관리
+- RLS (Row Level Security)
