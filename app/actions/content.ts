@@ -1,6 +1,6 @@
 'use server'
 
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 import type { ContentType, DifficultyLevel, ContentStatus } from '@/types/content'
 
@@ -184,10 +184,10 @@ export interface ContentInput {
 }
 
 /**
- * 콘텐츠 생성
+ * 콘텐츠 생성 (관리자 전용 - RLS 우회)
  */
 export async function createContent(input: ContentInput): Promise<{ success: boolean; id?: string; error?: string }> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from('contents')
         .insert({
             ...input,
@@ -208,23 +208,25 @@ export async function createContent(input: ContentInput): Promise<{ success: boo
 }
 
 /**
- * 콘텐츠 수정
+ * 콘텐츠 수정 (관리자 전용 - RLS 우회)
  */
 export async function updateContent(
     id: string,
     input: Partial<ContentInput>
 ): Promise<{ success: boolean; error?: string }> {
+    // 먼저 기존 콘텐츠 조회 (캐시 무효화용)
+    const existingContent = await getContent(id)
+
     const updateData: Record<string, unknown> = { ...input, updated_at: new Date().toISOString() }
 
     // 상태가 published로 변경되면 published_at 설정
     if (input.status === 'published') {
-        const existing = await getContent(id)
-        if (existing && !existing.published_at) {
+        if (existingContent && !existingContent.published_at) {
             updateData.published_at = new Date().toISOString()
         }
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
         .from('contents')
         .update(updateData)
         .eq('id', id)
@@ -235,11 +237,10 @@ export async function updateContent(
     }
 
     // 캐시 무효화 - 콘텐츠 페이지 새로고침
-    const content = await getContent(id)
-    if (content) {
-        revalidatePath(`/docs/${content.slug}`)
-        revalidatePath(`/tutorials/${content.slug}`)
-        revalidatePath(`/snippets/${content.slug}`)
+    if (existingContent) {
+        revalidatePath(`/docs/${existingContent.slug}`)
+        revalidatePath(`/tutorials/${existingContent.slug}`)
+        revalidatePath(`/snippets/${existingContent.slug}`)
         revalidatePath('/admin/content')
     }
 
@@ -247,10 +248,13 @@ export async function updateContent(
 }
 
 /**
- * 콘텐츠 삭제
+ * 콘텐츠 삭제 (관리자 전용 - RLS 우회)
  */
 export async function deleteContent(id: string): Promise<{ success: boolean; error?: string }> {
-    const { error } = await supabase
+    // 삭제 전 콘텐츠 정보 조회 (캐시 무효화용)
+    const content = await getContent(id)
+
+    const { error } = await supabaseAdmin
         .from('contents')
         .delete()
         .eq('id', id)
@@ -259,6 +263,14 @@ export async function deleteContent(id: string): Promise<{ success: boolean; err
         console.error('Error deleting content:', error)
         return { success: false, error: error.message }
     }
+
+    // 캐시 무효화
+    if (content) {
+        revalidatePath(`/docs/${content.slug}`)
+        revalidatePath(`/tutorials/${content.slug}`)
+        revalidatePath(`/snippets/${content.slug}`)
+    }
+    revalidatePath('/admin/content')
 
     return { success: true }
 }
