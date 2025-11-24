@@ -6,6 +6,8 @@ export { CodeBlock } from './code-block'
 export { Checkpoint } from './checkpoint'
 export { Quiz } from './quiz'
 export { Step, Steps } from './step'
+export { PreBlock } from './pre-block'
+export { CopyButton } from './copy-button'
 
 // MDX에서 사용할 컴포넌트 맵
 import { Callout } from './callout'
@@ -13,6 +15,7 @@ import { CodeBlock } from './code-block'
 import { Checkpoint } from './checkpoint'
 import { Quiz } from './quiz'
 import { Step, Steps } from './step'
+import { PreBlock } from './pre-block'
 
 // 기본 HTML 요소 스타일링
 const htmlComponents = {
@@ -80,11 +83,7 @@ const htmlComponents = {
             </code>
         )
     },
-    pre: ({ children }: { children?: React.ReactNode }) => (
-        <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4 text-sm">
-            {children}
-        </pre>
-    ),
+    pre: PreBlock,
     table: ({ children }: { children?: React.ReactNode }) => (
         <div className="overflow-x-auto mb-4">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
