@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Save, Eye, FileText, BookOpen, Code } from 'lucide-react'
+import { Save, Eye, FileText, BookOpen, Code, Trash2, ArrowLeft } from 'lucide-react'
+import { createContent, updateContent, deleteContent } from '@/app/actions/content'
 import type { DBContent } from '@/app/actions/content'
+import { MDXPreview } from './mdx-preview'
 
 interface ContentEditorProps {
     initialContent?: DBContent
@@ -16,6 +18,9 @@ type ContentStatus = 'draft' | 'published' | 'archived'
 type Difficulty = 'beginner' | 'intermediate' | 'advanced'
 
 export function ContentEditor({ initialContent }: ContentEditorProps) {
+    const router = useRouter()
+    const isEditing = !!initialContent?.id
+
     const [title, setTitle] = useState(initialContent?.title || '')
     const [slug, setSlug] = useState(initialContent?.slug || '')
     const [description, setDescription] = useState(initialContent?.description || '')
@@ -25,7 +30,9 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
     const [isPremium, setIsPremium] = useState(initialContent?.is_premium || false)
     const [content, setContent] = useState(initialContent?.content || defaultMDXTemplate)
     const [saving, setSaving] = useState(false)
+    const [deleting, setDeleting] = useState(false)
     const [showPreview, setShowPreview] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     // 제목에서 slug 자동 생성
     const generateSlug = () => {
@@ -38,12 +45,42 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
         setSlug(newSlug)
     }
 
+    // 저장 핸들러
     const handleSave = async () => {
+        if (!title.trim() || !slug.trim()) {
+            alert('제목과 Slug는 필수입니다.')
+            return
+        }
+
         setSaving(true)
         try {
-            // TODO: API 호출로 저장
-            console.log('Saving:', { title, slug, description, type, status, difficulty, isPremium, content })
-            alert('저장 기능은 아직 구현 중입니다.')
+            const contentData = {
+                title,
+                slug,
+                description: description || undefined,
+                type,
+                difficulty,
+                status,
+                is_premium: isPremium,
+                content,
+            }
+
+            let result
+            if (isEditing) {
+                result = await updateContent(initialContent.id, contentData)
+            } else {
+                result = await createContent(contentData)
+            }
+
+            if (result.success) {
+                alert(isEditing ? '저장되었습니다.' : '생성되었습니다.')
+                if (!isEditing && 'id' in result && result.id) {
+                    router.push(`/admin/content/${result.id}`)
+                }
+                router.refresh()
+            } else {
+                alert(`오류: ${result.error}`)
+            }
         } catch (error) {
             console.error('Save error:', error)
             alert('저장 중 오류가 발생했습니다.')
@@ -52,8 +89,68 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
         }
     }
 
+    // 삭제 핸들러
+    const handleDelete = async () => {
+        if (!isEditing) return
+
+        setDeleting(true)
+        try {
+            const result = await deleteContent(initialContent.id)
+            if (result.success) {
+                alert('삭제되었습니다.')
+                router.push('/admin/content')
+            } else {
+                alert(`오류: ${result.error}`)
+            }
+        } catch (error) {
+            console.error('Delete error:', error)
+            alert('삭제 중 오류가 발생했습니다.')
+        } finally {
+            setDeleting(false)
+            setShowDeleteConfirm(false)
+        }
+    }
+
     return (
         <div className="space-y-6">
+            {/* 상단 네비게이션 */}
+            <div className="flex justify-between items-center">
+                <Button variant="ghost" onClick={() => router.push('/admin/content')}>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    목록으로
+                </Button>
+                {isEditing && (
+                    <Button
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        disabled={deleting}
+                    >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        삭제
+                    </Button>
+                )}
+            </div>
+
+            {/* 삭제 확인 모달 */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+                        <h3 className="text-lg font-semibold mb-2">콘텐츠 삭제</h3>
+                        <p className="text-gray-600 mb-4">
+                            &quot;{title}&quot;을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+                        </p>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+                                취소
+                            </Button>
+                            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                                {deleting ? '삭제 중...' : '삭제'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* 메타데이터 섹션 */}
             <div className="bg-white p-6 rounded-lg border space-y-4">
                 <h2 className="font-semibold text-gray-900">기본 정보</h2>
@@ -61,7 +158,7 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
                 <div className="grid grid-cols-2 gap-4">
                     {/* 제목 */}
                     <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">제목 *</label>
                         <Input
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
@@ -72,7 +169,7 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
 
                     {/* Slug */}
                     <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL)</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL) *</label>
                         <div className="flex gap-2">
                             <Input
                                 value={slug}
@@ -188,10 +285,7 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
                 </div>
 
                 {showPreview ? (
-                    <div className="prose max-w-none p-4 bg-gray-50 rounded-lg min-h-[400px]">
-                        <p className="text-gray-500">미리보기는 저장 후 확인할 수 있습니다.</p>
-                        <pre className="text-sm">{content}</pre>
-                    </div>
+                    <MDXPreview content={content} />
                 ) : (
                     <textarea
                         value={content}
@@ -204,10 +298,12 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
 
             {/* 저장 버튼 */}
             <div className="flex justify-end gap-4">
-                <Button variant="outline">취소</Button>
+                <Button variant="outline" onClick={() => router.push('/admin/content')}>
+                    취소
+                </Button>
                 <Button onClick={handleSave} disabled={saving}>
                     <Save className="w-4 h-4 mr-2" />
-                    {saving ? '저장 중...' : '저장'}
+                    {saving ? '저장 중...' : isEditing ? '저장' : '생성'}
                 </Button>
             </div>
         </div>
@@ -215,12 +311,7 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
 }
 
 // 기본 MDX 템플릿
-const defaultMDXTemplate = `---
-title: 제목을 입력하세요
-description: 설명을 입력하세요
----
-
-# 시작하기
+const defaultMDXTemplate = `# 시작하기
 
 여기에 콘텐츠를 작성하세요.
 
@@ -234,8 +325,4 @@ console.log('Hello, World!')
 <Callout type="tip">
 유용한 팁을 여기에 작성하세요.
 </Callout>
-
-<Checkpoint id="step-1" title="첫 번째 단계 완료">
-이 단계를 완료했다면 체크하세요.
-</Checkpoint>
 `

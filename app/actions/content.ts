@@ -167,3 +167,85 @@ export async function incrementViewCount(contentId: string): Promise<void> {
 export async function incrementCompletionCount(contentId: string): Promise<void> {
     await supabase.rpc('increment_completion_count', { content_id: contentId })
 }
+
+// 콘텐츠 생성/수정 입력 타입
+export interface ContentInput {
+    title: string
+    slug: string
+    description?: string
+    type: ContentType
+    difficulty?: DifficultyLevel
+    status: ContentStatus
+    is_premium: boolean
+    content?: string
+    estimated_time_mins?: number
+    stack?: Record<string, string>
+}
+
+/**
+ * 콘텐츠 생성
+ */
+export async function createContent(input: ContentInput): Promise<{ success: boolean; id?: string; error?: string }> {
+    const { data, error } = await supabase
+        .from('contents')
+        .insert({
+            ...input,
+            published_at: input.status === 'published' ? new Date().toISOString() : null,
+        })
+        .select('id')
+        .single()
+
+    if (error) {
+        console.error('Error creating content:', error)
+        return { success: false, error: error.message }
+    }
+
+    return { success: true, id: data.id }
+}
+
+/**
+ * 콘텐츠 수정
+ */
+export async function updateContent(
+    id: string,
+    input: Partial<ContentInput>
+): Promise<{ success: boolean; error?: string }> {
+    const updateData: Record<string, unknown> = { ...input, updated_at: new Date().toISOString() }
+
+    // 상태가 published로 변경되면 published_at 설정
+    if (input.status === 'published') {
+        const existing = await getContent(id)
+        if (existing && !existing.published_at) {
+            updateData.published_at = new Date().toISOString()
+        }
+    }
+
+    const { error } = await supabase
+        .from('contents')
+        .update(updateData)
+        .eq('id', id)
+
+    if (error) {
+        console.error('Error updating content:', error)
+        return { success: false, error: error.message }
+    }
+
+    return { success: true }
+}
+
+/**
+ * 콘텐츠 삭제
+ */
+export async function deleteContent(id: string): Promise<{ success: boolean; error?: string }> {
+    const { error } = await supabase
+        .from('contents')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('Error deleting content:', error)
+        return { success: false, error: error.message }
+    }
+
+    return { success: true }
+}
