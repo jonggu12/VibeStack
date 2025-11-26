@@ -53,10 +53,35 @@ export async function POST(request: NextRequest) {
         // Markdown을 HTML로 변환
         let html = await marked.parse(processedContent)
 
-        // 코드 블록에 스타일 추가
+        // 실제 MDX 컴포넌트와 동일한 스타일 적용
         html = html
+            // 헤딩 스타일
+            .replace(/<h1>/g, '<h1 class="text-3xl font-bold mt-8 mb-4 text-gray-900">')
+            .replace(/<h2>/g, '<h2 class="text-2xl font-semibold mt-6 mb-3 text-gray-800 border-b pb-2">')
+            .replace(/<h3>/g, '<h3 class="text-xl font-medium mt-4 mb-2 text-gray-700">')
+            .replace(/<h4>/g, '<h4 class="text-lg font-medium mt-3 mb-2 text-gray-700">')
+
+            // 문단 스타일
+            .replace(/<p>/g, '<p class="text-gray-600 leading-relaxed mb-4">')
+
+            // 리스트 스타일
+            .replace(/<ul>/g, '<ul class="list-disc list-inside mb-4 text-gray-600 space-y-2 ml-4">')
+            .replace(/<ol>/g, '<ol class="list-decimal list-inside mb-4 text-gray-600 space-y-2 ml-4">')
+            .replace(/<li>/g, '<li class="ml-2">')
+
+            // 링크 스타일
+            .replace(/<a /g, '<a class="text-blue-600 hover:text-blue-800 underline" ')
+
+            // 코드 블록 스타일
             .replace(/<pre>/g, '<pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4">')
             .replace(/<code>/g, '<code class="font-mono text-sm">')
+
+            // 인용구 스타일
+            .replace(/<blockquote>/g, '<blockquote class="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4 bg-gray-50 py-2">')
+
+            // Strong, Em 스타일
+            .replace(/<strong>/g, '<strong class="font-semibold text-gray-900">')
+            .replace(/<em>/g, '<em class="italic text-gray-700">')
 
         return NextResponse.json({ html })
     } catch (error) {
