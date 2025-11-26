@@ -34,8 +34,8 @@ export default async function TutorialDetailPage({ params }: TutorialPageProps) 
         notFound()
     }
 
-    // 조회수 증가
-    incrementViewCount(content.id)
+    // 조회수 증가 (비동기로 실행, 에러는 무시)
+    incrementViewCount(content.id).catch(() => {})
 
     // MDX 콘텐츠가 없으면 기본 메시지 표시
     if (!content.content) {
