@@ -33,12 +33,18 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
     const [deleting, setDeleting] = useState(false)
     const [showPreview, setShowPreview] = useState(false)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false)
 
-    // 제목에서 slug 자동 생성
+    // 고유 ID 생성 (4자리 해시)
+    const generateUniqueId = () => {
+        return Math.random().toString(36).substring(2, 6).toLowerCase()
+    }
+
+    // 제목에서 slug 자동 생성 (제목 기반 + 고유 ID)
     const generateSlug = () => {
         if (!title.trim()) return
 
-        const newSlug = title
+        const baseSlug = title
             .toLowerCase()
             .replace(/[가-힣]/g, '') // 한글 제거 (URL 친화적)
             .replace(/[^a-z0-9\s-]/g, '') // 영문, 숫자, 공백, 하이픈만 허용
@@ -47,8 +53,10 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
             .replace(/^-|-$/g, '') // 앞뒤 하이픈 제거
             .trim()
 
-        // slug가 비어있으면 타임스탬프 기반으로 생성
-        setSlug(newSlug || `content-${Date.now()}`)
+        const uniqueId = generateUniqueId()
+
+        // 기본 slug가 있으면 "제목-고유ID", 없으면 "content-고유ID"
+        setSlug(baseSlug ? `${baseSlug}-${uniqueId}` : `content-${uniqueId}`)
     }
 
     // 저장 핸들러
@@ -79,13 +87,21 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
             }
 
             if (result.success) {
-                alert(isEditing ? '저장되었습니다.' : '생성되었습니다.')
+                // 성공 시 다이얼로그 표시
+                setShowSuccessDialog(true)
+
+                // 새 콘텐츠 생성 시 URL 업데이트
                 if (!isEditing && 'id' in result && result.id) {
                     router.push(`/admin/content/${result.id}`)
                 }
                 router.refresh()
             } else {
-                alert(`오류: ${result.error}`)
+                // 에러 다이얼로그로 표시
+                if (result.error?.includes('duplicate key') || result.error?.includes('slug_key')) {
+                    alert('⚠️ 중복된 Slug입니다.\n\n이미 사용 중인 Slug입니다. "자동 생성" 버튼을 눌러 새로운 Slug를 생성해주세요.')
+                } else {
+                    alert(`저장 실패\n\n${result.error}`)
+                }
             }
         } catch (error) {
             console.error('Save error:', error)
@@ -151,6 +167,33 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
                             </Button>
                             <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
                                 {deleting ? '삭제 중...' : '삭제'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 저장 성공 모달 */}
+            {showSuccessDialog && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+                        <h3 className="text-lg font-semibold mb-2">✅ 저장 완료</h3>
+                        <p className="text-gray-600 mb-4">
+                            콘텐츠가 성공적으로 {isEditing ? '저장' : '생성'}되었습니다.
+                            <br />
+                            콘텐츠 관리 페이지로 돌아가시겠습니까?
+                        </p>
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowSuccessDialog(false)}
+                            >
+                                아니오 (현재 페이지 유지)
+                            </Button>
+                            <Button
+                                onClick={() => router.push('/admin/content')}
+                            >
+                                예 (목록으로 이동)
                             </Button>
                         </div>
                     </div>
