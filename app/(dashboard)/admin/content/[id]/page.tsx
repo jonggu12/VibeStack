@@ -29,8 +29,8 @@ export default async function EditContentPage({ params }: EditContentPageProps) 
         )
     }
 
-    // 기존 콘텐츠 편집
-    const content = await getContent(id)
+    // 기존 콘텐츠 편집 (RLS 우회 - Admin은 모든 상태 접근 가능)
+    const content = await getContent(id, true)
 
     if (!content) {
         notFound()

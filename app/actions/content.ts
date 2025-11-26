@@ -39,8 +39,11 @@ interface GetContentsOptions {
 /**
  * ID로 콘텐츠 조회
  */
-export async function getContent(id: string): Promise<DBContent | null> {
-    const { data, error } = await supabase
+export async function getContent(id: string, bypassRLS = false): Promise<DBContent | null> {
+    // Admin이 모든 상태의 콘텐츠를 조회할 때는 supabaseAdmin 사용
+    const client = bypassRLS ? supabaseAdmin : supabase
+
+    const { data, error } = await client
         .from('contents')
         .select('*')
         .eq('id', id)
@@ -219,8 +222,8 @@ export async function updateContent(
     id: string,
     input: Partial<ContentInput>
 ): Promise<{ success: boolean; error?: string }> {
-    // 먼저 기존 콘텐츠 조회 (캐시 무효화용)
-    const existingContent = await getContent(id)
+    // 먼저 기존 콘텐츠 조회 (캐시 무효화용, RLS 우회)
+    const existingContent = await getContent(id, true)
 
     const updateData: Record<string, unknown> = { ...input, updated_at: new Date().toISOString() }
 
@@ -256,8 +259,8 @@ export async function updateContent(
  * 콘텐츠 삭제 (관리자 전용 - RLS 우회)
  */
 export async function deleteContent(id: string): Promise<{ success: boolean; error?: string }> {
-    // 삭제 전 콘텐츠 정보 조회 (캐시 무효화용)
-    const content = await getContent(id)
+    // 삭제 전 콘텐츠 정보 조회 (캐시 무효화용, RLS 우회)
+    const content = await getContent(id, true)
 
     const { error } = await supabaseAdmin
         .from('contents')
