@@ -75,13 +75,30 @@ export default async function AdminContentPage() {
                         <tbody>
                             {allContents.map((content) => {
                                 const Icon = typeIcons[content.type as keyof typeof typeIcons] || FileText
+                                // 타입별 URL 경로 생성
+                                const contentPath = content.type === 'doc'
+                                    ? `/docs/${content.slug}`
+                                    : content.type === 'tutorial'
+                                    ? `/tutorials/${content.slug}`
+                                    : `/snippets/${content.slug}`
+
                                 return (
                                     <tr key={content.id} className="border-b hover:bg-gray-50">
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
                                                 <Icon className="w-5 h-5 text-gray-400" />
                                                 <div>
-                                                    <p className="font-medium text-gray-900">{content.title}</p>
+                                                    {content.status === 'published' ? (
+                                                        <Link
+                                                            href={contentPath}
+                                                            className="font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                                                            target="_blank"
+                                                        >
+                                                            {content.title}
+                                                        </Link>
+                                                    ) : (
+                                                        <p className="font-medium text-gray-900">{content.title}</p>
+                                                    )}
                                                     <p className="text-sm text-gray-500">{content.slug}</p>
                                                 </div>
                                             </div>
