@@ -33,6 +33,7 @@ interface GetContentsOptions {
     limit?: number
     offset?: number
     difficulty?: DifficultyLevel
+    bypassRLS?: boolean // Admin 전용: RLS 우회
 }
 
 /**
@@ -90,9 +91,13 @@ export async function getContents(options: GetContentsOptions = {}): Promise<DBC
         limit = 20,
         offset = 0,
         difficulty,
+        bypassRLS = false, // Admin 전용: RLS 우회 여부
     } = options
 
-    let query = supabase
+    // Admin이 모든 상태의 콘텐츠를 조회할 때는 supabaseAdmin 사용
+    const client = bypassRLS ? supabaseAdmin : supabase
+
+    let query = client
         .from('contents')
         .select('*')
         .eq('status', status)
