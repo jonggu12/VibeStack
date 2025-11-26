@@ -18,7 +18,7 @@ export interface DBContent {
     status: ContentStatus
     stack: Record<string, string> | null
     author_id: string | null
-    view_count: number
+    views: number
     completion_count: number
     avg_rating: number | null
     published_at: string | null
@@ -187,7 +187,7 @@ export async function getRelatedContents(
         }
 
         // 4. 조회수 기반 인기도 (최대 +5점)
-        const popularityScore = Math.min(5, (candidate.view_count || 0) / 100)
+        const popularityScore = Math.min(5, (candidate.views || 0) / 100)
         score += popularityScore
 
         return { content: candidate, score }
@@ -210,7 +210,7 @@ export async function incrementViewCount(contentId: string): Promise<void> {
         // 현재 조회수 가져오기
         const { data: content, error: selectError } = await supabaseAdmin
             .from('contents')
-            .select('view_count')
+            .select('views')
             .eq('id', contentId)
             .single()
 
@@ -224,13 +224,13 @@ export async function incrementViewCount(contentId: string): Promise<void> {
             throw new Error('Content not found')
         }
 
-        console.log('[incrementViewCount] Current view_count:', content.view_count)
+        console.log('[incrementViewCount] Current views:', content.views)
 
         // 조회수 +1
-        const newCount = (content.view_count || 0) + 1
+        const newCount = (content.views || 0) + 1
         const { error: updateError } = await supabaseAdmin
             .from('contents')
-            .update({ view_count: newCount })
+            .update({ views: newCount })
             .eq('id', contentId)
 
         if (updateError) {

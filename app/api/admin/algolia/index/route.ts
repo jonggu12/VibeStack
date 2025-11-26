@@ -35,7 +35,7 @@ function toAlgoliaRecord(content: {
     author_id: string | null
     published_at: string | null
     updated_at: string
-    view_count: number
+    views: number
     completion_count: number
     avg_rating: number | null
     tags?: { name: string }[]
@@ -54,7 +54,7 @@ function toAlgoliaRecord(content: {
         author: content.author_id || undefined,
         publishedAt: content.published_at ? new Date(content.published_at).getTime() : Date.now(),
         updatedAt: new Date(content.updated_at).getTime(),
-        views: content.view_count,
+        views: content.views,
         completions: content.completion_count,
         avgRating: content.avg_rating || 0,
     }
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
                     author_id,
                     published_at,
                     updated_at,
-                    view_count,
+                    views,
                     completion_count,
                     avg_rating,
                     content_tags (
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
                     author_id,
                     published_at,
                     updated_at,
-                    view_count,
+                    views,
                     completion_count,
                     avg_rating,
                     content_tags (

@@ -65,7 +65,7 @@ export default async function SnippetDetailPage({ params }: SnippetPageProps) {
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                         <Eye className="w-4 h-4" />
-                        {(content.view_count ?? 0).toLocaleString()}회 조회
+                        {(content.views ?? 0).toLocaleString()}회 조회
                     </span>
                     {content.published_at && (
                         <span>

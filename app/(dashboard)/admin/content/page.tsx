@@ -115,7 +115,7 @@ export default async function AdminContentPage() {
                                             </Badge>
                                         </td>
                                         <td className="p-4 text-gray-600">
-                                            {(content.view_count ?? 0).toLocaleString()}
+                                            {(content.views ?? 0).toLocaleString()}
                                         </td>
                                         <td className="p-4 text-sm text-gray-500">
                                             {content.updated_at ? new Date(content.updated_at).toLocaleDateString('ko-KR') : '-'}

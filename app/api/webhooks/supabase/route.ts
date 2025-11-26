@@ -46,7 +46,7 @@ function toAlgoliaRecord(record: Record<string, unknown>): AlgoliaContentRecord 
         updatedAt: record.updated_at
             ? new Date(record.updated_at as string).getTime()
             : Date.now(),
-        views: (record.view_count as number) || 0,
+        views: (record.views as number) || 0,
         completions: (record.completion_count as number) || 0,
         avgRating: (record.avg_rating as number) || 0,
     }
