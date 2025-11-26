@@ -1,21 +1,27 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { Loader2 } from 'lucide-react'
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
+import { serialize } from 'next-mdx-remote/serialize'
+import { mdxComponents } from '@/components/mdx'
+import remarkGfm from 'remark-gfm'
+import rehypeSlug from 'rehype-slug'
+import rehypeHighlight from 'rehype-highlight'
 
 interface MDXPreviewProps {
     content: string
 }
 
 export function MDXPreview({ content }: MDXPreviewProps) {
-    const [html, setHtml] = useState<string>('')
+    const [mdxSource, setMdxSource] = useState<MDXRemoteSerializeResult | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        const fetchPreview = async () => {
+        const compileMDX = async () => {
             if (!content.trim()) {
-                setHtml('')
+                setMdxSource(null)
                 return
             }
 
@@ -23,28 +29,24 @@ export function MDXPreview({ content }: MDXPreviewProps) {
             setError(null)
 
             try {
-                const response = await fetch('/api/admin/preview', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content }),
+                // 클라이언트에서 직접 MDX 컴파일
+                const mdx = await serialize(content, {
+                    mdxOptions: {
+                        remarkPlugins: [remarkGfm],
+                        rehypePlugins: [rehypeSlug, rehypeHighlight],
+                    },
                 })
-
-                const data = await response.json()
-
-                if (!response.ok) {
-                    throw new Error(data.error || `미리보기 생성 실패 (${response.status})`)
-                }
-
-                setHtml(data.html)
+                setMdxSource(mdx)
             } catch (err) {
-                setError(err instanceof Error ? err.message : '알 수 없는 오류')
+                console.error('MDX compile error:', err)
+                setError(err instanceof Error ? err.message : 'MDX 컴파일 실패')
             } finally {
                 setLoading(false)
             }
         }
 
         // 디바운스: 타이핑 중에 너무 많은 요청 방지
-        const timer = setTimeout(fetchPreview, 500)
+        const timer = setTimeout(compileMDX, 500)
         return () => clearTimeout(timer)
     }, [content])
 
@@ -60,13 +62,13 @@ export function MDXPreview({ content }: MDXPreviewProps) {
     if (error) {
         return (
             <div className="min-h-[400px] bg-red-50 rounded-lg p-4">
-                <p className="text-red-600">오류: {error}</p>
-                <pre className="mt-4 text-sm text-gray-600 whitespace-pre-wrap">{content}</pre>
+                <p className="text-red-600 font-semibold">컴파일 오류</p>
+                <pre className="mt-2 text-sm text-red-700 whitespace-pre-wrap">{error}</pre>
             </div>
         )
     }
 
-    if (!html) {
+    if (!mdxSource) {
         return (
             <div className="min-h-[400px] bg-gray-50 rounded-lg p-4 flex items-center justify-center">
                 <p className="text-gray-500">콘텐츠를 입력하면 미리보기가 표시됩니다.</p>
@@ -75,9 +77,10 @@ export function MDXPreview({ content }: MDXPreviewProps) {
     }
 
     return (
-        <div
-            className="p-6 bg-white rounded-lg border min-h-[400px] max-w-none"
-            dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <div className="p-6 bg-white rounded-lg border min-h-[400px] max-w-none prose prose-lg">
+            <Suspense fallback={<div>Loading...</div>}>
+                <MDXRemote {...mdxSource} components={mdxComponents} />
+            </Suspense>
+        </div>
     )
 }
