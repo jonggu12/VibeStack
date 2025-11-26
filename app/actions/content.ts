@@ -136,7 +136,7 @@ export async function getContentsByType(
 }
 
 /**
- * 관련 콘텐츠 조회 (같은 태그 또는 스택 기반)
+ * 관련 콘텐츠 조회 (스택 기반 매칭)
  */
 export async function getRelatedContents(
     contentId: string,
@@ -146,28 +146,78 @@ export async function getRelatedContents(
     const content = await getContent(contentId)
     if (!content) return []
 
-    // 같은 타입의 다른 콘텐츠 조회
+    // 모든 발행된 콘텐츠 조회 (현재 콘텐츠 제외)
     const { data, error } = await supabase
         .from('contents')
         .select('*')
-        .eq('type', content.type)
         .eq('status', 'published')
         .neq('id', contentId)
-        .limit(limit)
 
     if (error) {
         console.error('Error fetching related contents:', error)
         return []
     }
 
-    return (data || []) as DBContent[]
+    const allContents = (data || []) as DBContent[]
+
+    // 스택 기반 점수 계산
+    const scoredContents = allContents.map(candidate => {
+        let score = 0
+
+        // 1. 스택 매칭 (가장 높은 가중치 - 각 매칭당 30점)
+        if (content.stack && candidate.stack) {
+            const currentStack = content.stack as Record<string, string>
+            const candidateStack = candidate.stack as Record<string, string>
+
+            Object.entries(currentStack).forEach(([key, value]) => {
+                if (candidateStack[key] === value) {
+                    score += 30
+                }
+            })
+        }
+
+        // 2. 같은 타입 (+20점)
+        if (candidate.type === content.type) {
+            score += 20
+        }
+
+        // 3. 같은 난이도 (+10점)
+        if (candidate.difficulty === content.difficulty) {
+            score += 10
+        }
+
+        // 4. 조회수 기반 인기도 (최대 +5점)
+        const popularityScore = Math.min(5, (candidate.view_count || 0) / 100)
+        score += popularityScore
+
+        return { content: candidate, score }
+    })
+
+    // 점수순 정렬 및 상위 N개 반환
+    return scoredContents
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map(item => item.content)
 }
 
 /**
- * 조회수 증가
+ * 조회수 증가 (RLS 우회 필요)
  */
 export async function incrementViewCount(contentId: string): Promise<void> {
-    await supabase.rpc('increment_view_count', { content_id: contentId })
+    // 현재 조회수 가져오기
+    const { data: content } = await supabaseAdmin
+        .from('contents')
+        .select('view_count')
+        .eq('id', contentId)
+        .single()
+
+    if (content) {
+        // 조회수 +1
+        await supabaseAdmin
+            .from('contents')
+            .update({ view_count: (content.view_count || 0) + 1 })
+            .eq('id', contentId)
+    }
 }
 
 /**

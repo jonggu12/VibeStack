@@ -28,6 +28,8 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
     const [status, setStatus] = useState<ContentStatus>(initialContent?.status as ContentStatus || 'draft')
     const [difficulty, setDifficulty] = useState<Difficulty>(initialContent?.difficulty || 'beginner')
     const [isPremium, setIsPremium] = useState(initialContent?.is_premium || false)
+    const [estimatedTime, setEstimatedTime] = useState(initialContent?.estimated_time_mins?.toString() || '')
+    const [stack, setStack] = useState<Record<string, string>>(initialContent?.stack || {})
     const [content, setContent] = useState(initialContent?.content || defaultMDXTemplate)
     const [saving, setSaving] = useState(false)
     const [deleting, setDeleting] = useState(false)
@@ -76,6 +78,8 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
                 difficulty,
                 status,
                 is_premium: isPremium,
+                estimated_time_mins: estimatedTime ? parseInt(estimatedTime) : undefined,
+                stack: Object.keys(stack).length > 0 ? stack : undefined,
                 content,
             }
 
@@ -315,6 +319,74 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
                         >
                             {isPremium ? '🔒 Pro 전용' : '🌐 무료 공개'}
                         </button>
+                    </div>
+
+                    {/* 예상 소요 시간 */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">예상 소요 시간 (분)</label>
+                        <Input
+                            type="number"
+                            value={estimatedTime}
+                            onChange={(e) => setEstimatedTime(e.target.value)}
+                            placeholder="15"
+                            min="1"
+                        />
+                    </div>
+                </div>
+
+                {/* Stack 정보 */}
+                <div className="pt-4 border-t">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">스택 (Stack)</label>
+                    <p className="text-xs text-gray-500 mb-3">
+                        관련 콘텐츠 추천에 사용됩니다. 예: framework=Next.js, database=Supabase, auth=Clerk
+                    </p>
+                    <div className="space-y-2">
+                        {Object.entries(stack).map(([key, value], index) => (
+                            <div key={index} className="flex gap-2">
+                                <Input
+                                    placeholder="키 (예: framework)"
+                                    value={key}
+                                    onChange={(e) => {
+                                        const newStack = { ...stack }
+                                        delete newStack[key]
+                                        if (e.target.value) {
+                                            newStack[e.target.value] = value
+                                        }
+                                        setStack(newStack)
+                                    }}
+                                    className="flex-1"
+                                />
+                                <Input
+                                    placeholder="값 (예: Next.js 14)"
+                                    value={value}
+                                    onChange={(e) => {
+                                        setStack({ ...stack, [key]: e.target.value })
+                                    }}
+                                    className="flex-1"
+                                />
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        const newStack = { ...stack }
+                                        delete newStack[key]
+                                        setStack(newStack)
+                                    }}
+                                >
+                                    삭제
+                                </Button>
+                            </div>
+                        ))}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                const newKey = `key${Object.keys(stack).length + 1}`
+                                setStack({ ...stack, [newKey]: '' })
+                            }}
+                        >
+                            + 스택 추가
+                        </Button>
                     </div>
                 </div>
             </div>
