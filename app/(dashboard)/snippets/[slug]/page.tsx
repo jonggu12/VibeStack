@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
-import { getContentBySlug, getRelatedContents, incrementViewCount } from '@/app/actions/content'
+import { getContentBySlug, getRelatedContents } from '@/app/actions/content'
 import { compileMDXContent } from '@/lib/mdx'
 import { Badge } from '@/components/ui/badge'
 import { Eye } from 'lucide-react'
+import { ViewTracker } from '@/components/content/view-tracker'
 
 // 캐싱 방지 - 항상 최신 데이터 표시
 export const dynamic = 'force-dynamic'
@@ -20,9 +21,6 @@ export default async function SnippetDetailPage({ params }: SnippetPageProps) {
     if (!content) {
         notFound()
     }
-
-    // 조회수 증가 (비동기로 실행, 에러는 무시)
-    incrementViewCount(content.id).catch(() => {})
 
     // MDX 콘텐츠가 없으면 기본 메시지 표시
     if (!content.content) {
@@ -42,6 +40,9 @@ export default async function SnippetDetailPage({ params }: SnippetPageProps) {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
+            {/* 조회수 추적 (5초 후 + 24시간 쿠키) */}
+            <ViewTracker contentId={content.id} />
+
             {/* 헤더 */}
             <header className="mb-8">
                 <div className="flex items-center gap-2 mb-4">

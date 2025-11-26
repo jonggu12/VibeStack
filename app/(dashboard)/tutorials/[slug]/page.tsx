@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
-import { getContentBySlug, getRelatedContents, incrementViewCount } from '@/app/actions/content'
+import { getContentBySlug, getRelatedContents } from '@/app/actions/content'
 import { compileMDXContent, extractTOC, calculateReadingTime } from '@/lib/mdx'
 import { Badge } from '@/components/ui/badge'
 import { Clock, Eye, CheckCircle, BookOpen } from 'lucide-react'
+import { ViewTracker } from '@/components/content/view-tracker'
 
 // 캐싱 방지 - 항상 최신 데이터 표시
 export const dynamic = 'force-dynamic'
@@ -34,9 +35,6 @@ export default async function TutorialDetailPage({ params }: TutorialPageProps) 
         notFound()
     }
 
-    // 조회수 증가 (비동기로 실행, 에러는 무시)
-    incrementViewCount(content.id).catch(() => {})
-
     // MDX 콘텐츠가 없으면 기본 메시지 표시
     if (!content.content) {
         return (
@@ -61,6 +59,9 @@ export default async function TutorialDetailPage({ params }: TutorialPageProps) 
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
+            {/* 조회수 추적 (5초 후 + 24시간 쿠키) */}
+            <ViewTracker contentId={content.id} />
+
             <div className="flex gap-8">
                 {/* 메인 콘텐츠 */}
                 <article className="flex-1 max-w-4xl">
