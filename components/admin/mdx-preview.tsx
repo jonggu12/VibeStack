@@ -76,7 +76,12 @@ export function MDXPreview({ content }: MDXPreviewProps) {
 
     return (
         <div
-            className="prose prose-lg max-w-none p-6 bg-white rounded-lg border min-h-[400px]"
+            className="prose prose-lg max-w-none p-6 bg-gray-50 rounded-lg border min-h-[400px]
+                prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+                prose-p:text-gray-700 prose-p:leading-relaxed
+                prose-pre:my-0 prose-code:text-sm
+                prose-strong:text-gray-900 prose-strong:font-semibold
+                prose-ul:list-disc prose-ol:list-decimal"
             dangerouslySetInnerHTML={{ __html: html }}
         />
     )
