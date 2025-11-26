@@ -33,10 +33,11 @@ export default async function AdminContentPage() {
         redirect('/')
     }
 
-    // 모든 콘텐츠 조회 (draft 포함)
-    const contents = await getContents({ status: 'published', limit: 50 })
+    // 모든 콘텐츠 조회 (모든 상태 포함)
+    const published = await getContents({ status: 'published', limit: 50 })
     const drafts = await getContents({ status: 'draft', limit: 50 })
-    const allContents = [...drafts, ...contents]
+    const archived = await getContents({ status: 'archived', limit: 50 })
+    const allContents = [...drafts, ...published, ...archived]
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
