@@ -204,19 +204,44 @@ export async function getRelatedContents(
  * 조회수 증가 (RLS 우회 필요)
  */
 export async function incrementViewCount(contentId: string): Promise<void> {
-    // 현재 조회수 가져오기
-    const { data: content } = await supabaseAdmin
-        .from('contents')
-        .select('view_count')
-        .eq('id', contentId)
-        .single()
+    try {
+        console.log('[incrementViewCount] Starting for contentId:', contentId)
 
-    if (content) {
-        // 조회수 +1
-        await supabaseAdmin
+        // 현재 조회수 가져오기
+        const { data: content, error: selectError } = await supabaseAdmin
             .from('contents')
-            .update({ view_count: (content.view_count || 0) + 1 })
+            .select('view_count')
             .eq('id', contentId)
+            .single()
+
+        if (selectError) {
+            console.error('[incrementViewCount] Select error:', selectError)
+            throw selectError
+        }
+
+        if (!content) {
+            console.error('[incrementViewCount] Content not found:', contentId)
+            throw new Error('Content not found')
+        }
+
+        console.log('[incrementViewCount] Current view_count:', content.view_count)
+
+        // 조회수 +1
+        const newCount = (content.view_count || 0) + 1
+        const { error: updateError } = await supabaseAdmin
+            .from('contents')
+            .update({ view_count: newCount })
+            .eq('id', contentId)
+
+        if (updateError) {
+            console.error('[incrementViewCount] Update error:', updateError)
+            throw updateError
+        }
+
+        console.log('[incrementViewCount] Success! New count:', newCount)
+    } catch (error) {
+        console.error('[incrementViewCount] Fatal error:', error)
+        throw error
     }
 }
 

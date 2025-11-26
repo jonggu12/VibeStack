@@ -24,19 +24,27 @@ export function ViewTracker({ contentId }: ViewTrackerProps) {
 
         // 5초 후 조회수 증가
         const timer = setTimeout(async () => {
+            console.log('[ViewTracker] 5 seconds elapsed, tracking view...')
             try {
                 // 서버 액션 호출
+                console.log('[ViewTracker] Sending POST to /api/content/track-view')
                 const response = await fetch('/api/content/track-view', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contentId }),
                 })
 
+                console.log('[ViewTracker] Response status:', response.status)
+                const data = await response.json()
+                console.log('[ViewTracker] Response data:', data)
+
                 if (response.ok) {
                     // 24시간 동안 쿠키 설정
                     Cookies.set(cookieKey, '1', { expires: 1 }) // 1 = 1 day
                     setTracked(true)
-                    console.log('[ViewTracker] View counted!')
+                    console.log('[ViewTracker] View counted! Cookie set.')
+                } else {
+                    console.error('[ViewTracker] Server returned error:', data)
                 }
             } catch (error) {
                 console.error('[ViewTracker] Failed to track view:', error)
