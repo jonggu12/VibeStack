@@ -113,24 +113,38 @@ export default async function DocDetailPage({ params }: DocPageProps) {
                     {/* 관련 콘텐츠 */}
                     {relatedContents.length > 0 && (
                         <section className="mt-16 pt-8 border-t">
-                            <h2 className="text-2xl font-bold mb-4">관련 문서</h2>
+                            <h2 className="text-2xl font-bold mb-4">관련 콘텐츠</h2>
                             <div className="grid gap-4">
-                                {relatedContents.map((related) => (
-                                    <a
-                                        key={related.id}
-                                        href={`/docs/${related.slug}`}
-                                        className="block p-4 border rounded-lg hover:border-blue-500 transition-colors"
-                                    >
-                                        <h3 className="font-semibold text-gray-900">
-                                            {related.title}
-                                        </h3>
-                                        {related.description && (
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                {related.description}
-                                            </p>
-                                        )}
-                                    </a>
-                                ))}
+                                {relatedContents.map((related) => {
+                                    // 타입별 경로 생성
+                                    const contentPath = related.type === 'doc'
+                                        ? `/docs/${related.slug}`
+                                        : related.type === 'tutorial'
+                                        ? `/tutorials/${related.slug}`
+                                        : `/snippets/${related.slug}`
+
+                                    return (
+                                        <a
+                                            key={related.id}
+                                            href={contentPath}
+                                            className="block p-4 border rounded-lg hover:border-blue-500 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h3 className="font-semibold text-gray-900">
+                                                    {related.title}
+                                                </h3>
+                                                <Badge variant="outline" className="text-xs">
+                                                    {related.type === 'doc' ? '문서' : related.type === 'tutorial' ? '튜토리얼' : '스니펫'}
+                                                </Badge>
+                                            </div>
+                                            {related.description && (
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    {related.description}
+                                                </p>
+                                            )}
+                                        </a>
+                                    )
+                                })}
                             </div>
                         </section>
                     )}

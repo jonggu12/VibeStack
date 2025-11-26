@@ -136,39 +136,51 @@ export default async function TutorialDetailPage({ params }: TutorialPageProps) 
                         </button>
                     </div>
 
-                    {/* 관련 튜토리얼 */}
+                    {/* 관련 콘텐츠 */}
                     {relatedContents.length > 0 && (
                         <section className="mt-16 pt-8 border-t">
-                            <h2 className="text-2xl font-bold mb-4">다음 튜토리얼</h2>
+                            <h2 className="text-2xl font-bold mb-4">관련 콘텐츠</h2>
                             <div className="grid gap-4">
-                                {relatedContents.map((related) => (
-                                    <a
-                                        key={related.id}
-                                        href={`/tutorials/${related.slug}`}
-                                        className="block p-4 border rounded-lg hover:border-blue-500 transition-colors"
-                                    >
-                                        <div className="flex items-center gap-2 mb-2">
-                                            {related.difficulty && (
-                                                <Badge className={difficultyColors[related.difficulty]}>
-                                                    {difficultyLabels[related.difficulty]}
+                                {relatedContents.map((related) => {
+                                    // 타입별 경로 생성
+                                    const contentPath = related.type === 'doc'
+                                        ? `/docs/${related.slug}`
+                                        : related.type === 'tutorial'
+                                        ? `/tutorials/${related.slug}`
+                                        : `/snippets/${related.slug}`
+
+                                    return (
+                                        <a
+                                            key={related.id}
+                                            href={contentPath}
+                                            className="block p-4 border rounded-lg hover:border-blue-500 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Badge variant="outline" className="text-xs">
+                                                    {related.type === 'doc' ? '문서' : related.type === 'tutorial' ? '튜토리얼' : '스니펫'}
                                                 </Badge>
+                                                {related.difficulty && (
+                                                    <Badge className={difficultyColors[related.difficulty]}>
+                                                        {difficultyLabels[related.difficulty]}
+                                                    </Badge>
+                                                )}
+                                                {related.estimated_time_mins && (
+                                                    <span className="text-sm text-gray-500">
+                                                        약 {related.estimated_time_mins}분
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <h3 className="font-semibold text-gray-900">
+                                                {related.title}
+                                            </h3>
+                                            {related.description && (
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    {related.description}
+                                                </p>
                                             )}
-                                            {related.estimated_time_mins && (
-                                                <span className="text-sm text-gray-500">
-                                                    약 {related.estimated_time_mins}분
-                                                </span>
-                                            )}
-                                        </div>
-                                        <h3 className="font-semibold text-gray-900">
-                                            {related.title}
-                                        </h3>
-                                        {related.description && (
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                {related.description}
-                                            </p>
-                                        )}
-                                    </a>
-                                ))}
+                                        </a>
+                                    )
+                                })}
                             </div>
                         </section>
                     )}
