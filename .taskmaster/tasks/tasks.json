@@ -206,67 +206,76 @@
       },
       {
         "id": 4,
-        "title": "Develop Project Selection and Onboarding UI",
-        "description": "Create the UI for project selection and onboarding.",
-        "details": "Design and implement the UI for selecting project types and technology stacks. Use Tailwind CSS for styling and ensure responsiveness.",
-        "testStrategy": "Conduct user testing to ensure the UI is intuitive and responsive across devices.",
-        "priority": "medium",
+        "title": "Implement Soft Onboarding System (비개발자 친화)",
+        "description": "Create Soft Onboarding with optional customization flow for non-technical users.",
+        "details": "Implement home screen with immediate content access after signup. Add dismissable onboarding banner. Create behavior-based personalization and strategic onboarding prompts (after 3 content views, 3 searches, or first tutorial completion). Design for 80% non-developer vibe coders.",
+        "testStrategy": "A/B test Soft Onboarding vs Forced Onboarding. Track: signup bounce rate (<25%), first content view (80%+), onboarding completion (45%), D7 retention (38%+).",
+        "priority": "high",
         "dependencies": [
-          1
+          1,
+          2
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Design Project Selection UI",
-            "description": "Create wireframes for the project selection interface.",
+            "title": "Design Home Screen UI (비개발자용)",
+            "description": "Create home screen that shows popular content immediately after signup.",
             "dependencies": [],
-            "details": "Use design tools to create wireframes focusing on user flow and layout.",
-            "status": "done",
-            "testStrategy": "Review wireframes with stakeholders for feedback."
+            "details": "Design sections: 🔥 Popular Tutorials (코딩 몰라도 완성!), 📚 Start Without Coding (Cursor guides, error solutions), 🔧 Most Copied Code. Use friendly Korean language.",
+            "status": "pending",
+            "testStrategy": "User testing with non-developers to ensure clarity and accessibility."
           },
           {
             "id": 2,
-            "title": "Implement Project Selection UI",
-            "description": "Develop the UI for project selection using Tailwind CSS.",
+            "title": "Implement Dismissable Onboarding Banner",
+            "description": "Add top banner prompting optional customization with dismiss option.",
             "dependencies": [
               1
             ],
-            "details": "Translate wireframes into code using React and Tailwind CSS for styling.",
-            "status": "done",
-            "testStrategy": "Conduct cross-browser testing to ensure consistent appearance."
+            "details": "Banner text: '💡 3분만 투자하면 맞춤 추천을 받을 수 있어요'. Two CTAs: [맞춤 추천 받기] [나중에]. Track dismissal in database.",
+            "status": "pending",
+            "testStrategy": "Test banner display, dismissal, and persistence across sessions."
           },
           {
             "id": 3,
-            "title": "Design Onboarding UI",
-            "description": "Create wireframes for the onboarding process.",
+            "title": "Build Behavior Tracking System",
+            "description": "Track user actions to enable implicit personalization.",
             "dependencies": [],
-            "details": "Focus on user experience and clarity in the onboarding steps.",
-            "status": "done",
-            "testStrategy": "Gather feedback from potential users on the wireframes."
+            "details": "Create user_behaviors table. Track: content_view, search_query, snippet_copy. Infer stack preferences after 3+ views of same framework.",
+            "status": "pending",
+            "testStrategy": "Verify accurate behavior tracking and stack inference logic."
           },
           {
             "id": 4,
-            "title": "Implement Onboarding UI",
-            "description": "Develop the onboarding interface using Tailwind CSS.",
+            "title": "Implement Strategic Onboarding Prompts",
+            "description": "Show contextual onboarding prompts at strategic moments.",
             "dependencies": [
               3
             ],
-            "details": "Use React and Tailwind CSS to build a responsive onboarding UI.",
-            "status": "done",
-            "testStrategy": "Test responsiveness on various devices and screen sizes."
+            "details": "Trigger conditions: 3+ content views, 3+ searches, 1 tutorial completion. Show modal: 'Next.js에 관심 있으시네요! 맞춤 추천 받으시겠어요?'. Track prompt shows and conversions.",
+            "status": "pending",
+            "testStrategy": "Test trigger logic and conversion rates for each prompt type."
           },
           {
             "id": 5,
-            "title": "Integrate Project and Onboarding UI",
-            "description": "Ensure seamless integration between project selection and onboarding.",
+            "title": "Create Optional Onboarding Flow",
+            "description": "Build project selection and stack selection UI for users who choose customization.",
             "dependencies": [
-              2,
-              4
+              2
             ],
-            "details": "Connect the project selection and onboarding components to provide a smooth user experience.",
-            "status": "done",
-            "testStrategy": "Conduct user testing to ensure intuitive navigation between components."
+            "details": "Step 1: Project type (웹/앱/백엔드). Step 2: Stack preset (SaaS Kit/E-commerce/Custom). Save to users table: onboarding_completed, project_type, stack_preset.",
+            "status": "pending",
+            "testStrategy": "Test complete onboarding flow and data persistence."
+          },
+          {
+            "id": 6,
+            "title": "Update Database Schema for Soft Onboarding",
+            "description": "Add fields to support soft onboarding and behavior tracking.",
+            "dependencies": [],
+            "details": "Add to users: onboarding_completed, onboarding_dismissed_at, inferred_stack, content_view_count, search_count. Create user_behaviors and onboarding_prompts tables.",
+            "status": "pending",
+            "testStrategy": "Run migrations and verify schema changes."
           }
         ]
       },
@@ -347,7 +356,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -355,7 +364,7 @@
             "description": "Configure the development environment to support MDX rendering.",
             "dependencies": [],
             "details": "Install necessary libraries and configure the build system to handle MDX files.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify MDX files are correctly processed and rendered."
           },
           {
@@ -366,7 +375,7 @@
               1
             ],
             "details": "Design a schema for documents and implement a system to manage them.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add sample documents and ensure they are displayed correctly."
           },
           {
@@ -377,7 +386,7 @@
               1
             ],
             "details": "Integrate libraries or frameworks that allow interactive components in MDX.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test with interactive components to ensure functionality."
           },
           {
@@ -388,7 +397,7 @@
               2
             ],
             "details": "Design and implement a user-friendly editing interface with live preview.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Conduct user testing to ensure ease of use and functionality."
           },
           {
@@ -400,13 +409,186 @@
               4
             ],
             "details": "Test all functionalities including rendering, editing, and interactive elements.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use a variety of test cases to ensure all features work as expected."
           }
         ]
       },
       {
         "id": 7,
+        "title": "Create 30 Non-Developer Focused Content (비개발자 특화 콘텐츠)",
+        "description": "Write 30 documents optimized for non-technical vibe coders with prompt-first approach.",
+        "details": "Create 3 categories: AI Tool Usage (10), Quick Start (10), Error Solutions (10). All content follows: Prompt 80% + Understanding 20%, Korean-friendly language, 'AI한테 이렇게 물어보세요' sections, Top 3 errors with solution prompts.",
+        "testStrategy": "Test with non-developers. Success metrics: 90%+ can follow without coding knowledge, 80%+ find prompts work immediately, average reading time < 10 minutes.",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Write AI Tool Usage Docs (10개)",
+            "description": "Create beginner-friendly Cursor and AI tool guides.",
+            "dependencies": [],
+            "details": "Topics: 'Cursor가 뭐예요?', Cursor 프롬프트 작성법 (기초/고급), AI가 자주 틀리는 부분 TOP 10, Copilot vs Cursor, 프롬프트 디버깅, AI 코드 리뷰, AI가 이해 못하는 상황, Cursor Composer 활용, AI에게 에러 설명하기, 코드 이해 없이 프로젝트 관리.",
+            "status": "pending",
+            "testStrategy": "User testing with 10 non-developers. 90%+ should understand and apply."
+          },
+          {
+            "id": 2,
+            "title": "Write Quick Start Docs (10개)",
+            "description": "Create fast-start guides for common tasks with copy-paste prompts.",
+            "dependencies": [],
+            "details": "Topics: 5분 Next.js 시작, Clerk 인증 복붙, Supabase DB 5분 설정, Vercel 배포 체크리스트, Stripe 결제 붙이기, 환경변수 설정, Git 기본 (AI 시대), 'localhost가 뭐예요?', 내 컴퓨터에서 웹사이트 띄우기, 에러 메시지 읽는 법.",
+            "status": "pending",
+            "testStrategy": "Measure completion time. Target: 80%+ complete in 5-10 minutes."
+          },
+          {
+            "id": 3,
+            "title": "Write Error Solution Docs (10개)",
+            "description": "Create error troubleshooting guides with AI prompts for solutions.",
+            "dependencies": [],
+            "details": "Topics: 'Module not found', 'use client' 에러, Hydration 에러, 환경변수 안 먹을 때, 'npm install 안 돼요', 페이지 안 뜰 때, 'TypeError' 읽는 법, 빌드 에러, DB 연결 안 될 때, 배포 후 안 될 때. Each includes: common cause, AI prompt to fix, 3-step solution.",
+            "status": "pending",
+            "testStrategy": "Track error resolution time. Target: 80%+ resolve in <30 minutes."
+          },
+          {
+            "id": 4,
+            "title": "Create Content Writing Guide for Authors",
+            "description": "Document content creation standards and templates.",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "details": "Create CONTENT_GUIDE.md: prompt-first structure, tone guidelines (코딩 몰라도 OK), required sections (1단계 프롬프트, 2단계 체크리스트, 💡 왜?, 🐛 에러 TOP 3), Korean localization standards.",
+            "status": "pending",
+            "testStrategy": "Use guide to create 2 new sample docs and verify consistency."
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Create 5 Prompt-First Tutorial Projects (비개발자용)",
+        "description": "Develop 5 complete tutorials designed for non-coders using only copy-paste prompts.",
+        "details": "Build tutorials: 45min Todo App, 30min Waitlist, 1.5h Blog, 2h Stripe SaaS, 3h Fullstack App. Each tutorial: 0→Deploy with zero coding, step-by-step Cursor prompts, checkpoints asking 'Does it work?', brief 'What just happened?' explanations, error resolution prompts.",
+        "testStrategy": "Beta test with 20 non-developers. Success: 60%+ complete first tutorial, 40%+ complete to deployment, 80%+ feel they understand what they built.",
+        "priority": "high",
+        "dependencies": [
+          6,
+          7
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Tutorial: 45min Todo App",
+            "description": "Build complete Todo SaaS tutorial from scratch to deployment.",
+            "dependencies": [],
+            "details": "Phases: 프로젝트 생성 (5분), 로그인 기능 (10분), Todo 기능 (20분), 배포 (10분). Each phase: Cursor prompt, checklist, explanation, error solutions. Tech: Next.js + Clerk + Supabase.",
+            "status": "pending",
+            "testStrategy": "10 non-developers attempt. 80%+ should complete successfully."
+          },
+          {
+            "id": 2,
+            "title": "Create Tutorial: 30min Waitlist Landing Page",
+            "description": "Simple email collection landing page with database.",
+            "dependencies": [],
+            "details": "Tech: Next.js + Supabase. Features: email form, thank you page, admin view. Focus on simplest possible setup. Designed for absolute beginners.",
+            "status": "pending",
+            "testStrategy": "Test with marketing/design background users (no coding experience)."
+          },
+          {
+            "id": 3,
+            "title": "Create Tutorial: 1.5h MDX Blog",
+            "description": "Personal blog with MDX content writing capability.",
+            "dependencies": [
+              1
+            ],
+            "details": "Tech: Next.js + MDX + Contentlayer. Features: post list, post detail, markdown editor. Emphasize: 'Just write, don't code'.",
+            "status": "pending",
+            "testStrategy": "Verify users can write and publish blog posts without touching code."
+          },
+          {
+            "id": 4,
+            "title": "Create Tutorial: 2h Stripe Subscription SaaS",
+            "description": "Simple SaaS with paid subscription using Stripe.",
+            "dependencies": [
+              1
+            ],
+            "details": "Tech: Next.js + Clerk + Stripe. Features: free tier, Pro plan ($12/month), payment flow, subscription management. Includes Korean Toss Payments alternative guide.",
+            "status": "pending",
+            "testStrategy": "Test payment flow in test mode. Verify subscription lifecycle."
+          },
+          {
+            "id": 5,
+            "title": "Create Tutorial: 3h Fullstack App (종합편)",
+            "description": "Complete app combining all previous concepts.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Tech: Next.js + Clerk + Supabase + Stripe. Features: auth, database CRUD, file upload, payments, admin dashboard. Serves as final graduation project.",
+            "status": "pending",
+            "testStrategy": "Completion rate target: 40%+. Post-completion survey: confidence level in building similar apps."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Create 50 Copy-Paste Code Snippets with AI Customization Prompts",
+        "description": "Build library of instantly working code snippets with customization guides.",
+        "details": "Categories: Auth (10), Database (15), Payments (10), UI (15). Each snippet: works immediately after paste, '이게 뭐하는 코드예요?' comment, '여기만 바꾸세요' markers, 3 customization prompts for AI, common error + solution.",
+        "testStrategy": "Test each snippet: paste and run without modification. Track copy count and customization success rate.",
+        "priority": "medium",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Auth Snippets (10개)",
+            "description": "Login, signup, protected routes, role-based access snippets.",
+            "dependencies": [],
+            "details": "Clerk-based auth snippets. Each includes: working code, Korean comments explaining function, AI prompts for customization ('버튼 색깔 바꾸기', '리다이렉트 경로 변경', etc).",
+            "status": "pending",
+            "testStrategy": "Test in fresh Next.js project. Should work after single copy-paste."
+          },
+          {
+            "id": 2,
+            "title": "Create Database Snippets (15개)",
+            "description": "CRUD operations, search, filtering, pagination for Supabase.",
+            "dependencies": [],
+            "details": "Supabase snippets for common operations. Include: create, read, update, delete, list with pagination, search, filter, sort, real-time subscriptions.",
+            "status": "pending",
+            "testStrategy": "Verify each snippet works with minimal Supabase setup."
+          },
+          {
+            "id": 3,
+            "title": "Create Payment Snippets (10개)",
+            "description": "Stripe and Toss Payments integration snippets.",
+            "dependencies": [],
+            "details": "Snippets: checkout button, subscription button, payment success page, webhook handler, billing management, refund handler. Include both Stripe and Toss versions.",
+            "status": "pending",
+            "testStrategy": "Test in sandbox/test mode for both payment providers."
+          },
+          {
+            "id": 4,
+            "title": "Create UI Component Snippets (15개)",
+            "description": "Common UI components with Tailwind styling.",
+            "dependencies": [],
+            "details": "Components: buttons, forms, cards, modals, toasts, loading states, error messages, navigation, footer, pricing tables. All use Tailwind CSS and Shadcn/ui.",
+            "status": "pending",
+            "testStrategy": "Visual testing across devices. Ensure responsive design."
+          }
+        ]
+      },
+      {
+        "id": 10,
         "title": "Implement Real-Time Success Metrics and Error Diagnostics",
         "description": "Add features for displaying success metrics and diagnosing errors.",
         "details": "Develop components to display real-time success metrics and integrate basic error diagnostics. Use PostHog for analytics and Sentry for error tracking.",
@@ -472,7 +654,7 @@
         ]
       },
       {
-        "id": 8,
+        "id": 11,
         "title": "Create Feedback and Quiz System",
         "description": "Implement a system for user feedback and quizzes.",
         "details": "Develop a feedback collection system and integrate quizzes at checkpoints in tutorials. Ensure data is stored securely.",
@@ -487,9 +669,7 @@
             "id": 1,
             "title": "Design Feedback Collection Interface",
             "description": "Create the user interface for collecting feedback.",
-            "dependencies": [
-              6
-            ],
+            "dependencies": [],
             "details": "Design a simple, user-friendly interface for feedback collection using Tailwind CSS.",
             "status": "pending",
             "testStrategy": "Conduct user testing to ensure ease of use."
@@ -542,7 +722,7 @@
         ]
       },
       {
-        "id": 9,
+        "id": 12,
         "title": "Set Up Infrastructure and Deployment",
         "description": "Configure hosting and deployment settings.",
         "details": "Set up Vercel for hosting, configure Supabase for database and storage, and ensure all services are correctly linked and deployed.",
@@ -611,77 +791,80 @@
         ]
       },
       {
-        "id": 10,
-        "title": "Conduct Beta Testing and Gather Feedback",
-        "description": "Launch a beta version for early access users.",
-        "details": "Invite 100 early access users to test the platform. Collect feedback and identify bugs for improvement before the official launch.",
-        "testStrategy": "Analyze user feedback and bug reports to prioritize fixes and enhancements for the official launch.",
-        "priority": "medium",
+        "id": 13,
+        "title": "Conduct Beta Testing with 100 Non-Developer Users",
+        "description": "Launch beta version targeting non-technical vibe coders.",
+        "details": "Recruit 100 beta testers (80% non-developers, 20% junior developers). Focus on testing prompt-first content effectiveness, soft onboarding conversion, and error resolution success. Collect feedback on language clarity and AI prompt accuracy.",
+        "testStrategy": "Success metrics: 60%+ complete first tutorial, 80%+ find prompts work immediately, 90%+ understand content without coding background, <30min average error resolution time.",
+        "priority": "high",
         "dependencies": [
-          9
+          4,
+          7,
+          8,
+          12
         ],
         "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Prepare Beta Version for Deployment",
-            "description": "Ensure the beta version is ready for deployment to early access users.",
+            "title": "Recruit 100 Beta Testers (비개발자 중심)",
+            "description": "Recruit beta testers from target audience: 80% non-developers.",
             "dependencies": [],
-            "details": "Finalize all features and perform internal testing to ensure stability before inviting users.",
+            "details": "Channels: Cursor Discord (비개발자 채널), Reddit r/cursor (beginners), Twitter/X #VibeCode community, Korean startup communities. Screening: 코딩 경험 수준, 사용 중인 AI 도구, 만들고 싶은 프로젝트.",
             "status": "pending",
-            "testStrategy": "Conduct internal testing to verify stability."
+            "testStrategy": "Verify recruits match target persona: 80+ non-developers, 15+ marketers/designers."
           },
           {
             "id": 2,
-            "title": "Invite Early Access Users",
-            "description": "Send invitations to 100 selected early access users.",
-            "dependencies": [
-              1
-            ],
-            "details": "Compile a list of early access users and send out invitations via email with access instructions.",
+            "title": "Prepare Beta Testing Guide and Instructions",
+            "description": "Create onboarding materials for beta testers.",
+            "dependencies": [],
+            "details": "Documents: Welcome email, Quick Start Guide (5분), Testing Tasks (1st tutorial must-do), Feedback Form, Discord invite for support. All in Korean and English. Emphasize: 코딩 몰라도 괜찮아요!",
             "status": "pending",
-            "testStrategy": "Verify that all users receive invitations and can access the platform."
+            "testStrategy": "Test instructions with 5 internal non-technical staff first."
           },
           {
             "id": 3,
-            "title": "Monitor User Activity and Collect Feedback",
-            "description": "Track user activity and gather feedback during the beta testing phase.",
+            "title": "Track User Behavior and Collect Quantitative Data",
+            "description": "Monitor key metrics during beta testing phase.",
             "dependencies": [
+              1,
               2
             ],
-            "details": "Set up analytics to monitor user interactions and provide a feedback form for users to submit their experiences.",
+            "details": "Track: signup → first content view (target 80%+), first tutorial start (target 70%+), first tutorial completion (target 60%+), prompt copy rate, error occurrence, onboarding conversion from prompts. Use PostHog for tracking.",
             "status": "pending",
-            "testStrategy": "Ensure feedback form is accessible and analytics are tracking correctly."
+            "testStrategy": "Daily monitoring. Alert if any metric falls below target."
           },
           {
             "id": 4,
-            "title": "Identify and Document Bugs",
-            "description": "Collect and document any bugs reported by users during beta testing.",
+            "title": "Collect Qualitative Feedback via Surveys and Interviews",
+            "description": "Gather detailed user feedback on content and UX.",
             "dependencies": [
               3
             ],
-            "details": "Review user feedback and analytics to identify bugs. Document these issues for the development team.",
+            "details": "Questions: '코딩 몰라도 따라할 수 있었나요?', 'AI 프롬프트가 잘 작동했나요?', '에러 해결에 얼마나 걸렸나요?', '어떤 부분이 어려웠나요?', '친구에게 추천하시겠어요? (NPS)'. Conduct 10 user interviews (30min each).",
             "status": "pending",
-            "testStrategy": "Cross-reference user reports with analytics data to confirm bugs."
+            "testStrategy": "Achieve 80%+ survey response rate. Conduct interviews with users who completed and users who dropped off."
           },
           {
             "id": 5,
-            "title": "Analyze Feedback and Prioritize Improvements",
-            "description": "Analyze user feedback and prioritize necessary improvements before the official launch.",
+            "title": "Analyze Feedback and Create Improvement Roadmap",
+            "description": "Analyze beta test results and prioritize fixes before launch.",
             "dependencies": [
+              3,
               4
             ],
-            "details": "Evaluate feedback and bug reports to determine priority fixes and enhancements. Plan updates accordingly.",
+            "details": "Analyze: content clarity issues, prompt failure patterns, common errors, onboarding conversion bottlenecks. Create: Priority P0 (blocker) and P1 (nice-to-have) fix lists. Update PRD if needed. Set launch readiness criteria.",
             "status": "pending",
-            "testStrategy": "Review feedback analysis to ensure all critical issues are addressed."
+            "testStrategy": "Stakeholder review. Launch only if: P0 bugs = 0, tutorial completion rate >50%, NPS >40."
           }
         ]
       },
       {
-        "id": 11,
+        "id": 14,
         "title": "Implement Payment System with Toss Payments (Korea)",
-        "description": "Set up payment processing using Toss Payments for Korean domestic users. This will be the primary payment system for Korean market before global expansion.",
-        "details": "Integrate Toss Payments SDK for handling payments in Korea. Implement one-time payments and subscription (billing) management. Support all Korean payment methods including credit cards, Kakao Pay, Naver Pay, Toss Pay, and bank transfers. Design the system to coexist with Stripe for future global expansion.",
+        "description": "Set up payment processing using Toss Payments for Korean domestic users.",
+        "details": "Integrate Toss Payments SDK for handling payments in Korea. Implement one-time payments and subscription (billing) management. Support all Korean payment methods including credit cards, Kakao Pay, Naver Pay, Toss Pay, and bank transfers.",
         "testStrategy": "Perform test transactions using Toss Payments test mode (sandbox) to ensure all payment flows work correctly. Test with various Korean payment methods.",
         "priority": "high",
         "dependencies": [
@@ -749,7 +932,7 @@
             "dependencies": [
               5
             ],
-            "details": "Implement billing key issuance for recurring payments. Create subscription management: create, update, cancel. Handle automatic billing on renewal dates. Support Pro ($15,000/month) and Team ($65,000/month) plans.",
+            "details": "Implement billing key issuance for recurring payments. Create subscription management: create, update, cancel. Handle automatic billing on renewal dates. Support Pro (₩15,000/month) and Team (₩65,000/month) plans.",
             "status": "done",
             "testStrategy": "Test subscription lifecycle: creation, renewal, cancellation in sandbox."
           },
@@ -780,8 +963,8 @@
     ],
     "metadata": {
       "created": "2025-11-21T04:41:42.478Z",
-      "updated": "2025-11-22T10:53:17.226Z",
-      "description": "Tasks for master context"
+      "updated": "2025-11-27T10:00:00.000Z",
+      "description": "Tasks for VibeStack - 100% Non-Technical Vibe Coder Platform (PRD v2.2)"
     }
   }
 }

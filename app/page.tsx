@@ -1,34 +1,45 @@
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { currentUser } from '@clerk/nextjs/server'
+import { HeroSection } from '@/components/home/hero-section'
+import { OnboardingBanner } from '@/components/home/onboarding-banner'
+import { PopularTutorials } from '@/components/home/popular-tutorials'
+import { QuickStartDocs } from '@/components/home/quick-start-docs'
+import { CodeSnippetsPreview } from '@/components/home/code-snippets-preview'
+import { TrustSection } from '@/components/home/trust-section'
+import { getHomePageData } from '@/app/actions/home'
 
-export default function Home() {
+export default async function Home() {
+  const user = await currentUser()
+  const { popularTutorials, quickStartDocs, popularSnippets } = await getHomePageData()
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="absolute top-4 right-4">
-        <SignedOut>
-          <SignInButton mode="modal">
-            <Button variant="outline">Sign In</Button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
-      </div>
+    <main className="min-h-screen">
+      {/* Dismissable onboarding banner (only for logged-in users) */}
+      {user && <OnboardingBanner userId={user.id} />}
 
-      <h1 className="text-4xl font-bold">Welcome to VibeStack</h1>
-      <p className="mt-4 text-xl">AI-era developer learning platform</p>
+      {/* Hero section with animated background */}
+      <HeroSection />
 
-      <SignedOut>
-        <SignInButton mode="modal">
-          <Button className="mt-8">Get Started</Button>
-        </SignInButton>
-      </SignedOut>
-      <SignedIn>
-        <Link href="/dashboard">
-        <Button className="mt-8">Go to Dashboard</Button>
-        </Link>
-      </SignedIn>
+      {/* Popular tutorials section */}
+      {popularTutorials.length > 0 && (
+        <PopularTutorials tutorials={popularTutorials} />
+      )}
+
+      {/* Quick start docs */}
+      {quickStartDocs.length > 0 && (
+        <QuickStartDocs docs={quickStartDocs} />
+      )}
+
+      {/* Code snippets preview */}
+      {popularSnippets.length > 0 && (
+        <CodeSnippetsPreview snippets={popularSnippets} />
+      )}
+
+      {/* Trust indicators & testimonials */}
+      <TrustSection />
+
+      {/* TODO: Add pricing CTA section */}
+      {/* TODO: Add FAQ section */}
+      {/* TODO: Add footer */}
     </main>
-  );
+  )
 }
