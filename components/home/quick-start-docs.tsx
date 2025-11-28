@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { BookOpen, Copy, Zap, MessageSquare } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { ReactElement } from 'react'
 
 interface Doc {
   id: string
@@ -21,7 +22,7 @@ interface QuickStartDocsProps {
   docs: Doc[]
 }
 
-const iconMap: Record<string, JSX.Element> = {
+const iconMap: Record<string, ReactElement> = {
   cursor: <MessageSquare className="w-6 h-6" />,
   prompt: <Copy className="w-6 h-6" />,
   error: <Zap className="w-6 h-6" />,

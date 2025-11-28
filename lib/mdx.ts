@@ -100,8 +100,8 @@ export function extractTOC(content: string): TOCItem[] {
     let match
 
     while ((match = headingRegex.exec(content)) !== null) {
-        const level = match[1].length
-        const text = match[2].trim()
+        const level = match[1]!.length
+        const text = match[2]!.trim()
         // ID 생성: 소문자, 공백을 하이픈으로, 특수문자 제거
         const id = text
             .toLowerCase()

@@ -37,8 +37,8 @@ export async function POST(req: Request) {
             orderId,
             orderName: `${pricing.name} 정기구독`,
             amount: pricing.amount,
-            customerEmail: user.emailAddresses[0].emailAddress,
-            customerName: user.firstName || user.emailAddresses[0].emailAddress.split('@')[0],
+            customerEmail: user.emailAddresses[0]!.emailAddress,
+            customerName: user.firstName || user.emailAddresses[0]!.emailAddress.split('@')[0],
             // 빌링키 발급 후 성공/실패 URL
             successUrl: `${baseUrl}/api/toss/billing/success?plan=${plan}&userId=${userId}`,
             failUrl: `${baseUrl}/checkout/fail?orderId=${orderId}&type=billing`,

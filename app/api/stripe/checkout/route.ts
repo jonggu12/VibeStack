@@ -69,7 +69,7 @@ export async function POST(req: Request) {
                 mode: "payment",
                 payment_method_types: getPaymentMethods(country),
                 billing_address_collection: "auto",
-                customer_email: user.emailAddresses[0].emailAddress,
+                customer_email: user.emailAddresses[0]!.emailAddress,
                 line_items: [
                     {
                         price: process.env.STRIPE_PRICE_ID_SINGLE_CONTENT!,
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
 
         // 기존 고객인지 확인
         const existingCustomers = await stripe.customers.list({
-            email: user.emailAddresses[0].emailAddress,
+            email: user.emailAddresses[0]!.emailAddress,
             limit: 1,
         });
 
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
         if (customerId) {
             sessionConfig.customer = customerId;
         } else {
-            sessionConfig.customer_email = user.emailAddresses[0].emailAddress;
+            sessionConfig.customer_email = user.emailAddresses[0]!.emailAddress;
         }
 
         // 국가가 지정된 경우 해당 국가의 결제 수단 사용
@@ -167,7 +167,7 @@ export async function POST(req: Request) {
 }
 
 function getPriceId(plan: string, currency: string): string | null {
-    const currencyPrices = PRICE_IDS[currency] || PRICE_IDS.USD;
+    const currencyPrices = PRICE_IDS[currency] || PRICE_IDS.USD!;
 
     if (plan === "pro") return currencyPrices.pro;
     if (plan === "team") return currencyPrices.team;

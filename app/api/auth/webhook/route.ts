@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const email = email_addresses[0].email_address
+    const email = email_addresses[0]!.email_address
     const name = [first_name, last_name].filter(Boolean).join(' ') || null
 
     try {
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const email = email_addresses[0].email_address
+    const email = email_addresses[0]!.email_address
     const name = [first_name, last_name].filter(Boolean).join(' ') || null
 
     try {

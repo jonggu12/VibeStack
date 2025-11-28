@@ -37,8 +37,8 @@ export async function POST(req: Request) {
                 orderName: contentTitle || "콘텐츠 단건 구매",
                 amount: TOSS_PRICING.single.amount,
                 customerKey,
-                customerName: user.firstName || user.emailAddresses[0].emailAddress.split('@')[0],
-                customerEmail: user.emailAddresses[0].emailAddress,
+                customerName: user.firstName || user.emailAddresses[0]!.emailAddress.split('@')[0],
+                customerEmail: user.emailAddresses[0]!.emailAddress,
                 successUrl: `${baseUrl}/api/toss/confirm?orderId=${orderId}&contentId=${contentId}&plan=single&userId=${userId}`,
                 failUrl: `${baseUrl}/checkout/fail?orderId=${orderId}`,
                 metadata: {
@@ -64,8 +64,8 @@ export async function POST(req: Request) {
             orderName: pricing.name,
             amount: pricing.amount,
             customerKey,
-            customerName: user.firstName || user.emailAddresses[0].emailAddress.split('@')[0],
-            customerEmail: user.emailAddresses[0].emailAddress,
+            customerName: user.firstName || user.emailAddresses[0]!.emailAddress.split('@')[0],
+            customerEmail: user.emailAddresses[0]!.emailAddress,
             successUrl: `${baseUrl}/api/toss/confirm?orderId=${orderId}&plan=${plan}&userId=${userId}`,
             failUrl: `${baseUrl}/checkout/fail?orderId=${orderId}`,
             // 정기결제를 위한 빌링 설정
