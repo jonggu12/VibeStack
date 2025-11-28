@@ -17,6 +17,37 @@ const ERROR_MESSAGES = {
   INTERNAL_ERROR: 'An unexpected error occurred',
 } as const
 
+/**
+ * Type for checkout session metadata
+ */
+type CheckoutMetadata = {
+  userId: string
+  purchaseType?: 'single' | 'subscription'
+  contentId?: string
+  plan?: string
+  currency?: string
+}
+
+/**
+ * Extract and validate metadata from Stripe checkout session
+ * Returns null if required fields are missing
+ */
+function extractCheckoutMetadata(
+  metadata: Record<string, string> | null | undefined
+): CheckoutMetadata | null {
+  if (!metadata?.userId) {
+    return null
+  }
+
+  return {
+    userId: metadata.userId,
+    purchaseType: metadata.purchaseType as 'single' | 'subscription' | undefined,
+    contentId: metadata.contentId,
+    plan: metadata.plan,
+    currency: metadata.currency || 'USD',
+  }
+}
+
 export async function POST(req: Request) {
     const requestId = generateRequestId();
     const body = await req.text();
@@ -89,18 +120,16 @@ export async function POST(req: Request) {
 
 // 체크아웃 완료 핸들러
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session, requestId: string) {
-    const userId = session.metadata?.userId;
-    const purchaseType = session.metadata?.purchaseType;
-    const contentId = session.metadata?.contentId;
-    const plan = session.metadata?.plan;
-    const currency = session.metadata?.currency || 'USD';
+    const metadata = extractCheckoutMetadata(session.metadata);
 
-    if (!userId) {
-        console.error("[CHECKOUT_COMPLETED] Missing userId in metadata");
+    if (!metadata) {
+        console.error(`[${requestId}] checkout.session.completed: Missing userId in metadata`);
         return;
     }
 
-    console.log(`[CHECKOUT_COMPLETED] User: ${userId}, Type: ${purchaseType || 'subscription'}`);
+    const { userId, purchaseType, contentId, plan, currency } = metadata;
+
+    console.log(`[${requestId}] checkout.session.completed: User ${userId}, Type: ${purchaseType || 'subscription'}`);
 
     // 단건 구매
     if (purchaseType === "single" && contentId) {
