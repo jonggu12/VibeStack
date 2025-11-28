@@ -1,5 +1,6 @@
-import { SignIn } from "@clerk/nextjs";
+import { SignIn } from "@clerk/nextjs"
+import { signInConfig } from "@/lib/clerk"
 
 export default function SignInPage() {
-    return <SignIn />;
+    return <SignIn {...signInConfig} />
 }

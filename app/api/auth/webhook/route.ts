@@ -16,6 +16,108 @@ const ERROR_MESSAGES = {
   INTERNAL_ERROR: 'An unexpected error occurred',
 } as const
 
+// Type for user data from Clerk webhook
+type ClerkUserData = {
+  id: string
+  email_addresses?: Array<{ email_address: string }>
+  first_name?: string | null
+  last_name?: string | null
+  image_url?: string | null
+}
+
+// Type for extracted user information
+type UserInfo = {
+  id: string
+  email: string
+  name: string | null
+  avatar_url: string | null
+}
+
+/**
+ * Extract and validate user information from Clerk webhook data
+ */
+function extractUserInfo(userData: ClerkUserData): UserInfo | null {
+  const { id, email_addresses, first_name, last_name, image_url } = userData
+
+  // Validate required fields
+  if (!email_addresses || email_addresses.length === 0) {
+    return null
+  }
+
+  const email = email_addresses[0]!.email_address
+  const name = [first_name, last_name].filter(Boolean).join(' ') || null
+  const avatar_url = image_url || null
+
+  return { id, email, name, avatar_url }
+}
+
+/**
+ * Handle user creation or update in Supabase
+ */
+async function syncUserToSupabase(
+  userInfo: UserInfo,
+  operation: 'create' | 'update',
+  requestId: string
+): Promise<NextResponse> {
+  try {
+    const supabase = await createClient()
+
+    if (operation === 'create') {
+      const { error } = await supabase
+        .from('users')
+        .insert({
+          clerk_user_id: userInfo.id,
+          email: userInfo.email,
+          name: userInfo.name,
+          avatar_url: userInfo.avatar_url,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error(`[${requestId}] user.created: Database error for user ${userInfo.id}:`, error)
+        return NextResponse.json(
+          { error: ERROR_MESSAGES.PROCESSING_FAILED },
+          { status: 500 }
+        )
+      }
+
+      console.log(`[${requestId}] user.created: Successfully created user ${userInfo.id}`)
+    } else {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          email: userInfo.email,
+          name: userInfo.name,
+          avatar_url: userInfo.avatar_url,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('clerk_user_id', userInfo.id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error(`[${requestId}] user.updated: Database error for user ${userInfo.id}:`, error)
+        return NextResponse.json(
+          { error: ERROR_MESSAGES.PROCESSING_FAILED },
+          { status: 500 }
+        )
+      }
+
+      console.log(`[${requestId}] user.updated: Successfully updated user ${userInfo.id}`)
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    const eventType = operation === 'create' ? 'user.created' : 'user.updated'
+    console.error(`[${requestId}] ${eventType}: Unexpected error for user ${userInfo.id}:`, error)
+    return NextResponse.json(
+      { error: ERROR_MESSAGES.INTERNAL_ERROR },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(req: NextRequest) {
   const requestId = generateRequestId()
 
@@ -62,102 +164,31 @@ export async function POST(req: NextRequest) {
   const eventType = evt.type
 
   if (eventType === 'user.created') {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data
+    const userInfo = extractUserInfo(evt.data)
 
-    // Validate required fields
-    if (!email_addresses || email_addresses.length === 0) {
-      console.error(`[${requestId}] user.created: Missing email address for user ${id}`)
+    if (!userInfo) {
+      console.error(`[${requestId}] user.created: Missing email address for user ${evt.data.id}`)
       return NextResponse.json(
         { error: ERROR_MESSAGES.INVALID_REQUEST },
         { status: 400 }
       )
     }
 
-    const email = email_addresses[0]!.email_address
-    const name = [first_name, last_name].filter(Boolean).join(' ') || null
-
-    try {
-      const supabase = await createClient()
-
-      // Insert user into Supabase
-      const { data, error } = await supabase
-        .from('users')
-        .insert({
-          clerk_user_id: id,
-          email: email,
-          name: name,
-          avatar_url: image_url || null,
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error(`[${requestId}] user.created: Database error for user ${id}:`, error)
-        return NextResponse.json(
-          { error: ERROR_MESSAGES.PROCESSING_FAILED },
-          { status: 500 }
-        )
-      }
-
-      console.log(`[${requestId}] user.created: Successfully created user ${id}`)
-      return NextResponse.json({ success: true })
-    } catch (error) {
-      console.error(`[${requestId}] user.created: Unexpected error for user ${id}:`, error)
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.INTERNAL_ERROR },
-        { status: 500 }
-      )
-    }
+    return syncUserToSupabase(userInfo, 'create', requestId)
   }
 
   if (eventType === 'user.updated') {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data
+    const userInfo = extractUserInfo(evt.data)
 
-    // Validate required fields
-    if (!email_addresses || email_addresses.length === 0) {
-      console.error(`[${requestId}] user.updated: Missing email address for user ${id}`)
+    if (!userInfo) {
+      console.error(`[${requestId}] user.updated: Missing email address for user ${evt.data.id}`)
       return NextResponse.json(
         { error: ERROR_MESSAGES.INVALID_REQUEST },
         { status: 400 }
       )
     }
 
-    const email = email_addresses[0]!.email_address
-    const name = [first_name, last_name].filter(Boolean).join(' ') || null
-
-    try {
-      const supabase = await createClient()
-
-      // Update user in Supabase
-      const { data, error } = await supabase
-        .from('users')
-        .update({
-          email: email,
-          name: name,
-          avatar_url: image_url || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('clerk_user_id', id)
-        .select()
-        .single()
-
-      if (error) {
-        console.error(`[${requestId}] user.updated: Database error for user ${id}:`, error)
-        return NextResponse.json(
-          { error: ERROR_MESSAGES.PROCESSING_FAILED },
-          { status: 500 }
-        )
-      }
-
-      console.log(`[${requestId}] user.updated: Successfully updated user ${id}`)
-      return NextResponse.json({ success: true })
-    } catch (error) {
-      console.error(`[${requestId}] user.updated: Unexpected error for user ${id}:`, error)
-      return NextResponse.json(
-        { error: ERROR_MESSAGES.INTERNAL_ERROR },
-        { status: 500 }
-      )
-    }
+    return syncUserToSupabase(userInfo, 'update', requestId)
   }
 
   if (eventType === 'user.deleted') {

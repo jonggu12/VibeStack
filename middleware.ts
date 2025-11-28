@@ -1,43 +1,27 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+import { PROTECTED_ROUTES, PUBLIC_ROUTES } from "@/lib/routes"
 
 // =======================
-// 🔒 로그인 필수 경로
+// 🔑 Route Matchers (Centralized Configuration)
 // =======================
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',                     // 대시보드 전체
-  '/onboarding(.*)',                    // 온보딩
-  '/tools/(ai-chat|project-map)(.*)',   // Pro 기능 도구
-  '/checkout(.*)',                       // 결제 페이지
-  '/admin(.*)',                          // 관리자 페이지
-]);
+const isProtectedRoute = createRouteMatcher([...PROTECTED_ROUTES])
+const isPublicRoute = createRouteMatcher([...PUBLIC_ROUTES])
 
 // =======================
-// 🌐 로그인 필요 없는 공개 API
-// =======================
-const isPublicApi = createRouteMatcher([
-  '/api/stripe/(.*)',                   // Stripe Webhook 등 공개 API
-  '/api/toss/(.*)',                     // Toss Webhook 등 공개 API
-  '/api/webhooks/(.*)',                 // Supabase 등 외부 Webhook
-]);
-
-// =======================
-// 🌐 로그인 필요 없는 공개 페이지 (결제 결과)
-// =======================
-const isPublicCheckout = createRouteMatcher([
-  '/success(.*)',                       // 결제 성공 페이지
-  '/canceled(.*)',                      // 결제 취소 페이지
-]);
-
-// =======================
-// 🔑 Clerk 미들웨어
+// 🔑 Clerk Middleware
 // =======================
 export default clerkMiddleware(async (auth, req) => {
-  if (isPublicApi(req)) return;        // 공개 API는 보호하지 않음
-  if (isPublicCheckout(req)) return;   // 결제 결과 페이지는 보호하지 않음
-
-  if (isProtectedRoute(req)) {
-    await auth.protect();              // 보호된 페이지 로그인 체크
+  // Public routes: no authentication required
+  if (isPublicRoute(req)) {
+    return
   }
+
+  // Protected routes: require authentication
+  if (isProtectedRoute(req)) {
+    await auth.protect()
+  }
+
+  // All other routes are public by default
 });
 
 // =======================

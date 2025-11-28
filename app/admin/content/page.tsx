@@ -2,8 +2,7 @@ import { getContents } from '@/app/actions/content'
 import { Badge } from '@/components/ui/badge'
 import { Plus, FileText, BookOpen, Code } from 'lucide-react'
 import Link from 'next/link'
-import { currentUser } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
+import { requireAdmin } from '@/lib/auth'
 
 // 빌드 시 정적 생성 방지 (DB 의존성)
 export const dynamic = 'force-dynamic'
@@ -27,11 +26,8 @@ const statusColors = {
 }
 
 export default async function AdminContentPage() {
-    // 관리자 권한 체크
-    const user = await currentUser()
-    if (!user || user.publicMetadata?.role !== 'admin') {
-        redirect('/')
-    }
+    // Require admin access (redirects if not admin)
+    await requireAdmin()
 
     // 모든 콘텐츠 조회 (모든 상태 포함, RLS 우회)
     const published = await getContents({ status: 'published', limit: 50, bypassRLS: true })
