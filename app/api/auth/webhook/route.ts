@@ -2,17 +2,25 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'svix'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { createClient } from '@/lib/supabase/server'
+import { env } from '@/lib/env'
+
+// Generate unique request ID for logging
+function generateRequestId(): string {
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+}
+
+// Generic error responses (safe for external clients)
+const ERROR_MESSAGES = {
+  INVALID_REQUEST: 'Invalid request',
+  PROCESSING_FAILED: 'Request processing failed',
+  INTERNAL_ERROR: 'An unexpected error occurred',
+} as const
 
 export async function POST(req: NextRequest) {
-  // Get webhook secret
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
+  const requestId = generateRequestId()
 
-  if (!WEBHOOK_SECRET) {
-    return NextResponse.json(
-      { error: 'Webhook secret not configured' },
-      { status: 400 }
-    )
-  }
+  // Get webhook secret (validated at startup via env.ts)
+  const WEBHOOK_SECRET = env.clerk.webhookSecret
 
   // Get headers for webhook verification
   const svix_id = req.headers.get('svix-id')
@@ -20,8 +28,9 @@ export async function POST(req: NextRequest) {
   const svix_signature = req.headers.get('svix-signature')
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
+    console.error(`[${requestId}] Missing required webhook headers`)
     return NextResponse.json(
-      { error: 'Missing required headers' },
+      { error: ERROR_MESSAGES.INVALID_REQUEST },
       { status: 400 }
     )
   }
@@ -42,9 +51,9 @@ export async function POST(req: NextRequest) {
       'svix-signature': svix_signature,
     }) as WebhookEvent
   } catch (err) {
-    console.error('Error verifying webhook:', err)
+    console.error(`[${requestId}] Webhook verification failed:`, err)
     return NextResponse.json(
-      { error: 'Webhook verification failed' },
+      { error: ERROR_MESSAGES.INVALID_REQUEST },
       { status: 400 }
     )
   }
@@ -57,8 +66,9 @@ export async function POST(req: NextRequest) {
 
     // Validate required fields
     if (!email_addresses || email_addresses.length === 0) {
+      console.error(`[${requestId}] user.created: Missing email address for user ${id}`)
       return NextResponse.json(
-        { error: 'User must have at least one email address' },
+        { error: ERROR_MESSAGES.INVALID_REQUEST },
         { status: 400 }
       )
     }
@@ -82,18 +92,19 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (error) {
-        console.error('Error creating user in Supabase:', error)
+        console.error(`[${requestId}] user.created: Database error for user ${id}:`, error)
         return NextResponse.json(
-          { error: 'Failed to create user in database' },
+          { error: ERROR_MESSAGES.PROCESSING_FAILED },
           { status: 500 }
         )
       }
 
-      return NextResponse.json({ success: true, user: data })
+      console.log(`[${requestId}] user.created: Successfully created user ${id}`)
+      return NextResponse.json({ success: true })
     } catch (error) {
-      console.error('Error in user.created webhook:', error)
+      console.error(`[${requestId}] user.created: Unexpected error for user ${id}:`, error)
       return NextResponse.json(
-        { error: 'Internal server error' },
+        { error: ERROR_MESSAGES.INTERNAL_ERROR },
         { status: 500 }
       )
     }
@@ -104,8 +115,9 @@ export async function POST(req: NextRequest) {
 
     // Validate required fields
     if (!email_addresses || email_addresses.length === 0) {
+      console.error(`[${requestId}] user.updated: Missing email address for user ${id}`)
       return NextResponse.json(
-        { error: 'User must have at least one email address' },
+        { error: ERROR_MESSAGES.INVALID_REQUEST },
         { status: 400 }
       )
     }
@@ -130,18 +142,19 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (error) {
-        console.error('Error updating user in Supabase:', error)
+        console.error(`[${requestId}] user.updated: Database error for user ${id}:`, error)
         return NextResponse.json(
-          { error: 'Failed to update user in database' },
+          { error: ERROR_MESSAGES.PROCESSING_FAILED },
           { status: 500 }
         )
       }
 
-      return NextResponse.json({ success: true, user: data })
+      console.log(`[${requestId}] user.updated: Successfully updated user ${id}`)
+      return NextResponse.json({ success: true })
     } catch (error) {
-      console.error('Error in user.updated webhook:', error)
+      console.error(`[${requestId}] user.updated: Unexpected error for user ${id}:`, error)
       return NextResponse.json(
-        { error: 'Internal server error' },
+        { error: ERROR_MESSAGES.INTERNAL_ERROR },
         { status: 500 }
       )
     }
@@ -161,23 +174,25 @@ export async function POST(req: NextRequest) {
         .eq('clerk_user_id', id)
 
       if (error) {
-        console.error('Error deleting user from Supabase:', error)
+        console.error(`[${requestId}] user.deleted: Database error for user ${id}:`, error)
         return NextResponse.json(
-          { error: 'Failed to delete user from database' },
+          { error: ERROR_MESSAGES.PROCESSING_FAILED },
           { status: 500 }
         )
       }
 
-      return NextResponse.json({ success: true, deleted: id })
+      console.log(`[${requestId}] user.deleted: Successfully deleted user ${id}`)
+      return NextResponse.json({ success: true })
     } catch (error) {
-      console.error('Error in user.deleted webhook:', error)
+      console.error(`[${requestId}] user.deleted: Unexpected error for user ${id}:`, error)
       return NextResponse.json(
-        { error: 'Internal server error' },
+        { error: ERROR_MESSAGES.INTERNAL_ERROR },
         { status: 500 }
       )
     }
   }
 
-  // Return success for other event types
+  // Return success for other event types (log for monitoring)
+  console.log(`[${requestId}] Unhandled event type: ${eventType}`)
   return NextResponse.json({ received: true })
 }
