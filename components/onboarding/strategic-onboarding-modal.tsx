@@ -75,6 +75,11 @@ export function StrategicOnboardingModal({ isOpen: controlledIsOpen, onClose: co
         return
       }
 
+      // Don't show modal on not-found or error pages
+      if (document.body.getAttribute('data-page-type') === 'not-found') {
+        return
+      }
+
       const result = await shouldShowOnboardingPrompt()
 
       if (result.shouldShow && result.triggerType) {
