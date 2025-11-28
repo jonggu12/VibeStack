@@ -14,13 +14,28 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
+// Generate unique request ID for logging
+function generateRequestId(): string {
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+}
+
+// Error messages
+const ERROR_MESSAGES = {
+  UNAUTHORIZED: 'Unauthorized',
+  INVALID_PLAN: 'Invalid plan',
+  INVALID_CURRENCY: 'Invalid currency',
+  INTERNAL_ERROR: 'Checkout session creation failed',
+} as const
+
 export async function POST(req: Request) {
+    const requestId = generateRequestId();
     try {
         const { userId } = await auth();
         const user = await currentUser();
 
         if (!userId || !user) {
-            return new NextResponse("Unauthorized", { status: 401 });
+            console.error(`[${requestId}] Unauthorized checkout attempt`);
+            return NextResponse.json({ error: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 });
         }
 
         const body = await req.json();
@@ -71,11 +86,13 @@ export async function POST(req: Request) {
 
         // Validate plan and currency
         if (!isSupportedPlan(plan)) {
-            return new NextResponse("Invalid plan", { status: 400 });
+            console.error(`[${requestId}] Invalid plan: ${plan}`);
+            return NextResponse.json({ error: ERROR_MESSAGES.INVALID_PLAN }, { status: 400 });
         }
 
         if (!isSupportedCurrency(currency)) {
-            return new NextResponse("Invalid currency", { status: 400 });
+            console.error(`[${requestId}] Invalid currency: ${currency}`);
+            return NextResponse.json({ error: ERROR_MESSAGES.INVALID_CURRENCY }, { status: 400 });
         }
 
         // 구독 모드 (Pro/Team)
@@ -139,9 +156,10 @@ export async function POST(req: Request) {
 
         const stripeSession = await stripe.checkout.sessions.create(sessionConfig);
 
+        console.log(`[${requestId}] Checkout session created for user ${userId}, plan: ${plan}, currency: ${currency}`);
         return NextResponse.json({ url: stripeSession.url });
     } catch (error) {
-        console.error("[STRIPE_CHECKOUT_ERROR]", error);
-        return new NextResponse("Internal Error", { status: 500 });
+        console.error(`[${requestId}] Checkout creation failed:`, error);
+        return NextResponse.json({ error: ERROR_MESSAGES.INTERNAL_ERROR }, { status: 500 });
     }
 }
