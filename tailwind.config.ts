@@ -9,9 +9,18 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
+  			mono: ['var(--font-jetbrains-mono)', 'JetBrains Mono', 'monospace'],
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+  			zinc: {
+  				'850': '#1f1f22',
+  				'900': '#18181b',
+  				'950': '#09090b',
+  			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
@@ -50,6 +59,16 @@ const config: Config = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			}
+  		},
+  		animation: {
+  			'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+  			'fade-in': 'fadeIn 0.5s ease-out forwards',
+  		},
+  		keyframes: {
+  			fadeIn: {
+  				'0%': { opacity: '0', transform: 'translateY(10px)' },
+  				'100%': { opacity: '1', transform: 'translateY(0)' },
+  			},
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

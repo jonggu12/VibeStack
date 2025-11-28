@@ -92,6 +92,8 @@ export const PUBLIC_API_ROUTES = [
  * Public page routes (no authentication required)
  */
 export const PUBLIC_PAGE_ROUTES = [
+  '/sign-in(.*)',                       // Sign in page
+  '/sign-up(.*)',                       // Sign up page
   '/success(.*)',                       // Payment success page
   '/canceled(.*)',                      // Payment canceled page
   '/error(.*)',                         // Error pages

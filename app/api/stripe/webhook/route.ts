@@ -30,7 +30,7 @@ type CheckoutMetadata = {
   purchaseType?: 'single' | 'subscription'
   contentId?: string
   plan?: string
-  currency?: string
+  currency: string
 }
 
 /**
@@ -212,7 +212,7 @@ async function handleSubscriptionPurchase(
         throw new Error('Invalid subscription ID');
     }
 
-    const subscription = await stripe.subscriptions.retrieve(session.subscription);
+    const subscription = await stripe.subscriptions.retrieve(session.subscription) as any;
 
     // 1. 구독 정보 저장/업데이트
     const { error: subscriptionError } = await supabaseAdmin
@@ -264,15 +264,15 @@ async function handleInvoicePaymentSucceeded(invoice: any, requestId: string) {
 
         if (!subData) return;
 
-        await updateSubscriptionPeriod(subData.user_id, subscription);
+        await updateSubscriptionPeriod(subData.user_id, subscription, requestId);
         return;
     }
 
-    await updateSubscriptionPeriod(userId, subscription);
+    await updateSubscriptionPeriod(userId, subscription, requestId);
 }
 
 // 구독 기간 업데이트
-async function updateSubscriptionPeriod(userId: string, subscription: any) {
+async function updateSubscriptionPeriod(userId: string, subscription: any, requestId: string) {
     const { error } = await supabaseAdmin
         .from('subscriptions')
         .update({
