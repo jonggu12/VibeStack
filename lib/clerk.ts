@@ -6,6 +6,7 @@
  */
 
 import { Theme } from '@clerk/types'
+import { ROUTES } from './routes'
 
 /**
  * Shared appearance configuration for Clerk components
@@ -51,11 +52,11 @@ export const clerkAppearance = {
 export const signInConfig = {
   appearance: clerkAppearance,
   routing: 'path' as const,
-  path: '/sign-in',
-  signUpUrl: '/sign-up',
-  redirectUrl: '/dashboard',
-  afterSignInUrl: '/dashboard',
-  afterSignUpUrl: '/onboarding',
+  path: ROUTES.SIGN_IN,
+  signUpUrl: ROUTES.SIGN_UP,
+  redirectUrl: ROUTES.DASHBOARD,
+  afterSignInUrl: ROUTES.DASHBOARD,
+  afterSignUpUrl: ROUTES.ONBOARDING,
 }
 
 /**
@@ -64,11 +65,11 @@ export const signInConfig = {
 export const signUpConfig = {
   appearance: clerkAppearance,
   routing: 'path' as const,
-  path: '/sign-up',
-  signInUrl: '/sign-in',
-  redirectUrl: '/onboarding',
-  afterSignInUrl: '/dashboard',
-  afterSignUpUrl: '/onboarding',
+  path: ROUTES.SIGN_UP,
+  signInUrl: ROUTES.SIGN_IN,
+  redirectUrl: ROUTES.ONBOARDING,
+  afterSignInUrl: ROUTES.DASHBOARD,
+  afterSignUpUrl: ROUTES.ONBOARDING,
 }
 
 /**
@@ -76,7 +77,7 @@ export const signUpConfig = {
  */
 export const userButtonConfig = {
   appearance: clerkAppearance,
-  afterSignOutUrl: '/',
+  afterSignOutUrl: ROUTES.HOME,
   showName: false,
   // Custom menu items can be added here
   userProfileMode: 'modal' as const,
@@ -88,9 +89,9 @@ export const userButtonConfig = {
  */
 export const signInButtonConfig = {
   mode: 'modal' as const,
-  redirectUrl: '/dashboard',
-  afterSignInUrl: '/dashboard',
-  afterSignUpUrl: '/onboarding',
+  redirectUrl: ROUTES.DASHBOARD,
+  afterSignInUrl: ROUTES.DASHBOARD,
+  afterSignUpUrl: ROUTES.ONBOARDING,
 }
 
 /**

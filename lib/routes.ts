@@ -6,6 +6,67 @@
  */
 
 /**
+ * Application Routes (exact paths)
+ * Use these instead of hardcoded strings for type safety and refactorability
+ */
+export const ROUTES = {
+  // Public routes
+  HOME: '/',
+  PRICING: '/pricing',
+  ABOUT: '/about',
+
+  // Auth routes
+  SIGN_IN: '/sign-in',
+  SIGN_UP: '/sign-up',
+
+  // Protected routes
+  DASHBOARD: '/dashboard',
+  ONBOARDING: '/onboarding',
+
+  // Content routes
+  DOCS: '/docs',
+  TUTORIALS: '/tutorials',
+  SNIPPETS: '/snippets',
+  LIBRARY: '/library',
+  SEARCH: '/search',
+
+  // Settings routes
+  SETTINGS: '/settings',
+  SETTINGS_BILLING: '/settings/billing',
+  SETTINGS_SUBSCRIPTION: '/settings/subscription',
+  SETTINGS_TEAM: '/settings/team',
+
+  // Tools routes
+  AI_CHAT: '/tools/ai-chat',
+  PROJECT_MAP: '/tools/project-map',
+  ERROR_CLINIC: '/error-clinic',
+
+  // Admin routes
+  ADMIN_CONTENT: '/admin/content',
+
+  // Checkout routes
+  CHECKOUT: '/checkout',
+  SUCCESS: '/success',
+  CANCELED: '/canceled',
+} as const
+
+/**
+ * API Routes
+ */
+export const API_ROUTES = {
+  // Auth webhooks
+  CLERK_WEBHOOK: '/api/auth/webhook',
+
+  // Payment webhooks
+  STRIPE_WEBHOOK: '/api/stripe/webhook',
+  TOSS_WEBHOOK: '/api/toss/webhook',
+
+  // Checkout
+  STRIPE_CHECKOUT: '/api/stripe/checkout',
+  TOSS_CHECKOUT: '/api/toss/checkout',
+} as const
+
+/**
  * Protected routes that require authentication
  */
 export const PROTECTED_ROUTES = [
