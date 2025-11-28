@@ -1,10 +1,24 @@
 import { stripe } from "@/lib/stripe";
+import { env } from "@/lib/env";
 import { supabaseAdmin } from "@/lib/supabase";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+// Generate unique request ID for logging
+function generateRequestId(): string {
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+}
+
+// Generic error responses (safe for external clients)
+const ERROR_MESSAGES = {
+  INVALID_SIGNATURE: 'Invalid webhook signature',
+  PROCESSING_FAILED: 'Webhook processing failed',
+  INTERNAL_ERROR: 'An unexpected error occurred',
+} as const
+
 export async function POST(req: Request) {
+    const requestId = generateRequestId();
     const body = await req.text();
     const signature = (await headers()).get("Stripe-Signature") as string;
 
@@ -14,59 +28,67 @@ export async function POST(req: Request) {
         event = stripe.webhooks.constructEvent(
             body,
             signature,
-            process.env.STRIPE_WEBHOOK_SECRET!
+            env.payment.stripe.webhookSecret!
         );
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        console.error("[STRIPE_WEBHOOK_ERROR]", message);
-        return new NextResponse(`Webhook Error: ${message}`, { status: 400 });
+        console.error(`[${requestId}] Webhook signature verification failed:`, message);
+        return NextResponse.json(
+            { error: ERROR_MESSAGES.INVALID_SIGNATURE },
+            { status: 400 }
+        );
     }
 
+    const eventType = event.type;
+
     try {
-        switch (event.type) {
+        switch (eventType) {
             // 결제 성공 (구독 또는 단건)
             case "checkout.session.completed":
-                await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+                await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session, requestId);
                 break;
 
             // 구독 갱신 결제 성공
             case "invoice.payment_succeeded":
-                await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+                await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice, requestId);
                 break;
 
             // 구독 갱신 결제 실패
             case "invoice.payment_failed":
-                await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+                await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice, requestId);
                 break;
 
             // 구독 상태 변경
             case "customer.subscription.updated":
-                await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+                await handleSubscriptionUpdated(event.data.object as Stripe.Subscription, requestId);
                 break;
 
             // 구독 취소
             case "customer.subscription.deleted":
-                await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+                await handleSubscriptionDeleted(event.data.object as Stripe.Subscription, requestId);
                 break;
 
             // 환불 처리
             case "charge.refunded":
-                await handleChargeRefunded(event.data.object as Stripe.Charge);
+                await handleChargeRefunded(event.data.object as Stripe.Charge, requestId);
                 break;
 
             default:
-                console.log(`[STRIPE_WEBHOOK] Unhandled event type: ${event.type}`);
+                console.log(`[${requestId}] Unhandled event type: ${eventType}`);
         }
 
-        return new NextResponse(null, { status: 200 });
+        return NextResponse.json({ received: true });
     } catch (error) {
-        console.error("[STRIPE_WEBHOOK_HANDLER_ERROR]", error);
-        return new NextResponse("Webhook handler error", { status: 500 });
+        console.error(`[${requestId}] ${eventType}: Unexpected error:`, error);
+        return NextResponse.json(
+            { error: ERROR_MESSAGES.INTERNAL_ERROR },
+            { status: 500 }
+        );
     }
 }
 
 // 체크아웃 완료 핸들러
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session, requestId: string) {
     const userId = session.metadata?.userId;
     const purchaseType = session.metadata?.purchaseType;
     const contentId = session.metadata?.contentId;
@@ -82,18 +104,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     // 단건 구매
     if (purchaseType === "single" && contentId) {
-        await handleSinglePurchase(session, userId, contentId, currency);
+        await handleSinglePurchase(requestId, session, userId, contentId, currency);
         return;
     }
 
     // 구독 구매
     if (session.subscription) {
-        await handleSubscriptionPurchase(session, userId, plan || 'pro', currency);
+        await handleSubscriptionPurchase(requestId, session, userId, plan || 'pro', currency);
     }
 }
 
 // 단건 구매 처리
 async function handleSinglePurchase(
+    requestId: string,
     session: Stripe.Checkout.Session,
     userId: string,
     contentId: string,
@@ -143,6 +166,7 @@ async function handleSinglePurchase(
 
 // 구독 구매 처리
 async function handleSubscriptionPurchase(
+    requestId: string,
     session: Stripe.Checkout.Session,
     userId: string,
     plan: string,
@@ -180,7 +204,7 @@ async function handleSubscriptionPurchase(
 }
 
 // 인보이스 결제 성공 (구독 갱신)
-async function handleInvoicePaymentSucceeded(invoice: any) {
+async function handleInvoicePaymentSucceeded(invoice: any, requestId: string) {
     if (!invoice.subscription) return;
 
     const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string) as any;
@@ -228,7 +252,7 @@ async function updateSubscriptionPeriod(userId: string, subscription: any) {
 }
 
 // 인보이스 결제 실패
-async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice, requestId: string) {
     const { data: subData } = await supabaseAdmin
         .from('subscriptions')
         .select('user_id')
@@ -252,7 +276,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 }
 
 // 구독 업데이트
-async function handleSubscriptionUpdated(subscription: any) {
+async function handleSubscriptionUpdated(subscription: any, requestId: string) {
     const { data: subData } = await supabaseAdmin
         .from('subscriptions')
         .select('user_id')
@@ -290,7 +314,7 @@ async function handleSubscriptionUpdated(subscription: any) {
 }
 
 // 구독 취소
-async function handleSubscriptionDeleted(subscription: any) {
+async function handleSubscriptionDeleted(subscription: any, requestId: string) {
     const { data: subData } = await supabaseAdmin
         .from('subscriptions')
         .select('user_id')
@@ -312,7 +336,7 @@ async function handleSubscriptionDeleted(subscription: any) {
 }
 
 // 환불 처리
-async function handleChargeRefunded(charge: Stripe.Charge) {
+async function handleChargeRefunded(charge: Stripe.Charge, requestId: string) {
     // 관련 구매 기록 찾기
     const paymentIntentId = charge.payment_intent as string;
 
