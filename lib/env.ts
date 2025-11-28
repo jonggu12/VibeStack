@@ -26,6 +26,19 @@ const REQUIRED_STRIPE_VARS = [
   'STRIPE_WEBHOOK_SECRET',
 ] as const
 
+// Optional Stripe price IDs (validated separately)
+const STRIPE_PRICE_ID_VARS = [
+  'STRIPE_PRICE_ID_PRO_USD',
+  'STRIPE_PRICE_ID_TEAM_USD',
+  'STRIPE_PRICE_ID_PRO_KRW',
+  'STRIPE_PRICE_ID_TEAM_KRW',
+  'STRIPE_PRICE_ID_PRO_EUR',
+  'STRIPE_PRICE_ID_TEAM_EUR',
+  'STRIPE_PRICE_ID_PRO_JPY',
+  'STRIPE_PRICE_ID_TEAM_JPY',
+  'STRIPE_SINGLE_CONTENT_PRICE_ID',
+] as const
+
 // Required Toss Payments environment variables (conditional based on payment provider)
 const REQUIRED_TOSS_VARS = [
   'TOSS_CLIENT_KEY',
@@ -117,6 +130,14 @@ function validatePaymentEnv() {
     stripeSecretKey = validateEnvVar('STRIPE_SECRET_KEY')
     stripePublishableKey = validateEnvVar('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY')
     stripeWebhookSecret = validateEnvVar('STRIPE_WEBHOOK_SECRET')
+
+    // Validate Stripe price IDs (warn if missing, but don't fail)
+    STRIPE_PRICE_ID_VARS.forEach((varName) => {
+      const value = validateEnvVar(varName, false)
+      if (!value) {
+        console.warn(`⚠️  Optional Stripe price ID not set: ${varName}`)
+      }
+    })
   } else if (paymentProvider === 'toss') {
     tossClientKey = validateEnvVar('TOSS_CLIENT_KEY')
     tossSecretKey = validateEnvVar('TOSS_SECRET_KEY')
@@ -187,6 +208,16 @@ export const env = {
       secretKey: process.env.STRIPE_SECRET_KEY,
       publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+      // Price IDs for subscriptions
+      proPriceIdUSD: process.env.STRIPE_PRICE_ID_PRO_USD,
+      teamPriceIdUSD: process.env.STRIPE_PRICE_ID_TEAM_USD,
+      proPriceIdKRW: process.env.STRIPE_PRICE_ID_PRO_KRW,
+      teamPriceIdKRW: process.env.STRIPE_PRICE_ID_TEAM_KRW,
+      proPriceIdEUR: process.env.STRIPE_PRICE_ID_PRO_EUR,
+      teamPriceIdEUR: process.env.STRIPE_PRICE_ID_TEAM_EUR,
+      proPriceIdJPY: process.env.STRIPE_PRICE_ID_PRO_JPY,
+      teamPriceIdJPY: process.env.STRIPE_PRICE_ID_TEAM_JPY,
+      singleContentPriceId: process.env.STRIPE_SINGLE_CONTENT_PRICE_ID,
     },
     toss: {
       clientKey: process.env.TOSS_CLIENT_KEY,

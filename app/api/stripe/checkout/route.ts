@@ -1,43 +1,18 @@
 import { stripe } from "@/lib/stripe";
+import {
+  STRIPE_SINGLE_CONTENT_PRICE_ID,
+  getPriceId,
+  getPaymentMethodsForCountry,
+  isSupportedCurrency,
+  isSupportedPlan,
+  type StripeCurrency,
+  type StripePlan,
+} from "@/lib/stripe-config";
+import { env } from "@/lib/env";
+import { ROUTES } from "@/lib/routes";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
-
-// 지원하는 통화 및 가격 ID 매핑
-const PRICE_IDS: Record<string, { pro: string; team: string }> = {
-    USD: {
-        pro: process.env.STRIPE_PRICE_ID_PRO_USD!,
-        team: process.env.STRIPE_PRICE_ID_TEAM_USD!,
-    },
-    KRW: {
-        pro: process.env.STRIPE_PRICE_ID_PRO_KRW!,
-        team: process.env.STRIPE_PRICE_ID_TEAM_KRW!,
-    },
-    EUR: {
-        pro: process.env.STRIPE_PRICE_ID_PRO_EUR!,
-        team: process.env.STRIPE_PRICE_ID_TEAM_EUR!,
-    },
-    JPY: {
-        pro: process.env.STRIPE_PRICE_ID_PRO_JPY!,
-        team: process.env.STRIPE_PRICE_ID_TEAM_JPY!,
-    },
-};
-
-// 국가별 결제 수단 매핑
-const PAYMENT_METHODS_BY_COUNTRY: Record<string, Stripe.Checkout.SessionCreateParams.PaymentMethodType[]> = {
-    KR: ["card", "kakao_pay", "naver_pay", "samsung_pay"],
-    US: ["card", "us_bank_account"],
-    JP: ["card", "konbini"],
-    DE: ["card", "giropay", "sofort"],
-    NL: ["card", "ideal"],
-    DEFAULT: ["card"],
-};
-
-// 기본 결제 수단 (자동 결제 수단 선택 사용 시)
-const DEFAULT_PAYMENT_METHODS: Stripe.Checkout.SessionCreateParams.PaymentMethodType[] = [
-    "card",
-    "link", // Stripe Link (원클릭 결제)
-];
+import type Stripe from "stripe";
 
 export async function POST(req: Request) {
     try {
@@ -57,9 +32,9 @@ export async function POST(req: Request) {
             returnUrl,              // 커스텀 리턴 URL
         } = body;
 
-        const settingsUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-        const successUrl = returnUrl ? `${settingsUrl}${returnUrl}` : `${settingsUrl}/checkout/success`;
-        const cancelUrl = `${settingsUrl}/checkout/canceled`;
+        const settingsUrl = env.app.url;
+        const successUrl = returnUrl ? `${settingsUrl}${returnUrl}` : `${settingsUrl}${ROUTES.SUCCESS}`;
+        const cancelUrl = `${settingsUrl}${ROUTES.CANCELED}`;
 
         // 단건 구매 모드
         if (plan === "single" && contentId) {
@@ -67,12 +42,12 @@ export async function POST(req: Request) {
                 success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}&content_id=${contentId}`,
                 cancel_url: cancelUrl,
                 mode: "payment",
-                payment_method_types: getPaymentMethods(country),
+                payment_method_types: country ? getPaymentMethodsForCountry(country) : ["card", "link"],
                 billing_address_collection: "auto",
                 customer_email: user.emailAddresses[0]!.emailAddress,
                 line_items: [
                     {
-                        price: process.env.STRIPE_PRICE_ID_SINGLE_CONTENT!,
+                        price: STRIPE_SINGLE_CONTENT_PRICE_ID,
                         quantity: 1,
                     },
                 ],
@@ -94,12 +69,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ url: singlePurchaseSession.url });
         }
 
-        // 구독 모드 (Pro/Team)
-        const priceId = getPriceId(plan, currency);
-
-        if (!priceId) {
-            return new NextResponse("Invalid plan or currency", { status: 400 });
+        // Validate plan and currency
+        if (!isSupportedPlan(plan)) {
+            return new NextResponse("Invalid plan", { status: 400 });
         }
+
+        if (!isSupportedCurrency(currency)) {
+            return new NextResponse("Invalid currency", { status: 400 });
+        }
+
+        // 구독 모드 (Pro/Team)
+        const priceId = getPriceId(plan as StripePlan, currency as StripeCurrency);
 
         // 기존 고객인지 확인
         const existingCustomers = await stripe.customers.list({
@@ -153,8 +133,8 @@ export async function POST(req: Request) {
 
         // 국가가 지정된 경우 해당 국가의 결제 수단 사용
         // 지정되지 않은 경우 Stripe가 자동으로 적절한 결제 수단 표시
-        if (country && PAYMENT_METHODS_BY_COUNTRY[country]) {
-            sessionConfig.payment_method_types = PAYMENT_METHODS_BY_COUNTRY[country];
+        if (country) {
+            sessionConfig.payment_method_types = getPaymentMethodsForCountry(country);
         }
 
         const stripeSession = await stripe.checkout.sessions.create(sessionConfig);
@@ -164,18 +144,4 @@ export async function POST(req: Request) {
         console.error("[STRIPE_CHECKOUT_ERROR]", error);
         return new NextResponse("Internal Error", { status: 500 });
     }
-}
-
-function getPriceId(plan: string, currency: string): string | null {
-    const currencyPrices = PRICE_IDS[currency] || PRICE_IDS.USD!;
-
-    if (plan === "pro") return currencyPrices.pro;
-    if (plan === "team") return currencyPrices.team;
-
-    return null;
-}
-
-function getPaymentMethods(country?: string): Stripe.Checkout.SessionCreateParams.PaymentMethodType[] {
-    if (!country) return DEFAULT_PAYMENT_METHODS;
-    return PAYMENT_METHODS_BY_COUNTRY[country] || DEFAULT_PAYMENT_METHODS;
 }
