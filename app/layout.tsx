@@ -41,9 +41,9 @@ export default function RootLayout({
       </head>
       <body className={inter.className} style={{ backgroundColor: '#09090b', color: '#fafafa' }}>
         <ClerkClientProvider>
-          <OnboardingProvider>
+          {/* <OnboardingProvider> */}
             {children}
-          </OnboardingProvider>
+          {/* </OnboardingProvider> */}
         </ClerkClientProvider>
         <Toaster position="top-center" richColors />
       </body>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { TriangleAlert, RotateCw } from 'lucide-react'
+import { useEffect } from 'react'
 
 export default function Error({
   error,
@@ -10,6 +11,13 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  // Mark this as an error page to prevent onboarding modal from triggering
+  useEffect(() => {
+    document.body.setAttribute('data-page-type', 'error')
+    return () => {
+      document.body.removeAttribute('data-page-type')
+    }
+  }, [])
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center bg-[#09090b]">
       <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20">
