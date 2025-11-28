@@ -206,7 +206,13 @@ async function handleSubscriptionPurchase(
     plan: string,
     currency: string
 ) {
-    const subscription = await stripe.subscriptions.retrieve(session.subscription as string) as any;
+    // Retrieve full subscription details with proper typing
+    if (typeof session.subscription !== 'string') {
+        console.error(`[${requestId}] subscription.purchase: Invalid subscription ID type`);
+        throw new Error('Invalid subscription ID');
+    }
+
+    const subscription = await stripe.subscriptions.retrieve(session.subscription);
 
     // 1. 구독 정보 저장/업데이트
     const { error: subscriptionError } = await supabaseAdmin
