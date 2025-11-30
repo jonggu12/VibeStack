@@ -7,9 +7,10 @@ import {
   Lock,
   Check,
   ArrowRight,
-  CreditCard,
   Loader2,
+  Info,
 } from 'lucide-react'
+import { FaStripe, FaCcVisa, FaCcMastercard, FaCcAmex } from 'react-icons/fa'
 
 type PaymentGateway = 'toss' | 'stripe'
 type BillingCycle = 'monthly' | 'yearly'
@@ -172,7 +173,7 @@ export default function SubscribePage() {
                 >
                   <div className="flex justify-between items-start mb-4">
                     <span className="font-bold text-[#635BFF] text-xl">
-                      <CreditCard className="w-6 h-6" />
+                      <FaStripe className="w-6 h-6" />
                     </span>
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
@@ -190,9 +191,7 @@ export default function SubscribePage() {
               </div>
 
               <div className="mt-4 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800 text-xs text-zinc-400 flex items-start gap-2">
-                <div className="w-4 h-4 rounded-full border border-zinc-600 flex items-center justify-center shrink-0 mt-0.5">
-                  <div className="w-2 h-2 bg-zinc-500 rounded-full"></div>
-                </div>
+                <Info className="w-4 h-4 shrink-0 mt-0.5" />
                 <p>
                   해외 거주자의 경우 Stripe를 선택하시면 달러(USD)로 결제됩니다.
                   <br />
@@ -353,9 +352,9 @@ export default function SubscribePage() {
 
               {/* Trust Badges */}
               <div className="flex justify-center gap-4 opacity-50 grayscale hover:grayscale-0 transition-all">
-                <CreditCard className="w-8 h-8 text-white" />
-                <CreditCard className="w-8 h-8 text-white" />
-                <CreditCard className="w-8 h-8 text-white" />
+                <FaCcVisa className="w-8 h-8 text-white" />
+                <FaCcMastercard className="w-8 h-8 text-white" />
+                <FaCcAmex className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
