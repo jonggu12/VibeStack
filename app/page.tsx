@@ -576,8 +576,8 @@ export default function HomePage() {
               <span className="text-zinc-500 text-sm font-medium">© 2024 VibeStack. All rights reserved.</span>
             </div>
             <div className="flex gap-8 text-sm text-zinc-500 font-medium">
-              <Link href="/" className="hover:text-white transition-colors">이용약관</Link>
-              <Link href="/" className="hover:text-white transition-colors">개인정보처리방침</Link>
+              <Link href="/terms" className="hover:text-white transition-colors">이용약관</Link>
+              <Link href="/privacy" className="hover:text-white transition-colors">개인정보처리방침</Link>
               <Link href="/" className="hover:text-white transition-colors flex items-center gap-1"><FaDiscord className="w-4 h-4" /> 커뮤니티</Link>
             </div>
           </div>

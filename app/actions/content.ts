@@ -15,12 +15,15 @@ export interface DBContent {
     difficulty: DifficultyLevel | null
     estimated_time_mins: number | null
     is_premium: boolean
+    price_cents: number | null
     status: ContentStatus
     stack: Record<string, string> | null
     author_id: string | null
     views: number
     completion_count: number
     avg_rating: number | null
+    meta_title: string | null
+    meta_description: string | null
     published_at: string | null
     created_at: string
     updated_at: string

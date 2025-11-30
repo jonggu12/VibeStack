@@ -2,433 +2,495 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Save, Eye, FileText, BookOpen, Code, Trash2, ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Eye, Pencil, Trash2 } from 'lucide-react'
 import { createContent, updateContent, deleteContent } from '@/app/actions/content'
 import type { DBContent } from '@/app/actions/content'
 import { MDXPreview } from './mdx-preview'
 
 interface ContentEditorProps {
-    initialContent?: DBContent
+  initialContent?: DBContent
 }
 
-type ContentType = 'doc' | 'tutorial' | 'snippet'
+type ContentType = 'doc' | 'tutorial' | 'snippet' | 'bundle'
 type ContentStatus = 'draft' | 'published' | 'archived'
 type Difficulty = 'beginner' | 'intermediate' | 'advanced'
 
 export function ContentEditor({ initialContent }: ContentEditorProps) {
-    const router = useRouter()
-    const isEditing = !!initialContent?.id
+  const router = useRouter()
+  const isEditing = !!initialContent?.id
 
-    const [title, setTitle] = useState(initialContent?.title || '')
-    const [slug, setSlug] = useState(initialContent?.slug || '')
-    const [description, setDescription] = useState(initialContent?.description || '')
-    const [type, setType] = useState<ContentType>(initialContent?.type as ContentType || 'doc')
-    const [status, setStatus] = useState<ContentStatus>(initialContent?.status as ContentStatus || 'draft')
-    const [difficulty, setDifficulty] = useState<Difficulty>(initialContent?.difficulty || 'beginner')
-    const [isPremium, setIsPremium] = useState(initialContent?.is_premium || false)
-    const [estimatedTime, setEstimatedTime] = useState(initialContent?.estimated_time_mins?.toString() || '')
-    const [stack, setStack] = useState<Record<string, string>>(initialContent?.stack || {})
-    const [content, setContent] = useState(initialContent?.content || defaultMDXTemplate)
-    const [saving, setSaving] = useState(false)
-    const [deleting, setDeleting] = useState(false)
-    const [showPreview, setShowPreview] = useState(false)
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-    const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  // Form State
+  const [title, setTitle] = useState(initialContent?.title || '')
+  const [slug, setSlug] = useState(initialContent?.slug || '')
+  const [description, setDescription] = useState(initialContent?.description || '')
+  const [type, setType] = useState<ContentType>((initialContent?.type as ContentType) || 'doc')
+  const [status, setStatus] = useState<ContentStatus>(
+    (initialContent?.status as ContentStatus) || 'draft'
+  )
+  const [difficulty, setDifficulty] = useState<Difficulty>(initialContent?.difficulty || 'beginner')
+  const [isPremium, setIsPremium] = useState(initialContent?.is_premium || false)
+  const [priceCents, setPriceCents] = useState(initialContent?.price_cents?.toString() || '0')
+  const [estimatedTime, setEstimatedTime] = useState(
+    initialContent?.estimated_time_mins?.toString() || ''
+  )
+  const [stackJson, setStackJson] = useState(
+    initialContent?.stack ? JSON.stringify(initialContent.stack, null, 2) : '{"framework": "Next.js"}'
+  )
+  const [metaTitle, setMetaTitle] = useState(initialContent?.meta_title || '')
+  const [metaDescription, setMetaDescription] = useState(initialContent?.meta_description || '')
+  const [content, setContent] = useState(initialContent?.content || defaultMDXTemplate)
 
-    // 고유 ID 생성 (4자리 해시)
-    const generateUniqueId = () => {
-        return Math.random().toString(36).substring(2, 6).toLowerCase()
+  // UI State
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [unsavedChanges, setUnsavedChanges] = useState(false)
+
+  // 고유 ID 생성
+  const generateUniqueId = () => {
+    return Math.random().toString(36).substring(2, 6).toLowerCase()
+  }
+
+  // Slug 자동 생성
+  const generateSlug = () => {
+    if (!title.trim()) return
+
+    const baseSlug = title
+      .toLowerCase()
+      .replace(/[가-힣]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .trim()
+
+    const uniqueId = generateUniqueId()
+    setSlug(baseSlug ? `${baseSlug}-${uniqueId}` : `content-${uniqueId}`)
+    setUnsavedChanges(true)
+  }
+
+  // 저장 핸들러
+  const handleSave = async () => {
+    if (!title.trim() || !slug.trim()) {
+      alert('제목과 Slug는 필수입니다.')
+      return
     }
 
-    // 제목에서 slug 자동 생성 (제목 기반 + 고유 ID)
-    const generateSlug = () => {
-        if (!title.trim()) return
-
-        const baseSlug = title
-            .toLowerCase()
-            .replace(/[가-힣]/g, '') // 한글 제거 (URL 친화적)
-            .replace(/[^a-z0-9\s-]/g, '') // 영문, 숫자, 공백, 하이픈만 허용
-            .replace(/\s+/g, '-') // 공백을 하이픈으로
-            .replace(/-+/g, '-') // 연속 하이픈 정리
-            .replace(/^-|-$/g, '') // 앞뒤 하이픈 제거
-            .trim()
-
-        const uniqueId = generateUniqueId()
-
-        // 기본 slug가 있으면 "제목-고유ID", 없으면 "content-고유ID"
-        setSlug(baseSlug ? `${baseSlug}-${uniqueId}` : `content-${uniqueId}`)
+    // Stack JSON 파싱
+    let parsedStack
+    try {
+      parsedStack = stackJson.trim() ? JSON.parse(stackJson) : undefined
+    } catch (error) {
+      alert('Stack JSON 형식이 올바르지 않습니다.')
+      return
     }
 
-    // 저장 핸들러
-    const handleSave = async () => {
-        if (!title.trim() || !slug.trim()) {
-            alert('제목과 Slug는 필수입니다.')
-            return
+    setSaving(true)
+    try {
+      const contentData = {
+        title,
+        slug,
+        description: description || undefined,
+        type,
+        difficulty,
+        status,
+        is_premium: isPremium,
+        price_cents: priceCents ? parseInt(priceCents) : 0,
+        estimated_time_mins: estimatedTime ? parseInt(estimatedTime) : undefined,
+        stack: parsedStack,
+        meta_title: metaTitle || undefined,
+        meta_description: metaDescription || undefined,
+        content,
+      }
+
+      let result
+      if (isEditing) {
+        result = await updateContent(initialContent.id, contentData)
+      } else {
+        result = await createContent(contentData)
+      }
+
+      if (result.success) {
+        setUnsavedChanges(false)
+        alert('✅ 저장되었습니다.')
+
+        if (!isEditing && 'id' in result && result.id) {
+          router.push(`/admin/content/${result.id}`)
         }
-
-        setSaving(true)
-        try {
-            const contentData = {
-                title,
-                slug,
-                description: description || undefined,
-                type,
-                difficulty,
-                status,
-                is_premium: isPremium,
-                estimated_time_mins: estimatedTime ? parseInt(estimatedTime) : undefined,
-                stack: Object.keys(stack).length > 0 ? stack : undefined,
-                content,
-            }
-
-            let result
-            if (isEditing) {
-                result = await updateContent(initialContent.id, contentData)
-            } else {
-                result = await createContent(contentData)
-            }
-
-            if (result.success) {
-                // 성공 시 다이얼로그 표시
-                setShowSuccessDialog(true)
-
-                // 새 콘텐츠 생성 시 URL 업데이트
-                if (!isEditing && 'id' in result && result.id) {
-                    router.push(`/admin/content/${result.id}`)
-                }
-                router.refresh()
-            } else {
-                // 에러 다이얼로그로 표시
-                if (result.error?.includes('duplicate key') || result.error?.includes('slug_key')) {
-                    alert('⚠️ 중복된 Slug입니다.\n\n이미 사용 중인 Slug입니다. "자동 생성" 버튼을 눌러 새로운 Slug를 생성해주세요.')
-                } else {
-                    alert(`저장 실패\n\n${result.error}`)
-                }
-            }
-        } catch (error) {
-            console.error('Save error:', error)
-            alert('저장 중 오류가 발생했습니다.')
-        } finally {
-            setSaving(false)
+        router.refresh()
+      } else {
+        if (result.error?.includes('duplicate key') || result.error?.includes('slug_key')) {
+          alert('⚠️ 중복된 Slug입니다.\n\n이미 사용 중인 Slug입니다.')
+        } else {
+          alert(`저장 실패\n\n${result.error}`)
         }
+      }
+    } catch (error) {
+      console.error('Save error:', error)
+      alert('저장 중 오류가 발생했습니다.')
+    } finally {
+      setSaving(false)
     }
+  }
 
-    // 삭제 핸들러
-    const handleDelete = async () => {
-        if (!isEditing) return
+  // 삭제 핸들러
+  const handleDelete = async () => {
+    if (!isEditing) return
 
-        setDeleting(true)
-        try {
-            const result = await deleteContent(initialContent.id)
-            if (result.success) {
-                alert('삭제되었습니다.')
-                router.push('/admin/content')
-            } else {
-                alert(`오류: ${result.error}`)
-            }
-        } catch (error) {
-            console.error('Delete error:', error)
-            alert('삭제 중 오류가 발생했습니다.')
-        } finally {
-            setDeleting(false)
-            setShowDeleteConfirm(false)
-        }
+    setDeleting(true)
+    try {
+      const result = await deleteContent(initialContent.id)
+      if (result.success) {
+        alert('삭제되었습니다.')
+        router.push('/admin/content')
+      } else {
+        alert(`오류: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('삭제 중 오류가 발생했습니다.')
+    } finally {
+      setDeleting(false)
+      setShowDeleteConfirm(false)
     }
+  }
 
-    return (
-        <div className="space-y-6">
-            {/* 상단 네비게이션 */}
-            <div className="flex justify-between items-center">
-                <Button variant="ghost" onClick={() => router.push('/admin/content')}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    목록으로
-                </Button>
-                {isEditing && (
-                    <Button
-                        variant="destructive"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        disabled={deleting}
-                    >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        삭제
-                    </Button>
-                )}
-            </div>
+  // 미리보기 토글
+  const togglePreview = () => {
+    setShowPreview(!showPreview)
+  }
 
-            {/* 삭제 확인 모달 */}
-            {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-                        <h3 className="text-lg font-semibold mb-2">콘텐츠 삭제</h3>
-                        <p className="text-gray-600 mb-4">
-                            &quot;{title}&quot;을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
-                        </p>
-                        <div className="flex justify-end gap-2">
-                            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
-                                취소
-                            </Button>
-                            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-                                {deleting ? '삭제 중...' : '삭제'}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 저장 성공 모달 */}
-            {showSuccessDialog && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-                        <h3 className="text-lg font-semibold mb-2">✅ 저장 완료</h3>
-                        <p className="text-gray-600 mb-4">
-                            콘텐츠가 성공적으로 {isEditing ? '저장' : '생성'}되었습니다.
-                            <br />
-                            콘텐츠 관리 페이지로 돌아가시겠습니까?
-                        </p>
-                        <div className="flex justify-end gap-2">
-                            <Button
-                                variant="outline"
-                                onClick={() => setShowSuccessDialog(false)}
-                            >
-                                아니오 (현재 페이지 유지)
-                            </Button>
-                            <Button
-                                onClick={() => router.push('/admin/content')}
-                            >
-                                예 (목록으로 이동)
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 메타데이터 섹션 */}
-            <div className="bg-white p-6 rounded-lg border space-y-4">
-                <h2 className="font-semibold text-gray-900">기본 정보</h2>
-
-                <div className="grid grid-cols-2 gap-4">
-                    {/* 제목 */}
-                    <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">제목 *</label>
-                        <Input
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            onBlur={generateSlug}
-                            placeholder="콘텐츠 제목"
-                        />
-                    </div>
-
-                    {/* Slug */}
-                    <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Slug (URL) *</label>
-                        <div className="flex gap-2">
-                            <Input
-                                value={slug}
-                                onChange={(e) => setSlug(e.target.value)}
-                                placeholder="url-friendly-slug"
-                            />
-                            <Button variant="outline" onClick={generateSlug}>
-                                자동 생성
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* 설명 */}
-                    <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
-                        <textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="콘텐츠에 대한 짧은 설명"
-                            rows={2}
-                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-
-                    {/* 타입 */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">타입</label>
-                        <div className="flex gap-2">
-                            {(['doc', 'tutorial', 'snippet'] as const).map((t) => (
-                                <button
-                                    key={t}
-                                    onClick={() => setType(t)}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
-                                        type === t
-                                            ? 'bg-blue-50 border-blue-500 text-blue-700'
-                                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                                    }`}
-                                >
-                                    {t === 'doc' && <FileText className="w-4 h-4" />}
-                                    {t === 'tutorial' && <BookOpen className="w-4 h-4" />}
-                                    {t === 'snippet' && <Code className="w-4 h-4" />}
-                                    {t === 'doc' ? '문서' : t === 'tutorial' ? '튜토리얼' : '스니펫'}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* 난이도 */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">난이도</label>
-                        <div className="flex gap-2">
-                            {(['beginner', 'intermediate', 'advanced'] as const).map((d) => (
-                                <button
-                                    key={d}
-                                    onClick={() => setDifficulty(d)}
-                                    className={`px-3 py-2 rounded-lg border transition-colors ${
-                                        difficulty === d
-                                            ? d === 'beginner' ? 'bg-green-50 border-green-500 text-green-700'
-                                            : d === 'intermediate' ? 'bg-yellow-50 border-yellow-500 text-yellow-700'
-                                            : 'bg-red-50 border-red-500 text-red-700'
-                                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                                    }`}
-                                >
-                                    {d === 'beginner' ? '초급' : d === 'intermediate' ? '중급' : '고급'}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* 상태 */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">상태</label>
-                        <select
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value as ContentStatus)}
-                            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="draft">초안</option>
-                            <option value="published">발행</option>
-                            <option value="archived">보관</option>
-                        </select>
-                    </div>
-
-                    {/* 프리미엄 */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">접근 권한</label>
-                        <button
-                            onClick={() => setIsPremium(!isPremium)}
-                            className={`px-4 py-2 rounded-lg border transition-colors ${
-                                isPremium
-                                    ? 'bg-purple-50 border-purple-500 text-purple-700'
-                                    : 'bg-white border-gray-200 text-gray-600'
-                            }`}
-                        >
-                            {isPremium ? '🔒 Pro 전용' : '🌐 무료 공개'}
-                        </button>
-                    </div>
-
-                    {/* 예상 소요 시간 */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">예상 소요 시간 (분)</label>
-                        <Input
-                            type="number"
-                            value={estimatedTime}
-                            onChange={(e) => setEstimatedTime(e.target.value)}
-                            placeholder="15"
-                            min="1"
-                        />
-                    </div>
-                </div>
-
-                {/* Stack 정보 */}
-                <div className="pt-4 border-t">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">스택 (Stack)</label>
-                    <p className="text-xs text-gray-500 mb-3">
-                        관련 콘텐츠 추천에 사용됩니다. 예: framework=Next.js, database=Supabase, auth=Clerk
-                    </p>
-                    <div className="space-y-2">
-                        {Object.entries(stack).map(([key, value], index) => (
-                            <div key={index} className="flex gap-2">
-                                <Input
-                                    placeholder="키 (예: framework)"
-                                    value={key}
-                                    onChange={(e) => {
-                                        const newStack = { ...stack }
-                                        delete newStack[key]
-                                        if (e.target.value) {
-                                            newStack[e.target.value] = value
-                                        }
-                                        setStack(newStack)
-                                    }}
-                                    className="flex-1"
-                                />
-                                <Input
-                                    placeholder="값 (예: Next.js 14)"
-                                    value={value}
-                                    onChange={(e) => {
-                                        setStack({ ...stack, [key]: e.target.value })
-                                    }}
-                                    className="flex-1"
-                                />
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                        const newStack = { ...stack }
-                                        delete newStack[key]
-                                        setStack(newStack)
-                                    }}
-                                >
-                                    삭제
-                                </Button>
-                            </div>
-                        ))}
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                                const newKey = `key${Object.keys(stack).length + 1}`
-                                setStack({ ...stack, [newKey]: '' })
-                            }}
-                        >
-                            + 스택 추가
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            {/* MDX 에디터 */}
-            <div className="bg-white p-6 rounded-lg border">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="font-semibold text-gray-900">콘텐츠 (MDX)</h2>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowPreview(!showPreview)}
-                    >
-                        <Eye className="w-4 h-4 mr-2" />
-                        {showPreview ? '편집' : '미리보기'}
-                    </Button>
-                </div>
-
-                {showPreview ? (
-                    <MDXPreview content={content} />
-                ) : (
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        className="w-full h-[500px] px-4 py-3 font-mono text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="MDX 콘텐츠를 작성하세요..."
-                    />
-                )}
-            </div>
-
-            {/* 저장 버튼 */}
-            <div className="flex justify-end gap-4">
-                <Button variant="outline" onClick={() => router.push('/admin/content')}>
-                    취소
-                </Button>
-                <Button onClick={handleSave} disabled={saving}>
-                    <Save className="w-4 h-4 mr-2" />
-                    {saving ? '저장 중...' : isEditing ? '저장' : '생성'}
-                </Button>
-            </div>
+  return (
+    <div className="h-[calc(100vh-64px)] overflow-hidden flex flex-col">
+      {/* Editor Toolbar */}
+      <div className="h-14 border-b border-zinc-800 bg-zinc-900 px-6 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push('/admin/content')}
+            className="text-zinc-500 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="h-6 w-px bg-zinc-800"></div>
+          <span className="text-sm font-mono text-zinc-400" id="editor-id-display">
+            {isEditing ? initialContent.id : 'New Content'}
+          </span>
+          {unsavedChanges && (
+            <span className="bg-yellow-500/10 text-yellow-500 text-[10px] px-2 py-0.5 rounded border border-yellow-500/20">
+              Unsaved
+            </span>
+          )}
         </div>
-    )
+        <div className="flex items-center gap-3">
+          {isEditing && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-xs font-bold text-zinc-400 hover:text-red-400 px-3 py-1.5 rounded border border-zinc-700 hover:bg-zinc-800 transition-colors"
+              disabled={deleting}
+            >
+              <Trash2 className="w-3 h-3 inline mr-1" />
+              삭제
+            </button>
+          )}
+          <button
+            onClick={togglePreview}
+            className={`text-xs font-bold px-3 py-1.5 rounded border transition-colors ${
+              showPreview
+                ? 'bg-zinc-800 text-white border-zinc-700'
+                : 'text-zinc-400 hover:text-white border-zinc-700 hover:bg-zinc-800'
+            }`}
+          >
+            {showPreview ? (
+              <>
+                <Pencil className="w-3 h-3 inline mr-1" /> 편집하기
+              </>
+            ) : (
+              <>
+                <Eye className="w-3 h-3 inline mr-1" /> 미리보기
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-white text-black text-xs font-bold px-4 py-2 rounded hover:bg-zinc-200 transition-colors disabled:opacity-50"
+          >
+            {saving ? '저장 중...' : '저장하기'}
+          </button>
+        </div>
+      </div>
+
+      {/* Editor Split View */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left: Metadata Form (Scrollable) */}
+        <div className="w-80 shrink-0 border-r border-zinc-800 bg-zinc-900/50 p-6 overflow-y-auto">
+          <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">
+            기본 정보
+          </h3>
+
+          <div className="space-y-4">
+            {/* Type */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Type</label>
+              <select
+                value={type}
+                onChange={(e) => {
+                  setType(e.target.value as ContentType)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+              >
+                <option value="snippet">Snippet</option>
+                <option value="doc">Doc</option>
+                <option value="tutorial">Tutorial</option>
+                <option value="bundle">Bundle</option>
+              </select>
+            </div>
+
+            {/* Slug */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Slug</label>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => {
+                  setSlug(e.target.value)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm text-white focus:border-indigo-500 focus:outline-none font-mono"
+                placeholder="my-content-slug"
+              />
+              <button
+                onClick={generateSlug}
+                className="mt-1 text-xs text-indigo-400 hover:text-indigo-300"
+              >
+                자동 생성
+              </button>
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Status</label>
+              <select
+                value={status}
+                onChange={(e) => {
+                  setStatus(e.target.value as ContentStatus)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+              >
+                <option value="draft">Draft (임시)</option>
+                <option value="published">Published (발행)</option>
+                <option value="archived">Archived (보관)</option>
+              </select>
+            </div>
+
+            <div className="h-px bg-zinc-800 my-4"></div>
+
+            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">
+              상세 설정
+            </h3>
+
+            {/* Difficulty */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Difficulty</label>
+              <select
+                value={difficulty}
+                onChange={(e) => {
+                  setDifficulty(e.target.value as Difficulty)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+              >
+                <option value="beginner">Beginner (초급)</option>
+                <option value="intermediate">Intermediate (중급)</option>
+                <option value="advanced">Advanced (고급)</option>
+              </select>
+            </div>
+
+            {/* Estimated Time */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">
+                Estimated Time (mins)
+              </label>
+              <input
+                type="number"
+                value={estimatedTime}
+                onChange={(e) => {
+                  setEstimatedTime(e.target.value)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                placeholder="30"
+              />
+            </div>
+
+            {/* Stack (JSONB) */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Stack (JSON)</label>
+              <textarea
+                value={stackJson}
+                onChange={(e) => {
+                  setStackJson(e.target.value)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full h-24 bg-zinc-950 border border-zinc-700 rounded p-2 text-xs text-zinc-300 focus:border-indigo-500 focus:outline-none font-mono"
+                placeholder='{"framework": "Next.js"}'
+              />
+            </div>
+
+            {/* Premium & Price */}
+            <div className="flex items-center justify-between py-2">
+              <label className="text-xs font-medium text-zinc-400">Premium Content</label>
+              <input
+                type="checkbox"
+                checked={isPremium}
+                onChange={(e) => {
+                  setIsPremium(e.target.checked)
+                  setUnsavedChanges(true)
+                }}
+                className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">
+                Price (Cents)
+              </label>
+              <input
+                type="number"
+                value={priceCents}
+                onChange={(e) => {
+                  setPriceCents(e.target.value)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                placeholder="0"
+              />
+            </div>
+
+            <div className="h-px bg-zinc-800 my-4"></div>
+
+            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">SEO</h3>
+
+            {/* Meta Title */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">Meta Title</label>
+              <input
+                type="text"
+                value={metaTitle}
+                onChange={(e) => {
+                  setMetaTitle(e.target.value)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+                placeholder="SEO 제목"
+              />
+            </div>
+
+            {/* Meta Description */}
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1">
+                Meta Description
+              </label>
+              <textarea
+                value={metaDescription}
+                onChange={(e) => {
+                  setMetaDescription(e.target.value)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full h-20 bg-zinc-950 border border-zinc-700 rounded p-2 text-xs text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                placeholder="SEO 설명"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Center: MDX Editor & Preview */}
+        <div className="flex-1 flex flex-col h-full relative">
+          {/* Title Input (Top of Editor) */}
+          <div className="p-4 border-b border-zinc-800 bg-zinc-900/30">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value)
+                setUnsavedChanges(true)
+              }}
+              onBlur={generateSlug}
+              className="w-full bg-transparent text-2xl font-bold text-white placeholder-zinc-600 focus:outline-none"
+              placeholder="여기에 제목 입력..."
+            />
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value)
+                setUnsavedChanges(true)
+              }}
+              className="w-full bg-transparent text-sm text-zinc-400 placeholder-zinc-600 mt-2 focus:outline-none"
+              placeholder="간단한 설명 (Description) 입력..."
+            />
+          </div>
+
+          {/* WRITE MODE (Textarea) */}
+          {!showPreview && (
+            <div className="flex-1 bg-zinc-950 relative">
+              <textarea
+                value={content}
+                onChange={(e) => {
+                  setContent(e.target.value)
+                  setUnsavedChanges(true)
+                }}
+                className="w-full h-full p-6 bg-transparent text-zinc-200 font-mono text-sm leading-relaxed resize-none focus:outline-none"
+                placeholder="# 여기에 MDX 작성
+
+MDX 형식을 지원합니다.
+
+```tsx
+const code = 'hello';
+```"
+              />
+            </div>
+          )}
+
+          {/* PREVIEW MODE (Div) */}
+          {showPreview && (
+            <div className="flex-1 bg-zinc-950 p-8 overflow-y-auto prose-preview">
+              <MDXPreview content={content} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-2 text-white">콘텐츠 삭제</h3>
+            <p className="text-zinc-400 mb-4">
+              &quot;{title}&quot;을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 bg-zinc-800 text-white rounded hover:bg-zinc-700 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                {deleting ? '삭제 중...' : '삭제'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // 기본 MDX 템플릿

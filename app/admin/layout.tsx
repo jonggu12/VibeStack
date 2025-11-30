@@ -1,4 +1,4 @@
-import { Header } from '@/components/layout/header'
+import { AdminSidebar } from '@/components/layout/admin-sidebar'
 
 export default function AdminLayout({
   children,
@@ -6,12 +6,12 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header only - no sidebar */}
-      <Header />
+    <div className="min-h-screen flex bg-zinc-950">
+      {/* Sidebar */}
+      <AdminSidebar />
 
-      {/* Full-width main content */}
-      <main className="w-full">
+      {/* Main content */}
+      <main className="flex-1 ml-64 min-w-0">
         {children}
       </main>
     </div>
