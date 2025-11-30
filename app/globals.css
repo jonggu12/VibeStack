@@ -189,3 +189,53 @@
 .prose-preview li {
   margin-bottom: 0.5rem;
 }
+
+/* Docs Page Prose Styles */
+.prose-docs h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  scroll-margin-top: 100px;
+}
+
+.prose-docs h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e4e4e7;
+  scroll-margin-top: 100px;
+}
+
+.prose-docs p {
+  margin-bottom: 1.25rem;
+  line-height: 1.75;
+  color: #a1a1aa;
+}
+
+.prose-docs ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+  color: #a1a1aa;
+}
+
+.prose-docs li {
+  margin-bottom: 0.5rem;
+}
+
+.prose-docs strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.prose-docs code {
+  background: #27272a;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: 'JetBrains Mono', monospace;
+  color: #e4e4e7;
+}
