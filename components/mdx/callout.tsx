@@ -12,34 +12,34 @@ interface CalloutProps {
 
 const calloutStyles: Record<CalloutType, { bg: string; border: string; icon: typeof Info; iconColor: string }> = {
     info: {
-        bg: 'bg-blue-50',
-        border: 'border-blue-200',
+        bg: 'bg-blue-500/10',
+        border: 'border-blue-500/30',
         icon: Info,
-        iconColor: 'text-blue-500',
+        iconColor: 'text-blue-300',
     },
     warning: {
-        bg: 'bg-yellow-50',
-        border: 'border-yellow-200',
+        bg: 'bg-yellow-500/10',
+        border: 'border-yellow-500/30',
         icon: AlertTriangle,
-        iconColor: 'text-yellow-500',
+        iconColor: 'text-yellow-300',
     },
     error: {
-        bg: 'bg-red-50',
-        border: 'border-red-200',
+        bg: 'bg-red-500/10',
+        border: 'border-red-500/30',
         icon: AlertCircle,
-        iconColor: 'text-red-500',
+        iconColor: 'text-red-300',
     },
     success: {
-        bg: 'bg-green-50',
-        border: 'border-green-200',
+        bg: 'bg-emerald-500/10',
+        border: 'border-emerald-500/30',
         icon: CheckCircle,
-        iconColor: 'text-green-500',
+        iconColor: 'text-emerald-300',
     },
     tip: {
-        bg: 'bg-purple-50',
-        border: 'border-purple-200',
+        bg: 'bg-purple-500/10',
+        border: 'border-purple-500/30',
         icon: Lightbulb,
-        iconColor: 'text-purple-500',
+        iconColor: 'text-purple-300',
     },
 }
 
@@ -57,14 +57,14 @@ export function Callout({ type = 'info', title, children }: CalloutProps) {
     const displayTitle = title || defaultTitles[type]
 
     return (
-        <div className={`${style.bg} ${style.border} border rounded-lg p-4 my-4`}>
+        <div className={`${style.bg} ${style.border} border rounded-xl p-4 my-6`}>
             <div className="flex items-start gap-3">
                 <Icon className={`w-5 h-5 ${style.iconColor} mt-0.5 shrink-0`} />
-                <div className="flex-1">
+                <div className="flex-1 space-y-2">
                     {displayTitle && (
-                        <p className="font-semibold text-gray-900 mb-1">{displayTitle}</p>
+                        <p className="font-bold text-sm text-white">{displayTitle}</p>
                     )}
-                    <div className="text-gray-700 text-sm">{children}</div>
+                    <div className="text-zinc-300 text-sm leading-relaxed">{children}</div>
                 </div>
             </div>
         </div>

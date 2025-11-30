@@ -141,12 +141,41 @@ export function ContentList({ contents }: ContentListProps) {
                 </td>
               </tr>
             ) : (
-              filteredContents.map((content) => (
-                <tr key={content.id} className="hover:bg-zinc-800/50 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-white text-base mb-0.5">{content.title}</div>
-                    <div className="font-mono text-xs text-zinc-500">{content.slug}</div>
-                  </td>
+              filteredContents.map((content) => {
+                // 타입별 URL 경로 생성
+                const getContentPath = () => {
+                  if (content.status !== 'published') return null
+                  switch (content.type) {
+                    case 'doc':
+                      return `/docs/${content.slug}`
+                    case 'tutorial':
+                      return `/tutorials/${content.slug}`
+                    case 'snippet':
+                      return `/snippets/${content.slug}`
+                    case 'bundle':
+                      return `/bundles/${content.slug}`
+                    default:
+                      return null
+                  }
+                }
+                const contentPath = getContentPath()
+
+                return (
+                  <tr key={content.id} className="hover:bg-zinc-800/50 transition-colors group">
+                    <td className="px-6 py-4">
+                      {contentPath ? (
+                        <Link
+                          href={contentPath}
+                          target="_blank"
+                          className="font-bold text-white text-base mb-0.5 hover:text-indigo-400 transition-colors"
+                        >
+                          {content.title}
+                        </Link>
+                      ) : (
+                        <div className="font-bold text-white text-base mb-0.5">{content.title}</div>
+                      )}
+                      <div className="font-mono text-xs text-zinc-500">{content.slug}</div>
+                    </td>
                   <td className="px-6 py-4">
                     <span
                       className={`${
@@ -198,7 +227,8 @@ export function ContentList({ contents }: ContentListProps) {
                     </div>
                   </td>
                 </tr>
-              ))
+                )
+              })
             )}
           </tbody>
         </table>

@@ -29,55 +29,56 @@ export function CodeBlock({
     const lines = children.split('\n')
 
     return (
-        <div className="relative group my-4">
-            {/* 파일명 헤더 */}
-            {filename && (
-                <div className="bg-gray-800 text-gray-400 text-sm px-4 py-2 rounded-t-lg border-b border-gray-700 font-mono">
-                    {filename}
+        <div className="my-6 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900 border-b border-zinc-800">
+                <div className="flex items-center gap-3">
+                    {filename && <span className="text-xs font-medium text-zinc-400">{filename}</span>}
+                    <span className="text-[10px] uppercase font-bold text-zinc-600">{language}</span>
                 </div>
-            )}
-
-            {/* 복사 버튼 */}
-            <button
-                onClick={handleCopy}
-                className="absolute top-2 right-2 p-2 bg-gray-700 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                title="복사"
-            >
-                {copied ? (
-                    <Check className="w-4 h-4 text-green-400" />
-                ) : (
-                    <Copy className="w-4 h-4 text-gray-400" />
-                )}
-            </button>
-
-            {/* 코드 블록 */}
-            <pre className={`bg-gray-900 text-gray-100 p-4 overflow-x-auto text-sm font-mono ${filename ? 'rounded-b-lg' : 'rounded-lg'}`}>
-                <code className={`language-${language}`}>
-                    {showLineNumbers ? (
-                        lines.map((line, index) => {
-                            const lineNum = index + 1
-                            const isHighlighted = highlightLines.includes(lineNum)
-                            return (
-                                <div
-                                    key={index}
-                                    className={`${isHighlighted ? 'bg-yellow-500/20 -mx-4 px-4' : ''}`}
-                                >
-                                    <span className="inline-block w-8 text-gray-500 select-none text-right mr-4">
-                                        {lineNum}
-                                    </span>
-                                    {line}
-                                </div>
-                            )
-                        })
+                <button
+                    onClick={handleCopy}
+                    className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs transition-colors"
+                >
+                    {copied ? (
+                        <>
+                            <Check className="w-3.5 h-3.5" />
+                            복사됨
+                        </>
                     ) : (
-                        children
+                        <>
+                            <Copy className="w-3.5 h-3.5" />
+                            복사
+                        </>
                     )}
-                </code>
-            </pre>
+                </button>
+            </div>
 
-            {/* 언어 표시 */}
-            <div className="absolute bottom-2 right-2 text-xs text-gray-500 font-mono">
-                {language}
+            {/* Code Content */}
+            <div className="relative">
+                <pre className={`p-4 overflow-x-auto text-sm font-mono text-zinc-300 ${showLineNumbers ? 'pl-12' : ''}`}>
+                    <code className={`language-${language}`}>
+                        {showLineNumbers ? (
+                            lines.map((line, index) => {
+                                const lineNum = index + 1
+                                const isHighlighted = highlightLines.includes(lineNum)
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`${isHighlighted ? 'bg-yellow-500/20 -mx-4 px-4' : ''}`}
+                                    >
+                                        <span className="inline-block w-8 text-zinc-600 select-none text-right mr-4">
+                                            {lineNum}
+                                        </span>
+                                        {line}
+                                    </div>
+                                )
+                            })
+                        ) : (
+                            children
+                        )}
+                    </code>
+                </pre>
             </div>
         </div>
     )

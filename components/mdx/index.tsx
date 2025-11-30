@@ -8,6 +8,9 @@ export { Quiz } from './quiz'
 export { Step, Steps } from './step'
 export { PreBlock } from './pre-block'
 export { CopyButton } from './copy-button'
+export { Terminal } from './terminal'
+export { PromptBlock } from './prompt-block'
+export { Feedback } from './feedback'
 
 // MDX에서 사용할 컴포넌트 맵
 import { Callout } from './callout'
@@ -16,6 +19,9 @@ import { Checkpoint } from './checkpoint'
 import { Quiz } from './quiz'
 import { Step, Steps } from './step'
 import { PreBlock } from './pre-block'
+import { Terminal } from './terminal'
+import { PromptBlock } from './prompt-block'
+import { Feedback } from './feedback'
 
 // children에서 텍스트 추출하여 slug 생성
 function getTextFromChildren(children: React.ReactNode): string {
@@ -35,13 +41,13 @@ function generateSlug(text: string): string {
         .replace(/[^\w가-힣-]/g, '')
 }
 
-// 기본 HTML 요소 스타일링
+// 기본 HTML 요소 스타일링 (Dark theme)
 const htmlComponents = {
     h1: ({ children }: { children?: React.ReactNode }) => {
         const text = getTextFromChildren(children)
         const id = generateSlug(text)
         return (
-            <h1 id={id} className="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-gray-100 scroll-mt-20">
+            <h1 id={id} className="text-3xl font-bold mt-8 mb-4 text-white scroll-mt-24">
                 {children}
             </h1>
         )
@@ -50,7 +56,7 @@ const htmlComponents = {
         const text = getTextFromChildren(children)
         const id = generateSlug(text)
         return (
-            <h2 id={id} className="text-2xl font-semibold mt-6 mb-3 text-gray-800 dark:text-gray-200 border-b pb-2 scroll-mt-20">
+            <h2 id={id} className="text-2xl font-semibold mt-6 mb-3 text-white border-b border-zinc-800 pb-2 scroll-mt-24">
                 {children}
             </h2>
         )
@@ -59,23 +65,23 @@ const htmlComponents = {
         const text = getTextFromChildren(children)
         const id = generateSlug(text)
         return (
-            <h3 id={id} className="text-xl font-medium mt-4 mb-2 text-gray-700 dark:text-gray-300 scroll-mt-20">
+            <h3 id={id} className="text-xl font-medium mt-4 mb-2 text-zinc-200 scroll-mt-24">
                 {children}
             </h3>
         )
     },
     p: ({ children }: { children?: React.ReactNode }) => (
-        <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+        <p className="text-zinc-400 leading-relaxed mb-4">
             {children}
         </p>
     ),
     ul: ({ children }: { children?: React.ReactNode }) => (
-        <ul className="list-disc list-inside mb-4 text-gray-600 dark:text-gray-400 space-y-2 ml-4">
+        <ul className="list-disc list-inside mb-4 text-zinc-400 space-y-2 ml-4">
             {children}
         </ul>
     ),
     ol: ({ children }: { children?: React.ReactNode }) => (
-        <ol className="list-decimal list-inside mb-4 text-gray-600 dark:text-gray-400 space-y-2 ml-4">
+        <ol className="list-decimal list-inside mb-4 text-zinc-400 space-y-2 ml-4">
             {children}
         </ol>
     ),
@@ -85,7 +91,7 @@ const htmlComponents = {
     a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
         <a
             href={href}
-            className="text-blue-600 hover:text-blue-800 underline"
+            className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2"
             target={href?.startsWith('http') ? '_blank' : undefined}
             rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
         >
@@ -93,7 +99,7 @@ const htmlComponents = {
         </a>
     ),
     blockquote: ({ children }: { children?: React.ReactNode }) => (
-        <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 dark:text-gray-400 my-4 bg-gray-50 dark:bg-gray-800 py-2">
+        <blockquote className="border-l-4 border-indigo-500 pl-4 italic text-zinc-400 my-4 bg-zinc-900/50 py-2 rounded-r">
             {children}
         </blockquote>
     ),
@@ -102,7 +108,7 @@ const htmlComponents = {
         const isInline = !className
         if (isInline) {
             return (
-                <code className="bg-gray-100 dark:bg-gray-800 text-pink-600 dark:text-pink-400 px-1.5 py-0.5 rounded text-sm font-mono">
+                <code className="bg-zinc-900 text-pink-400 px-1.5 py-0.5 rounded text-sm font-mono border border-zinc-800">
                     {children}
                 </code>
             )
@@ -115,28 +121,28 @@ const htmlComponents = {
     },
     pre: PreBlock,
     table: ({ children }: { children?: React.ReactNode }) => (
-        <div className="overflow-x-auto mb-4">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="overflow-x-auto mb-4 rounded-lg border border-zinc-800">
+            <table className="min-w-full divide-y divide-zinc-800">
                 {children}
             </table>
         </div>
     ),
     th: ({ children }: { children?: React.ReactNode }) => (
-        <th className="px-4 py-2 bg-gray-50 dark:bg-gray-800 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
+        <th className="px-4 py-2 bg-zinc-900 text-left text-sm font-semibold text-zinc-300">
             {children}
         </th>
     ),
     td: ({ children }: { children?: React.ReactNode }) => (
-        <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border-t dark:border-gray-700">
+        <td className="px-4 py-2 text-sm text-zinc-400 border-t border-zinc-800">
             {children}
         </td>
     ),
-    hr: () => <hr className="my-8 border-gray-200 dark:border-gray-700" />,
+    hr: () => <hr className="my-8 border-zinc-800" />,
     strong: ({ children }: { children?: React.ReactNode }) => (
-        <strong className="font-semibold text-gray-900 dark:text-gray-100">{children}</strong>
+        <strong className="font-semibold text-white">{children}</strong>
     ),
     em: ({ children }: { children?: React.ReactNode }) => (
-        <em className="italic">{children}</em>
+        <em className="italic text-zinc-300">{children}</em>
     ),
 }
 
@@ -150,4 +156,7 @@ export const mdxComponents = {
     Quiz,
     Step,
     Steps,
+    Terminal,
+    PromptBlock,
+    Feedback,
 }
