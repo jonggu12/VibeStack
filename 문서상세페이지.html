@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docs - Module not found 해결법 | VibeStack</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        zinc: {
+                            850: '#1f1f22',
+                            900: '#18181b',
+                            950: '#09090b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #09090b;
+            color: #fafafa;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+        .glass-header {
+            background: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Typography Override for MDX feel */
+        .prose-custom h2 { margin-top: 2.5rem; margin-bottom: 1rem; font-size: 1.5rem; font-weight: 700; color: #fff; scroll-margin-top: 100px; }
+        .prose-custom h3 { margin-top: 2rem; margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 600; color: #e4e4e7; scroll-margin-top: 100px; }
+        .prose-custom p { margin-bottom: 1.25rem; line-height: 1.75; color: #a1a1aa; }
+        .prose-custom ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #a1a1aa; }
+        .prose-custom li { margin-bottom: 0.5rem; }
+        .prose-custom strong { color: #fff; font-weight: 600; }
+        .prose-custom code { background: #27272a; padding: 0.2em 0.4em; border-radius: 4px; font-size: 0.875em; font-family: 'JetBrains Mono', monospace; color: #e4e4e7; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 1. HEADER (Compact Version for Docs) -->
+    <header class="sticky top-0 z-50 glass-header border-b border-zinc-800 h-16">
+        <div class="w-full max-w-[1440px] mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="w-7 h-7 bg-white rounded flex items-center justify-center text-black font-bold text-base group-hover:rotate-3 transition-transform">V</div>
+                    <span class="font-bold text-lg tracking-tight">VibeStack</span>
+                    <span class="text-xs font-mono text-zinc-500 mt-1">Docs</span>
+                </a>
+                
+                <!-- Breadcrumb (Desktop) -->
+                <div class="hidden md:flex items-center gap-2 text-sm text-zinc-500 border-l border-zinc-800 pl-6">
+                    <span class="hover:text-zinc-300 cursor-pointer">에러 해결</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    <span class="text-white font-medium">Module not found</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Compact Search -->
+                <div class="hidden md:flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-sm text-zinc-500 hover:border-zinc-700 cursor-pointer w-64 transition-colors">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    <span>검색 (⌘K)</span>
+                </div>
+                <!-- Profile -->
+                <button class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500"></button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 w-full max-w-[1440px] mx-auto flex">
+        
+        <!-- 2. LEFT SIDEBAR (Navigation) -->
+        <aside class="hidden lg:block w-64 shrink-0 border-r border-zinc-800 h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto py-8 pr-6 pl-4">
+            <div class="space-y-8">
+                <!-- Group 1 -->
+                <div>
+                    <h5 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 px-2">시작하기 (Start)</h5>
+                    <ul class="space-y-1">
+                        <li><a href="#" class="block px-2 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded transition-colors">Cursor 설치 및 설정</a></li>
+                        <li><a href="#" class="block px-2 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded transition-colors">첫 프롬프트 작성법</a></li>
+                        <li><a href="#" class="block px-2 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded transition-colors">Github 연동하기</a></li>
+                    </ul>
+                </div>
+
+                <!-- Group 2 -->
+                <div>
+                    <h5 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 px-2">에러 해결 (Troubleshoot)</h5>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#" class="block px-2 py-1.5 text-sm text-indigo-400 bg-indigo-500/10 border-l-2 border-indigo-500 rounded-r font-medium transition-colors">
+                                "Module not found" 해결
+                            </a>
+                        </li>
+                        <li><a href="#" class="block px-2 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded transition-colors">"Environment Variable" 설정</a></li>
+                        <li><a href="#" class="block px-2 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded transition-colors">Hydration Failed 에러</a></li>
+                        <li><a href="#" class="block px-2 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded transition-colors">배포 후 404 에러</a></li>
+                    </ul>
+                </div>
+
+                <!-- Group 3 -->
+                <div>
+                    <h5 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 px-2">개념 사전 (Dictionary)</h5>
+                    <ul class="space-y-1">
+                        <li><a href="#" class="block px-2 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded transition-colors">localhost가 뭐예요?</a></li>
+                        <li><a href="#" class="block px-2 py-1.5 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded transition-colors">API, JSON이 뭔가요?</a></li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 3. MAIN CONTENT (MDX Area) -->
+        <main class="flex-1 min-w-0 py-10 px-4 md:px-12 prose-custom">
+            
+            <!-- Meta Info -->
+            <div class="flex items-center gap-3 mb-6">
+                <span class="bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold px-2.5 py-0.5 rounded-full">Error Fix</span>
+                <span class="text-zinc-500 text-xs">최종 업데이트: 2024.11.27</span>
+                <span class="text-zinc-500 text-xs flex items-center gap-1"><i class="fa-solid fa-users"></i> 562명이 해결</span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-6">"Module not found: Can't resolve..." 해결법</h1>
+            
+            <p class="text-lg">
+                코드를 복사해서 붙여넣었는데, 터미널에 빨간 글씨로 <strong>"Module not found"</strong>라고 뜨나요? 
+                이것은 요리에 필요한 재료(라이브러리)를 아직 사오지 않아서 생기는 문제입니다.
+            </p>
+
+            <hr class="border-zinc-800 my-8">
+
+            <!-- MDX Component: Callout (Info) -->
+            <div class="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 my-6 flex gap-3">
+                <i class="fa-solid fa-circle-info text-blue-400 mt-1 shrink-0"></i>
+                <div>
+                    <h4 class="font-bold text-blue-400 text-sm mb-1">잠깐! 터미널이 켜져 있나요?</h4>
+                    <p class="text-zinc-400 text-sm mb-0">
+                        Cursor 하단에 있는 <code>Terminal</code> 탭을 클릭해서 열어주세요.
+                    </p>
+                </div>
+            </div>
+
+            <h2 id="section-1">1. 증상 확인하기</h2>
+            <p>터미널에 아래와 비슷한 에러 메시지가 뜬다면 이 문서가 정답입니다.</p>
+
+            <!-- MDX Component: Terminal Preview -->
+            <div class="bg-zinc-950 rounded-lg border border-zinc-800 my-4 font-mono text-sm overflow-hidden">
+                <div class="bg-zinc-900 px-4 py-2 border-b border-zinc-800 flex gap-1.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                </div>
+                <div class="p-4 text-zinc-300">
+                    <span class="text-red-400">error</span> - ./src/app/page.tsx:3:0<br>
+                    Module not found: Can't resolve <span class="text-yellow-300">'lucide-react'</span>
+                </div>
+            </div>
+
+            <h2 id="section-2">2. AI에게 해결 요청하기 (추천)</h2>
+            <p>직접 명령어를 칠 필요 없이, Cursor의 AI에게 <strong>설치해달라고 명령</strong>하는 것이 가장 빠릅니다.</p>
+
+            <!-- MDX Component: Prompt Block -->
+            <div class="my-6 relative group">
+                <div class="absolute -top-3 left-4 bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg z-10">
+                    RECOMMENDED PROMPT
+                </div>
+                <div class="bg-zinc-900 border border-indigo-500/30 rounded-xl p-5 hover:border-indigo-500 transition-colors">
+                    <div class="flex justify-between items-start gap-4">
+                        <code class="text-sm md:text-base text-zinc-100 bg-transparent p-0 font-normal leading-relaxed block w-full whitespace-pre-wrap">에러 메시지: "Module not found: Can't resolve '라이브러리이름'"
+
+이 에러가 났어. 필요한 패키지를 설치하는 npm 명령어를 알려주고, 자동으로 설치해줘.</code>
+                        <button onclick="copyCode(this)" class="shrink-0 bg-zinc-800 hover:bg-indigo-600 text-zinc-400 hover:text-white p-2 rounded-lg transition-all group-active:scale-95" title="프롬프트 복사">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-zinc-500 mt-2 text-center">
+                    👆 위 내용을 복사해서 <code>Cmd + L</code> (Chat) 창에 붙여넣으세요.
+                </p>
+            </div>
+
+            <h2 id="section-3">3. 수동으로 해결하기</h2>
+            <p>AI가 안 될 경우, 직접 설치 명령어를 입력할 수도 있습니다. 에러 메시지에 뜬 이름(예: <code>lucide-react</code>)을 확인하세요.</p>
+
+            <!-- MDX Component: Code Block -->
+            <div class="bg-zinc-950 rounded-lg border border-zinc-800 my-4 group relative">
+                <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onclick="copyCode(this)" class="bg-zinc-800 text-zinc-400 hover:text-white text-xs px-2 py-1 rounded">Copy</button>
+                </div>
+                <pre class="p-4 overflow-x-auto text-sm text-zinc-300 font-mono"><code>npm install lucide-react</code></pre>
+            </div>
+
+            <h2 id="section-4">왜 이런 에러가 나나요?</h2>
+            <p>
+                우리가 요리를 할 때 "소금"이 필요하듯, 코드에서도 다른 사람이 만들어둔 도구(패키지)를 빌려 씁니다.
+                코드는 <code>import</code>로 빌려 쓰겠다고 선언했는데, 실제 프로젝트 폴더(<code>node_modules</code>)에는 그 도구가 없어서 생기는 일입니다.
+            </p>
+
+            <!-- Feedback Section -->
+            <div class="mt-16 pt-8 border-t border-zinc-800">
+                <h4 class="text-sm font-bold text-zinc-300 mb-4">이 문서가 도움이 되었나요?</h4>
+                <div class="flex gap-3">
+                    <button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 text-sm text-zinc-400 hover:text-white transition-colors">
+                        <i class="fa-regular fa-thumbs-up"></i> 네, 해결했어요
+                    </button>
+                    <button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 text-sm text-zinc-400 hover:text-white transition-colors">
+                        <i class="fa-regular fa-thumbs-down"></i> 아니요
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- 4. RIGHT SIDEBAR (Table of Contents) -->
+        <aside class="hidden xl:block w-64 shrink-0 h-[calc(100vh-4rem)] sticky top-16 py-10 px-6">
+            <h5 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">On This Page</h5>
+            <ul class="space-y-3 text-sm border-l border-zinc-800 pl-4">
+                <li><a href="#section-1" class="block text-zinc-400 hover:text-white transition-colors">1. 증상 확인하기</a></li>
+                <li><a href="#section-2" class="block text-indigo-400 font-medium border-l border-indigo-500 -ml-[17px] pl-4 transition-colors">2. AI에게 해결 요청 (추천)</a></li>
+                <li><a href="#section-3" class="block text-zinc-400 hover:text-white transition-colors">3. 수동으로 해결하기</a></li>
+                <li><a href="#section-4" class="block text-zinc-400 hover:text-white transition-colors">왜 이런 에러가 나나요?</a></li>
+            </ul>
+
+            <!-- Floating Promo -->
+            <div class="mt-8 bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                <div class="text-xs font-bold text-white mb-2">아직도 해결이 안 되나요?</div>
+                <p class="text-xs text-zinc-500 mb-3">VibeStack 커뮤니티에 에러 로그를 올려보세요.</p>
+                <button class="w-full bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white py-2 rounded transition-colors">
+                    질문하러 가기
+                </button>
+            </div>
+        </aside>
+
+    </div>
+
+    <script>
+        // Simple Copy Function
+        function copyCode(btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check text-green-400"></i>';
+            // In real app, copy textContent of sibling code block
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

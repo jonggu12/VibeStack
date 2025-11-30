@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getContentBySlug, getContents } from '@/app/actions/content'
+import { getContentBySlug } from '@/app/actions/content'
 import { compileMDXContent, extractTOC, calculateReadingTime } from '@/lib/mdx'
-import { Search, Home, ChevronRight } from 'lucide-react'
+import { Search, ChevronRight, Users, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { ViewTracker } from '@/components/content/view-tracker'
-import { Feedback } from '@/components/mdx/feedback'
+import { TerminalPreview } from '@/components/docs/terminal-preview'
+import { PromptBlock } from '@/components/docs/prompt-block'
+import { Callout } from '@/components/docs/callout'
 
 // 캐싱 방지
 export const dynamic = 'force-dynamic'
@@ -79,7 +81,7 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
   const categoryName = currentCategory?.title.split(' ')[0] || '문서'
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen bg-zinc-950 flex flex-col font-sans text-zinc-100 selection:bg-indigo-500/30">
       <ViewTracker contentId={content.id} />
 
       {/* HEADER (Compact) */}
@@ -132,11 +134,10 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
                     <li key={item.slug}>
                       <Link
                         href={`/docs/${item.slug}`}
-                        className={`block px-2 py-1.5 text-sm rounded transition-colors ${
-                          item.slug === slug
+                        className={`block px-2 py-1.5 text-sm rounded transition-colors ${item.slug === slug
                             ? 'text-indigo-400 bg-indigo-500/10 border-l-2 border-indigo-500 rounded-r font-medium'
                             : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                        }`}
+                          }`}
                       >
                         {item.title}
                       </Link>
@@ -152,35 +153,21 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
         <main className="flex-1 min-w-0 py-10 px-4 md:px-12">
           {/* Meta Info */}
           <div className="flex items-center gap-3 mb-6">
-            {content.difficulty && (
-              <span
-                className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                  content.difficulty === 'beginner'
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : content.difficulty === 'intermediate'
-                    ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                    : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                }`}
-              >
-                {content.difficulty === 'beginner'
-                  ? '초급'
-                  : content.difficulty === 'intermediate'
-                  ? '중급'
-                  : '고급'}
-              </span>
-            )}
+            <span className="bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              Error Fix
+            </span>
             {content.updated_at && (
               <span className="text-zinc-500 text-xs">
                 최종 업데이트: {new Date(content.updated_at).toLocaleDateString('ko-KR')}
               </span>
             )}
             <span className="text-zinc-500 text-xs flex items-center gap-1">
-              👥 {(content.views ?? 0).toLocaleString()}명 조회
+              <Users className="w-3 h-3" /> {(content.views ?? 0).toLocaleString()}명이 해결
             </span>
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">{content.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">{content.title}</h1>
 
           {/* Description */}
           {content.description && (
@@ -189,21 +176,57 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
 
           <hr className="border-zinc-800 my-8" />
 
-          {/* MDX Content */}
-          <div className="prose-docs">{mdxContent}</div>
+          {/* Example Components (Hardcoded for Demo matching reference) */}
+          <Callout type="info" title="잠깐! 터미널이 켜져 있나요?">
+            Cursor 하단에 있는 <code className="bg-zinc-800 px-1 py-0.5 rounded text-zinc-300">Terminal</code> 탭을 클릭해서 열어주세요.
+          </Callout>
 
-          {/* Feedback */}
-          <Feedback contentId={content.id} />
+          {/* MDX Content */}
+          <div className="prose prose-invert max-w-none prose-zinc prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline prose-code:text-indigo-300 prose-code:bg-indigo-500/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
+            {mdxContent}
+
+            {/* Example Terminal Preview (Demo) */}
+            <div className="not-prose">
+              <h2 className="text-2xl font-bold text-white mt-10 mb-4" id="section-1">1. 증상 확인하기</h2>
+              <p className="text-zinc-400 mb-4">터미널에 아래와 비슷한 에러 메시지가 뜬다면 이 문서가 정답입니다.</p>
+              <TerminalPreview>
+                <span className="text-red-400">error</span> - ./src/app/page.tsx:3:0<br />
+                Module not found: Can&apos;t resolve <span className="text-yellow-300">&apos;lucide-react&apos;</span>
+              </TerminalPreview>
+            </div>
+
+            {/* Example Prompt Block (Demo) */}
+            <div className="not-prose">
+              <h2 className="text-2xl font-bold text-white mt-10 mb-4" id="section-2">2. AI에게 해결 요청하기 (추천)</h2>
+              <p className="text-zinc-400 mb-4">직접 명령어를 칠 필요 없이, Cursor의 AI에게 <strong>설치해달라고 명령</strong>하는 것이 가장 빠릅니다.</p>
+              <PromptBlock prompt={`에러 메시지: "Module not found: Can't resolve '라이브러리이름'"
+
+이 에러가 났어. 필요한 패키지를 설치하는 npm 명령어를 알려주고, 자동으로 설치해줘.`} />
+            </div>
+          </div>
+
+          {/* Feedback Section */}
+          <div className="mt-16 pt-8 border-t border-zinc-800">
+            <h4 className="text-sm font-bold text-zinc-300 mb-4">이 문서가 도움이 되었나요?</h4>
+            <div className="flex gap-3">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 text-sm text-zinc-400 hover:text-white transition-colors">
+                <ThumbsUp className="w-4 h-4" /> 네, 해결했어요
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 text-sm text-zinc-400 hover:text-white transition-colors">
+                <ThumbsDown className="w-4 h-4" /> 아니요
+              </button>
+            </div>
+          </div>
         </main>
 
         {/* RIGHT SIDEBAR (TOC) */}
-        {toc.length > 0 && (
-          <aside className="hidden xl:block w-64 shrink-0 h-[calc(100vh-4rem)] sticky top-16 py-10 px-6">
-            <h5 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">
-              On This Page
-            </h5>
-            <ul className="space-y-3 text-sm border-l border-zinc-800 pl-4">
-              {toc.map((item) => (
+        <aside className="hidden xl:block w-64 shrink-0 h-[calc(100vh-4rem)] sticky top-16 py-10 px-6">
+          <h5 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">
+            On This Page
+          </h5>
+          <ul className="space-y-3 text-sm border-l border-zinc-800 pl-4">
+            {toc.length > 0 ? (
+              toc.map((item) => (
                 <li key={item.id}>
                   <a
                     href={`#${item.id}`}
@@ -212,10 +235,27 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
                     {item.text}
                   </a>
                 </li>
-              ))}
-            </ul>
-          </aside>
-        )}
+              ))
+            ) : (
+              // Fallback TOC for demo if MDX doesn't have headers
+              <>
+                <li><a href="#section-1" className="block text-zinc-400 hover:text-white transition-colors">1. 증상 확인하기</a></li>
+                <li><a href="#section-2" className="block text-indigo-400 font-medium border-l border-indigo-500 -ml-[17px] pl-4 transition-colors">2. AI에게 해결 요청 (추천)</a></li>
+                <li><a href="#" className="block text-zinc-400 hover:text-white transition-colors">3. 수동으로 해결하기</a></li>
+                <li><a href="#" className="block text-zinc-400 hover:text-white transition-colors">왜 이런 에러가 나나요?</a></li>
+              </>
+            )}
+          </ul>
+
+          {/* Floating Promo */}
+          <div className="mt-8 bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+            <div className="text-xs font-bold text-white mb-2">아직도 해결이 안 되나요?</div>
+            <p className="text-xs text-zinc-500 mb-3">VibeStack 커뮤니티에 에러 로그를 올려보세요.</p>
+            <button className="w-full bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white py-2 rounded transition-colors">
+              질문하러 가기
+            </button>
+          </div>
+        </aside>
       </div>
     </div>
   )

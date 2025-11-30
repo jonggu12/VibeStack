@@ -12,6 +12,10 @@ export { Terminal } from './terminal'
 export { PromptBlock } from './prompt-block'
 export { Feedback } from './feedback'
 
+// Tutorial 컴포넌트들
+export { PromptCopy } from '../tutorial/prompt-copy'
+export { Checklist } from '../tutorial/checklist'
+
 // MDX에서 사용할 컴포넌트 맵
 import { Callout } from './callout'
 import { CodeBlock } from './code-block'
@@ -22,6 +26,8 @@ import { PreBlock } from './pre-block'
 import { Terminal } from './terminal'
 import { PromptBlock } from './prompt-block'
 import { Feedback } from './feedback'
+import { PromptCopy } from '../tutorial/prompt-copy'
+import { Checklist } from '../tutorial/checklist'
 
 // children에서 텍스트 추출하여 slug 생성
 function getTextFromChildren(children: React.ReactNode): string {
@@ -159,4 +165,7 @@ export const mdxComponents = {
     Terminal,
     PromptBlock,
     Feedback,
+    // Tutorial 컴포넌트들
+    PromptCopy,
+    Checklist,
 }

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial - 45분 Todo SaaS 만들기 | VibeStack</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        zinc: {
+                            850: '#1f1f22',
+                            900: '#18181b',
+                            950: '#09090b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #09090b; color: #fafafa; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+        .glass-header {
+            background: rgba(9, 9, 11, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Timeline Connector */
+        .step-connector::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            bottom: -16px;
+            left: 11px;
+            width: 2px;
+            background-color: #27272a;
+            z-index: 0;
+        }
+        .step-connector:last-child::before { display: none; }
+        
+        .active-step .step-circle { background-color: #6366f1; border-color: #6366f1; color: white; }
+        .active-step .step-title { color: white; }
+        
+        .completed-step .step-circle { background-color: #10b981; border-color: #10b981; color: black; }
+        .completed-step .step-connector::before { background-color: #10b981; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 1. HEADER -->
+    <header class="sticky top-0 z-50 glass-header border-b border-zinc-800 h-16">
+        <div class="w-full max-w-[1600px] mx-auto px-4 h-full flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="w-7 h-7 bg-white rounded flex items-center justify-center text-black font-bold text-base group-hover:rotate-3 transition-transform">V</div>
+                    <span class="font-bold text-lg tracking-tight">VibeStack</span>
+                    <span class="text-xs font-mono text-zinc-500 mt-1">Tutorials</span>
+                </a>
+                
+                <!-- Breadcrumb -->
+                <div class="hidden md:flex items-center gap-2 text-sm text-zinc-500 border-l border-zinc-800 pl-6">
+                    <a href="tutorials.html" class="hover:text-zinc-300">Tutorials</a>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    <span class="text-white font-medium">SaaS Todo App</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-2 text-sm text-zinc-400">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span>Saving...</span>
+                </div>
+                <button class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500"></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. HERO BANNER -->
+    <div class="border-b border-zinc-800 bg-zinc-900/30">
+        <div class="max-w-[1600px] mx-auto px-4 md:px-8 py-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-bold px-2 py-0.5 rounded uppercase">SaaS Kit</span>
+                        <span class="bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs font-bold px-2 py-0.5 rounded">Beginner</span>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">45분 만에 만드는 Todo SaaS</h1>
+                    <p class="text-zinc-400 max-w-2xl">
+                        로그인, 데이터베이스 저장, 결제까지. Cursor를 사용하여 실제 작동하는 서비스를 처음부터 끝까지 만들어봅니다.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="#" class="px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 text-zinc-300 text-sm font-medium transition-colors">
+                        <i class="fa-brands fa-github mr-2"></i> 완성 코드
+                    </a>
+                    <a href="#" class="px-4 py-2 rounded-lg border border-zinc-700 hover:bg-zinc-800 text-zinc-300 text-sm font-medium transition-colors">
+                        <i class="fa-solid fa-desktop mr-2"></i> 데모 보기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAIN LAYOUT (3-Column) -->
+    <div class="flex-1 w-full max-w-[1600px] mx-auto flex items-start">
+        
+        <!-- LEFT SIDEBAR: STEP NAVIGATION -->
+        <aside class="hidden lg:block w-72 shrink-0 h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto py-8 pl-4 pr-6 border-r border-zinc-800">
+            <h5 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-6 px-2">Table of Contents</h5>
+            
+            <div class="space-y-0">
+                <!-- Step 1 (Completed) -->
+                <div class="relative pl-2 step-connector completed-step">
+                    <a href="#step-1" class="flex items-start gap-3 py-2 group">
+                        <div class="w-6 h-6 rounded-full border-2 bg-zinc-900 border-zinc-700 text-[10px] flex items-center justify-center shrink-0 z-10 step-circle transition-colors">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div class="pt-0.5">
+                            <h6 class="text-sm font-medium text-zinc-400 group-hover:text-white step-title transition-colors">프로젝트 셋팅</h6>
+                            <p class="text-[10px] text-zinc-500">5분 소요</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Step 2 (Active) -->
+                <div class="relative pl-2 step-connector active-step">
+                    <a href="#step-2" class="flex items-start gap-3 py-2 group">
+                        <div class="w-6 h-6 rounded-full border-2 bg-zinc-900 border-zinc-600 text-[10px] flex items-center justify-center shrink-0 z-10 step-circle transition-colors">
+                            2
+                        </div>
+                        <div class="pt-0.5">
+                            <h6 class="text-sm font-medium text-zinc-300 group-hover:text-white step-title transition-colors">DB 연결 (Supabase)</h6>
+                            <p class="text-[10px] text-zinc-500">10분 소요</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative pl-2 step-connector">
+                    <a href="#step-3" class="flex items-start gap-3 py-2 group">
+                        <div class="w-6 h-6 rounded-full border-2 border-zinc-800 bg-zinc-950 text-[10px] flex items-center justify-center shrink-0 z-10 step-circle transition-colors text-zinc-600">
+                            3
+                        </div>
+                        <div class="pt-0.5">
+                            <h6 class="text-sm font-medium text-zinc-500 group-hover:text-zinc-300 step-title transition-colors">로그인 구현 (Clerk)</h6>
+                            <p class="text-[10px] text-zinc-600">15분 소요</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="relative pl-2 step-connector">
+                    <a href="#step-4" class="flex items-start gap-3 py-2 group">
+                        <div class="w-6 h-6 rounded-full border-2 border-zinc-800 bg-zinc-950 text-[10px] flex items-center justify-center shrink-0 z-10 step-circle transition-colors text-zinc-600">
+                            4
+                        </div>
+                        <div class="pt-0.5">
+                            <h6 class="text-sm font-medium text-zinc-500 group-hover:text-zinc-300 step-title transition-colors">Todo 기능 구현</h6>
+                            <p class="text-[10px] text-zinc-600">15분 소요</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER CONTENT: TUTORIAL STEPS -->
+        <main class="flex-1 min-w-0 py-10 px-4 md:px-12 border-r border-zinc-800">
+            
+            <!-- Step 1 (Collapsed/Completed) -->
+            <section id="step-1" class="mb-12 opacity-50 hover:opacity-100 transition-opacity">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center border border-emerald-500/30">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-zinc-300 decoration-zinc-500">Phase 1: 프로젝트 생성 (완료됨)</h2>
+                    <button class="text-xs text-zinc-500 hover:text-white underline">다시 보기</button>
+                </div>
+            </section>
+
+            <!-- Step 2 (Active) -->
+            <section id="step-2" class="mb-20">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-500/20">
+                        2
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Phase 2: 데이터베이스 연결</h2>
+                </div>
+
+                <div class="prose-custom mb-8">
+                    <p class="text-zinc-400 text-lg leading-relaxed">
+                        이제 우리의 앱에 <strong>기억력</strong>을 심어줄 차례입니다. Supabase라는 도구를 사용해서 데이터를 저장할 공간을 만들고, Next.js와 연결해봅시다.
+                        <br><br>
+                        직접 코드를 짤 필요 없습니다. 아래 과정을 따라오세요.
+                    </p>
+                </div>
+
+                <!-- Action 1: Create Project -->
+                <div class="mb-10">
+                    <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                        <span class="text-indigo-400">2-1.</span> Supabase 프로젝트 생성
+                    </h3>
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-4">
+                        <ol class="list-decimal list-inside space-y-2 text-zinc-300 text-sm">
+                            <li><a href="#" class="text-indigo-400 hover:underline">Supabase.com</a>에 접속해서 로그인하세요.</li>
+                            <li><strong>[New Project]</strong> 버튼을 클릭하세요.</li>
+                            <li>Database Password를 설정하고 <strong>[Create New Project]</strong>를 누르세요.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Action 2: The Golden Prompt -->
+                <div class="mb-10">
+                    <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                        <span class="text-indigo-400">2-2.</span> 연결 코드 작성 (AI)
+                    </h3>
+                    <p class="text-sm text-zinc-500 mb-3">
+                        이제 Cursor에게 연결 코드를 짜라고 시킬 차례입니다. <code>.env.local</code> 파일이 자동으로 생성될 것입니다.
+                    </p>
+
+                    <!-- Prompt Box -->
+                    <div class="relative group">
+                        <div class="absolute -top-3 left-4 bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg z-10">
+                            COPY THIS PROMPT
+                        </div>
+                        <div class="bg-zinc-950 border border-indigo-500/40 rounded-xl p-6 hover:border-indigo-500 transition-colors shadow-2xl">
+                            <code class="block text-zinc-200 font-mono text-sm leading-relaxed whitespace-pre-wrap mb-4">현재 프로젝트에 Supabase를 연결하고 싶어.
+
+1. @supabase/ssr 패키지를 설치하는 명령어를 알려줘.
+2. 루트 경로에 .env.local 파일을 만들고, Supabase URL과 Anon Key를 넣을 수 있는 템플릿을 만들어줘.
+3. utils/supabase/server.ts 와 client.ts 파일을 생성해서 클라이언트 유틸리티 코드를 작성해줘.</code>
+                            
+                            <div class="flex justify-end">
+                                <button onclick="copyPrompt(this)" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2.5 px-6 rounded-lg transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/20 active:scale-95">
+                                    <i class="fa-regular fa-copy"></i> 프롬프트 복사
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action 3: Verification (Checklist) -->
+                <div class="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+                    <h4 class="text-sm font-bold text-white mb-4 uppercase tracking-wider">✅ 제대로 됐는지 확인하기</h4>
+                    <div class="space-y-3">
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" class="mt-1 w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-zinc-900">
+                            <span class="text-sm text-zinc-400 group-hover:text-zinc-200 transition-colors">
+                                <code>npm install @supabase/ssr</code> 명령어를 실행했나요?
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" class="mt-1 w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-zinc-900">
+                            <span class="text-sm text-zinc-400 group-hover:text-zinc-200 transition-colors">
+                                <code>.env.local</code> 파일에 URL과 KEY를 붙여넣었나요?
+                            </span>
+                        </label>
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <input type="checkbox" class="mt-1 w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-zinc-900">
+                            <span class="text-sm text-zinc-400 group-hover:text-zinc-200 transition-colors">
+                                <code>utils/supabase</code> 폴더가 생성되었나요?
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Step 3 (Pending) -->
+            <section id="step-3" class="mb-20 opacity-40 hover:opacity-80 transition-opacity">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full border-2 border-zinc-700 text-zinc-500 flex items-center justify-center font-bold">
+                        3
+                    </div>
+                    <h2 class="text-xl font-bold text-zinc-400">Phase 3: 로그인 구현 (Clerk)</h2>
+                </div>
+                <p class="text-sm text-zinc-500 pl-11">이전 단계를 완료하면 열립니다.</p>
+            </section>
+
+            <!-- Next Button -->
+            <div class="py-8 border-t border-zinc-800 flex justify-between items-center">
+                <button class="text-zinc-400 hover:text-white px-4 py-2 rounded-lg hover:bg-zinc-800 transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> 이전 단계
+                </button>
+                <button class="bg-white text-black font-bold px-6 py-3 rounded-xl hover:bg-zinc-200 transition-colors flex items-center gap-2 shadow-lg shadow-white/10">
+                    다음 단계 완료 <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+        </main>
+
+        <!-- RIGHT SIDEBAR: PROGRESS & TOOLS -->
+        <aside class="hidden xl:block w-80 shrink-0 h-[calc(100vh-4rem)] sticky top-16 py-8 px-6">
+            
+            <!-- Progress Card -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 mb-6 sticky top-0">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-xs font-bold text-zinc-500 uppercase">Your Progress</span>
+                    <span class="text-xl font-bold text-white">25%</span>
+                </div>
+                <div class="w-full bg-zinc-800 rounded-full h-2 mb-4">
+                    <div class="bg-indigo-500 h-2 rounded-full transition-all duration-500" style="width: 25%"></div>
+                </div>
+                <p class="text-xs text-zinc-400 mb-4">
+                    잘하고 있어요! 이제 가장 중요한 DB 연결 단계입니다.
+                </p>
+                <button class="w-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-2.5 rounded-lg transition-colors border border-zinc-700">
+                    진행상황 저장하기
+                </button>
+            </div>
+
+            <!-- Tech Stack -->
+            <div class="mb-8">
+                <h5 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Used in this step</h5>
+                <div class="space-y-2">
+                    <a href="#" class="flex items-center gap-3 p-2 rounded hover:bg-zinc-900 transition-colors group">
+                        <img src="https://pbs.twimg.com/profile_images/1397471927778390018/KLK4c1XW_400x400.png" class="w-8 h-8 rounded-lg" alt="Supabase">
+                        <div>
+                            <div class="text-sm font-bold text-zinc-300 group-hover:text-white">Supabase</div>
+                            <div class="text-[10px] text-zinc-500">Database & Auth</div>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-zinc-600 group-hover:text-zinc-400"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Help -->
+            <div class="bg-indigo-500/5 border border-indigo-500/20 rounded-xl p-5">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs font-bold text-indigo-300">Live Help</span>
+                </div>
+                <p class="text-xs text-zinc-400 mb-3">
+                    이 단계에서 막히셨나요? 디스코드에서 'Phase 2' 채널을 확인하세요.
+                </p>
+                <a href="#" class="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                    질문하러 가기 <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-8 right-8 bg-zinc-800 border border-zinc-700 text-white px-4 py-3 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50">
+        <div class="w-6 h-6 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center">
+            <i class="fa-solid fa-check text-xs"></i>
+        </div>
+        <div>
+            <h4 class="font-bold text-sm">프롬프트 복사 완료!</h4>
+            <p class="text-xs text-zinc-400">Cursor (Ctrl+I)에 붙여넣으세요.</p>
+        </div>
+    </div>
+
+    <script>
+        function copyPrompt(btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> 복사됨!';
+            btn.classList.add('bg-green-600', 'hover:bg-green-500');
+            btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('bg-green-600', 'hover:bg-green-500');
+                btn.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
