@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { Search, Clock, Signal, CheckCircle, Lock, Plus, ArrowRight, Users } from 'lucide-react'
 import { FaDiscord, FaRobot, FaListCheck, FaEnvelope, FaFeather, FaCartShopping } from 'react-icons/fa6'
-import { useUser, UserButton } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
+import { UserMenu } from '@/components/layout/user-menu'
 
 export default function TutorialsPage() {
   const { isSignedIn } = useUser()
@@ -52,16 +53,7 @@ export default function TutorialsPage() {
 
             <div className="flex items-center gap-4">
               {isSignedIn ? (
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8 rounded-full border border-zinc-700 shadow-inner",
-                      userButtonPopoverCard: "bg-zinc-900 border border-zinc-800 shadow-2xl",
-                      userButtonPopoverActionButton: "text-zinc-300 hover:text-white hover:bg-zinc-800",
-                    }
-                  }}
-                  afterSignOutUrl="/"
-                />
+                <UserMenu />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border border-zinc-700 cursor-pointer" />
               )}

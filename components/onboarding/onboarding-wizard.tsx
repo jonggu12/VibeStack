@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { ProjectTypeSelection, type ProjectType } from './project-type-selection'
 import { StackSelection, type StackPreferences } from './stack-selection'
 import { StackPresetSelection, type StackPreset } from './stack-preset-selection'
 import { completeOnboarding, skipOnboarding } from '@/app/actions/onboarding'
 import { toast } from 'sonner'
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 type Step = 1 | 2 | 3
@@ -32,10 +30,10 @@ export function OnboardingWizard() {
 
   const progress = (currentStep / 3) * 100
 
-  const handleStackSelect = (category: keyof StackPreferences, value: string) => {
+  const handleStackToggle = (feature: keyof StackPreferences) => {
     setStackPreferences((prev) => ({
       ...prev,
-      [category]: value,
+      [feature]: !prev[feature],
     }))
   }
 
@@ -82,31 +80,9 @@ export function OnboardingWizard() {
 
     setIsSubmitting(true)
 
-    // Apply preset if selected
-    let finalStackPreferences = stackPreferences
-    if (stackPreset === 'saas-kit') {
-      finalStackPreferences = {
-        framework: 'nextjs',
-        auth: 'clerk',
-        database: 'supabase',
-        hosting: 'vercel',
-        styling: 'shadcn',
-        payments: 'stripe',
-      }
-    } else if (stackPreset === 'ecommerce') {
-      finalStackPreferences = {
-        framework: 'nextjs',
-        auth: 'clerk',
-        database: 'supabase',
-        hosting: 'vercel',
-        styling: 'shadcn',
-        payments: 'toss',
-      }
-    }
-
     const result = await completeOnboarding({
       projectType,
-      stackPreferences: finalStackPreferences,
+      stackPreferences,
       stackPreset,
     })
 
@@ -121,118 +97,99 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
+      {/* Progress Bar */}
+      <div className="absolute top-0 left-0 w-full h-2 bg-zinc-800">
+        <div
+          className="h-full bg-indigo-500 transition-all duration-500 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                맞춤 추천 설정
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                {currentStep === STEPS.PROJECT_TYPE && '프로젝트 유형을 선택해주세요'}
-                {currentStep === STEPS.STACK_SELECTION && '선호하는 스택을 선택해주세요'}
-                {currentStep === STEPS.STACK_PRESET && '시작 템플릿을 선택해주세요'}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              onClick={handleSkip}
-              disabled={isSubmitting}
-            >
-              나중에 하기
-            </Button>
+      <header className="absolute top-8 left-0 w-full px-8 flex justify-between items-center z-10">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-bold text-lg">
+            V
           </div>
-
-          {/* Progress bar */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs text-gray-600">
-              <span>단계 {currentStep} / 3</span>
-              <span>{Math.round(progress)}% 완료</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
+          <span className="font-bold text-lg text-white hidden sm:block">VibeStack</span>
         </div>
-      </div>
+        <button
+          onClick={handleSkip}
+          disabled={isSubmitting}
+          className="text-zinc-500 hover:text-white text-sm transition-colors"
+        >
+          <X className="w-4 h-4 inline mr-1" />
+          나가기
+        </button>
+      </header>
 
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-5xl">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {currentStep === STEPS.PROJECT_TYPE && (
-                <ProjectTypeSelection
-                  selected={projectType}
-                  onSelect={setProjectType}
-                />
-              )}
-
-              {currentStep === STEPS.STACK_SELECTION && (
-                <StackSelection
-                  selected={stackPreferences}
-                  onSelect={handleStackSelect}
-                />
-              )}
-
-              {currentStep === STEPS.STACK_PRESET && (
-                <StackPresetSelection
-                  selected={stackPreset}
-                  onSelect={setStackPreset}
-                  userSelectedStack={Object.keys(stackPreferences).length > 0 ? stackPreferences : undefined}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Footer navigation */}
-      <div className="bg-white border-t sticky bottom-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={currentStep === 1 || isSubmitting}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              이전
-            </Button>
-
-            {currentStep < 3 ? (
-              <Button
-                onClick={handleNext}
-                disabled={!canProceed() || isSubmitting}
-              >
-                다음
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleComplete}
-                disabled={!canProceed() || isSubmitting}
-                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
-              >
-                {isSubmitting ? (
-                  '저장 중...'
-                ) : (
-                  <>
-                    완료
-                    <Sparkles className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
+      {/* Main Content */}
+      <main className="w-full max-w-2xl z-10">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+          >
+            {currentStep === STEPS.PROJECT_TYPE && (
+              <ProjectTypeSelection
+                selected={projectType}
+                onSelect={setProjectType}
+              />
             )}
-          </div>
+
+            {currentStep === STEPS.STACK_SELECTION && (
+              <StackSelection
+                selected={stackPreferences}
+                onToggle={handleStackToggle}
+              />
+            )}
+
+            {currentStep === STEPS.STACK_PRESET && (
+              <StackPresetSelection
+                selected={stackPreset}
+                onSelect={setStackPreset}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Navigation Buttons */}
+        <div className="mt-10 flex justify-center gap-4">
+          {currentStep > 1 && (
+            <button
+              onClick={handleBack}
+              disabled={isSubmitting}
+              className="text-zinc-400 hover:text-white font-medium py-3 px-6 transition-colors"
+            >
+              뒤로가기
+            </button>
+          )}
+
+          {currentStep < 3 ? (
+            <button
+              onClick={handleNext}
+              disabled={!canProceed() || isSubmitting}
+              className="bg-white text-black font-bold py-3 px-12 rounded-full hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-white/10"
+            >
+              다음 단계
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={handleComplete}
+              disabled={!canProceed() || isSubmitting}
+              className="bg-white text-black font-bold py-3 px-12 rounded-full hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-white/10"
+            >
+              {isSubmitting ? '저장 중...' : '완료'}
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+            </button>
+          )}
         </div>
-      </div>
+      </main>
     </div>
   )
 }

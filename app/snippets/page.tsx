@@ -4,7 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Search, Check, Plus, Sparkles, Code, Bookmark, Layers, Zap } from 'lucide-react'
 import { FaGoogle, FaStripe, FaDatabase } from 'react-icons/fa'
-import { useUser, UserButton } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
+import { UserMenu } from '@/components/layout/user-menu'
 
 export default function SnippetsPage() {
   const { isSignedIn } = useUser()
@@ -74,16 +75,7 @@ export default function SnippetsPage() {
 
             <div className="flex items-center gap-4">
               {isSignedIn ? (
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8 rounded-full border border-zinc-700 shadow-inner",
-                      userButtonPopoverCard: "bg-zinc-900 border border-zinc-800 shadow-2xl",
-                      userButtonPopoverActionButton: "text-zinc-300 hover:text-white hover:bg-zinc-800",
-                    }
-                  }}
-                  afterSignOutUrl="/"
-                />
+                <UserMenu />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border border-zinc-700 cursor-pointer" />
               )}

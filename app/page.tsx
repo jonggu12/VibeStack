@@ -10,7 +10,8 @@ import {
 } from 'lucide-react'
 import { FaGithub, FaGoogle, FaStripe, FaDiscord } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
-import { useUser, UserButton } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
+import { UserMenu } from '@/components/layout/user-menu'
 
 export default function HomePage() {
   const router = useRouter()
@@ -116,19 +117,7 @@ export default function HomePage() {
                     <Plus className="w-4 h-4" />
                     <span>새 프로젝트</span>
                   </button>
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-8 h-8 rounded-full border border-zinc-700 shadow-inner",
-                        userButtonPopoverCard: "bg-zinc-900 border border-zinc-800 shadow-2xl",
-                        userButtonPopoverActionButton: "text-zinc-300 hover:text-white hover:bg-zinc-800",
-                        userButtonPopoverActionButtonText: "text-zinc-300",
-                        userButtonPopoverActionButtonIcon: "text-zinc-400",
-                        userButtonPopoverFooter: "hidden",
-                      }
-                    }}
-                    afterSignOutUrl="/"
-                  />
+                  <UserMenu />
                 </>
               ) : (
                 <>

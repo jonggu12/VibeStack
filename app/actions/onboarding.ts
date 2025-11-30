@@ -5,14 +5,12 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export interface OnboardingData {
-  projectType: 'web' | 'app' | 'backend'
+  projectType: 'saas' | 'landing' | 'blog'
   stackPreferences: {
-    framework?: string
-    auth?: string
-    database?: string
-    hosting?: string
-    styling?: string
-    payments?: string
+    auth?: boolean
+    database?: boolean
+    payments?: boolean
+    [key: string]: boolean | undefined
   }
   stackPreset: 'saas-kit' | 'ecommerce' | 'custom'
 }

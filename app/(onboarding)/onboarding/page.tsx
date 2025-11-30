@@ -10,7 +10,10 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <main className="min-h-screen bg-zinc-950 relative overflow-hidden">
+      {/* Background Decoration */}
+      <div className="absolute top-0 right-0 -mr-40 -mt-40 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+
       <OnboardingWizard />
     </main>
   )
