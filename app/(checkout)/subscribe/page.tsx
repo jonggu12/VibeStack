@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import Link from 'next/link'
+import Script from 'next/script'
 import {
   Lock,
   Check,
@@ -14,6 +15,13 @@ import { FaStripe, FaCcVisa, FaCcMastercard, FaCcAmex } from 'react-icons/fa'
 
 type PaymentGateway = 'toss' | 'stripe'
 type BillingCycle = 'monthly' | 'yearly'
+
+// Toss Payments 글로벌 타입 선언
+declare global {
+  interface Window {
+    TossPayments: any
+  }
+}
 
 const pricing = {
   toss: {
@@ -35,6 +43,7 @@ export default function SubscribePage() {
   const [gateway, setGateway] = useState<PaymentGateway>('toss')
   const [cycle, setCycle] = useState<BillingCycle>('monthly')
   const [isLoading, setIsLoading] = useState(false)
+  const [tossPayments, setTossPayments] = useState<any>(null)
 
   const currentPricing = pricing[gateway]
   const amount = cycle === 'monthly' ? currentPricing.monthly : currentPricing.yearly
@@ -46,13 +55,21 @@ export default function SubscribePage() {
     return num.toFixed(2)
   }
 
+  // Toss Payments SDK 초기화
+  const handleTossScriptLoad = () => {
+    const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY
+    if (clientKey && window.TossPayments) {
+      setTossPayments(window.TossPayments(clientKey))
+    }
+  }
+
   const handlePayment = async () => {
     if (!user) return
 
     setIsLoading(true)
     try {
       if (gateway === 'toss') {
-        // Toss Payments
+        // Toss Payments SDK 사용
         const res = await fetch('/api/toss/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -64,7 +81,21 @@ export default function SubscribePage() {
         if (!res.ok) throw new Error('Checkout failed')
 
         const data = await res.json()
-        window.location.href = data.checkoutUrl
+
+        // Toss Payments SDK로 결제창 띄우기
+        if (tossPayments) {
+          await tossPayments.requestPayment('카드', {
+            amount: data.amount,
+            orderId: data.orderId,
+            orderName: data.orderName,
+            customerName: data.customerName,
+            customerEmail: data.customerEmail,
+            successUrl: data.successUrl,
+            failUrl: data.failUrl,
+          })
+        } else {
+          throw new Error('Toss Payments SDK not loaded')
+        }
       } else {
         // Stripe
         const res = await fetch('/api/stripe/checkout', {
@@ -91,8 +122,16 @@ export default function SubscribePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-950">
-      {/* Header */}
+    <>
+      {/* Toss Payments SDK */}
+      <Script
+        src="https://js.tosspayments.com/v1/payment"
+        onLoad={handleTossScriptLoad}
+        strategy="lazyOnload"
+      />
+
+      <div className="min-h-screen flex flex-col bg-zinc-950">
+        {/* Header */}
       <header className="border-b border-zinc-800 h-16 bg-zinc-950">
         <div className="max-w-5xl mx-auto px-4 h-full flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
@@ -360,6 +399,7 @@ export default function SubscribePage() {
           </div>
         </div>
       </main>
-    </div>
+      </div>
+    </>
   )
 }
