@@ -53,11 +53,11 @@ export const PAYMENT_METHODS_BY_COUNTRY: Record<
   string,
   Stripe.Checkout.SessionCreateParams.PaymentMethodType[]
 > = {
-  KR: ['card', 'kakao_pay', 'naver_pay', 'samsung_pay'],
-  US: ['card', 'us_bank_account'],
-  JP: ['card', 'konbini'],
-  DE: ['card', 'giropay', 'sofort'],
-  NL: ['card', 'ideal'],
+  KR: ['card'],
+  US: ['card'],
+  JP: ['card'],
+  DE: ['card'],
+  NL: ['card'],
   DEFAULT: ['card'],
 } as const
 

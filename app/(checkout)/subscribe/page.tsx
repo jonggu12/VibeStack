@@ -108,7 +108,11 @@ export default function SubscribePage() {
           }),
         })
 
-        if (!res.ok) throw new Error('Checkout failed')
+        if (!res.ok) {
+          const errorData = await res.json()
+          console.error('Stripe checkout error:', errorData)
+          throw new Error(errorData.error || 'Checkout failed')
+        }
 
         const data = await res.json()
         window.location.href = data.url

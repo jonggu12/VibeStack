@@ -160,6 +160,17 @@ export async function POST(req: Request) {
         return NextResponse.json({ url: stripeSession.url });
     } catch (error) {
         console.error(`[${requestId}] Checkout creation failed:`, error);
-        return NextResponse.json({ error: ERROR_MESSAGES.INTERNAL_ERROR }, { status: 500 });
+
+        // 개발 환경에서는 자세한 에러 메시지 반환
+        const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.INTERNAL_ERROR;
+        const isDev = process.env.NODE_ENV === 'development';
+
+        return NextResponse.json(
+            {
+                error: errorMessage,
+                details: isDev ? String(error) : undefined
+            },
+            { status: 500 }
+        );
     }
 }
