@@ -15,7 +15,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-zinc-800 transition-all duration-300 bg-zinc-950/85 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2 group shrink-0">
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
           <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-bold text-lg group-hover:rotate-3 transition-transform">
             V
           </div>

@@ -11,18 +11,17 @@ export default function SuccessPage() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval)
-          router.push('/dashboard')
-          return 0
-        }
-        return prev - 1
-      })
+      setCountdown((prev) => prev - 1)
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [router])
+  }, [])
+
+  useEffect(() => {
+    if (countdown === 0) {
+      router.push('/dashboard')
+    }
+  }, [countdown, router])
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-zinc-950">
