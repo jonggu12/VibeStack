@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Search, ArrowRight, Bot, BookOpen, Terminal, Rocket, Database, Lightbulb } from 'lucide-react'
 import { FaReact } from 'react-icons/fa'
 import { useUser } from '@clerk/nextjs'
@@ -8,6 +9,7 @@ import { UserMenu } from '@/components/layout/user-menu'
 
 export default function DocsPage() {
   const { isSignedIn } = useUser()
+  const pathname = usePathname()
 
   return (
     <>
@@ -45,11 +47,38 @@ export default function DocsPage() {
               <span className="font-bold text-lg tracking-tight hidden sm:block">VibeStack</span>
             </Link>
 
-            {/* Desktop Nav */}
+            {/* Desktop Nav - Sub Tabs */}
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-              <Link href="/tutorials" className="text-zinc-400 hover:text-white transition-colors">프로젝트</Link>
-              <Link href="/docs" className="text-white border-b-2 border-indigo-500 h-16 flex items-center">문서</Link>
-              <Link href="/snippets" className="text-zinc-400 hover:text-white transition-colors">스니펫</Link>
+              <Link
+                href="/docs"
+                className={`h-16 flex items-center transition-colors ${
+                  pathname === '/docs'
+                    ? 'text-white border-b-2 border-indigo-500'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                전체
+              </Link>
+              <Link
+                href="/docs/guides"
+                className={`h-16 flex items-center transition-colors ${
+                  pathname.startsWith('/docs/guides')
+                    ? 'text-white border-b-2 border-indigo-500'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                가이드
+              </Link>
+              <Link
+                href="/docs/glossary"
+                className={`h-16 flex items-center transition-colors ${
+                  pathname.startsWith('/docs/glossary')
+                    ? 'text-white border-b-2 border-indigo-500'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                용어 사전
+              </Link>
             </nav>
 
             <div className="flex items-center gap-4">

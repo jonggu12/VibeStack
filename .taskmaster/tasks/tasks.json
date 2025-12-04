@@ -959,11 +959,90 @@
             "testStrategy": "Run migration and verify data integrity. Test CRUD operations with new schema."
           }
         ]
+      },
+      {
+        "id": 15,
+        "title": "Create Developer Glossary (개발자 용어 사전)",
+        "description": "Build a comprehensive glossary of developer terms explained with elementary school-level analogies.",
+        "details": "Create 10 glossary entries explaining common developer terms (API, Webhook, Database, Component, Environment Variables, Build, Deploy, CORS, SSR vs CSR, npm) using simple analogies and real-world examples. Each entry includes: 1-minute read time, elementary student analogy, practical examples, AI prompts for related tasks, links to tutorials. Implement glossary page with search and categories.",
+        "testStrategy": "Test with non-developers. Success metrics: 95%+ understand terms without coding background, 90%+ find analogies helpful, average read time < 2 minutes per term.",
+        "priority": "medium",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Glossary Page UI and Navigation",
+            "description": "Create user-friendly glossary interface with search and categories.",
+            "dependencies": [],
+            "details": "Design /glossary page with: search bar, category filters (기본 개념, Next.js 용어, 개발 도구, 에러 용어), popular terms section, alphabetical index. Include glossary link in main navigation. Use Tailwind + Shadcn/ui components.",
+            "status": "pending",
+            "testStrategy": "UI testing for usability and mobile responsiveness."
+          },
+          {
+            "id": 2,
+            "title": "Write Core Developer Terms (5개)",
+            "description": "Write glossary entries for fundamental developer concepts.",
+            "dependencies": [],
+            "details": "Create entries: API (음식점 주문 비유), 웹훅 (택배 알림 비유), 데이터베이스 (엑셀 파일 비유), 환경변수 (비밀 메모 비유), 컴포넌트 (레고 블록 비유). Each includes: 초등학생 비유, 실전 예시, AI 프롬프트 3개, 관련 튜토리얼 링크.",
+            "status": "pending",
+            "testStrategy": "Test comprehension with 10 non-developers. 90%+ should understand without prior coding knowledge."
+          },
+          {
+            "id": 3,
+            "title": "Write Development Process Terms (3개)",
+            "description": "Explain development workflow terms with practical analogies.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create entries: 빌드 (요리 준비 비유), 배포 (가게 오픈 비유), npm (앱스토어 비유). Focus on explaining the 'why' behind each step in development workflow.",
+            "status": "pending",
+            "testStrategy": "Verify users understand when and why to use each process."
+          },
+          {
+            "id": 4,
+            "title": "Write Technical Terms (2개)",
+            "description": "Simplify complex technical concepts for beginners.",
+            "dependencies": [
+              2
+            ],
+            "details": "Create entries: CORS (경비원 검사 비유), SSR vs CSR (주문 방식 비유 - 주방에서 조리 vs 테이블에서 조리). Use diagrams where helpful.",
+            "status": "pending",
+            "testStrategy": "Test understanding: users should be able to explain concept to someone else in their own words."
+          },
+          {
+            "id": 5,
+            "title": "Implement In-Content Term Linking",
+            "description": "Add automatic term highlighting and tooltips throughout site content.",
+            "dependencies": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "details": "Detect glossary terms in docs, tutorials, and snippets. Add underline styling with hover tooltip showing brief definition. Click opens full glossary entry in modal or sidebar. Implement using MDX components.",
+            "status": "pending",
+            "testStrategy": "Verify term detection and tooltip functionality across all content types."
+          },
+          {
+            "id": 6,
+            "title": "Add Glossary Search and Analytics",
+            "description": "Implement search functionality and track popular terms.",
+            "dependencies": [
+              1
+            ],
+            "details": "Integrate Algolia search for glossary. Track: search queries, term views, most helpful ratings. Use data to prioritize future term additions. Display 'Most Searched Terms' section.",
+            "status": "pending",
+            "testStrategy": "Test search accuracy and verify analytics tracking."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-11-21T04:41:42.478Z",
-      "updated": "2025-11-27T10:00:00.000Z",
+      "updated": "2025-12-04T10:00:00.000Z",
       "description": "Tasks for VibeStack - 100% Non-Technical Vibe Coder Platform (PRD v2.2)"
     }
   }
