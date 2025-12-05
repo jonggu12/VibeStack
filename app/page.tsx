@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import {
   Rocket, Code, BookOpen, Globe, Smartphone, ArrowRight,
-  Search, Plus, XIcon, Check, Copy,
+  Search, XIcon, Check, Copy,
   ShoppingBag, PenTool, Clock, CircleCheck,
   Sparkles, Database, Book, Bot
 } from 'lucide-react'
@@ -111,11 +111,6 @@ export default function HomePage() {
                 <>
                   <button className="text-zinc-400 hover:text-white transition-colors">
                     <FaDiscord className="w-5 h-5" />
-                  </button>
-                  <div className="h-6 w-px bg-zinc-800" />
-                  <button className="hidden sm:flex items-center gap-2 bg-white text-black px-4 py-1.5 rounded-full text-sm font-bold hover:bg-zinc-200 transition-colors">
-                    <Plus className="w-4 h-4" />
-                    <span>새 프로젝트</span>
                   </button>
                   <UserMenu />
                 </>
