@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { Sparkles, ShoppingCart, Wrench, LucideIcon } from 'lucide-react'
 
 export type StackPreset = 'saas-kit' | 'ecommerce' | 'custom'
 
@@ -8,7 +9,7 @@ interface PresetOption {
   id: StackPreset
   title: string
   description: string
-  emoji: string
+  icon: LucideIcon
   features: string[]
 }
 
@@ -17,21 +18,21 @@ const presets: PresetOption[] = [
     id: 'saas-kit',
     title: 'SaaS 스타터 킷',
     description: '완전한 SaaS 템플릿 (인증, 결제, 대시보드)',
-    emoji: '✨',
+    icon: Sparkles,
     features: ['Next.js 14', 'Clerk 인증', 'Supabase DB', 'Stripe 결제', 'Tailwind CSS'],
   },
   {
     id: 'ecommerce',
     title: '이커머스 템플릿',
     description: '온라인 쇼핑몰 (장바구니, 결제, 주문관리)',
-    emoji: '🛒',
+    icon: ShoppingCart,
     features: ['Next.js 14', 'Clerk 인증', 'Supabase DB', 'Toss 결제', 'Tailwind CSS'],
   },
   {
     id: 'custom',
     title: '커스텀 설정',
     description: '직접 선택한 스택으로 시작',
-    emoji: '🔧',
+    icon: Wrench,
     features: ['선택한 기능으로', '프로젝트를', '시작합니다'],
   },
 ]
@@ -63,6 +64,7 @@ export function StackPresetSelection({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {presets.map((preset) => {
           const isRecommended = preset.id === 'saas-kit'
+          const Icon = preset.icon
 
           return (
             <label key={preset.id} className="cursor-pointer group relative">
@@ -86,8 +88,8 @@ export function StackPresetSelection({
                 )}
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-14 h-14 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-4 text-2xl group-hover:scale-110 transition-transform">
-                    {preset.emoji}
+                  <div className="w-14 h-14 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Icon className="w-7 h-7 text-zinc-300" />
                   </div>
                   <h3 className="font-bold text-white mb-2">{preset.title}</h3>
                   <p className="text-xs text-zinc-500 mb-4">{preset.description}</p>

@@ -1,38 +1,62 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { Sparkles, BarChart3, Users, Zap, Gamepad2, Megaphone, LucideIcon } from 'lucide-react'
 
-export type ProjectType = 'saas' | 'landing' | 'blog'
+export type ProjectType = 'ai_saas' | 'dashboard' | 'community' | 'productivity' | 'quiz' | 'landing'
 
 interface ProjectTypeOption {
   id: ProjectType
   title: string
   description: string
-  emoji: string
-  color: 'indigo' | 'emerald' | 'pink'
+  icon: LucideIcon
+  color: 'purple' | 'blue' | 'indigo' | 'emerald' | 'pink' | 'orange'
+  badge?: string
 }
 
 const projectTypes: ProjectTypeOption[] = [
   {
-    id: 'saas',
-    title: '웹 서비스 (SaaS)',
-    description: '로그인, 데이터 저장, 결제가 필요한 앱',
-    emoji: '🚀',
+    id: 'ai_saas',
+    title: 'AI 기반 웹 서비스',
+    description: 'GPT 요약기, 이미지 생성 도구',
+    icon: Sparkles,
+    color: 'purple',
+    badge: '⭐ 인기',
+  },
+  {
+    id: 'dashboard',
+    title: '대시보드 / 데이터 앱',
+    description: '주가·코인 대시보드, 운동 기록',
+    icon: BarChart3,
+    color: 'blue',
+  },
+  {
+    id: 'community',
+    title: '커뮤니티 / 소셜 서비스',
+    description: '게시판, 댓글, 좋아요 기능',
+    icon: Users,
     color: 'indigo',
+  },
+  {
+    id: 'productivity',
+    title: '생산성 / 자동화 툴',
+    description: 'To-Do, 파일변환, 북마크 관리',
+    icon: Zap,
+    color: 'emerald',
+  },
+  {
+    id: 'quiz',
+    title: '퀴즈 / 테스트 / 미니게임',
+    description: 'MBTI 테스트, 밸런스 게임',
+    icon: Gamepad2,
+    color: 'pink',
   },
   {
     id: 'landing',
     title: '랜딩 페이지',
-    description: '이메일 수집, 홍보용 원페이지 사이트',
-    emoji: '📢',
-    color: 'emerald',
-  },
-  {
-    id: 'blog',
-    title: '블로그 / 포트폴리오',
-    description: '글 작성, SEO 최적화가 중요한 사이트',
-    emoji: '📝',
-    color: 'pink',
+    description: '제품 홍보, 이메일 수집',
+    icon: Megaphone,
+    color: 'orange',
   },
 ]
 
@@ -42,6 +66,16 @@ interface ProjectTypeSelectionProps {
 }
 
 const colorClasses = {
+  purple: {
+    border: 'peer-checked:border-purple-500',
+    bg: 'peer-checked:bg-purple-500/5',
+    shadow: 'peer-checked:shadow-[0_0_20px_rgba(168,85,247,0.2)]',
+  },
+  blue: {
+    border: 'peer-checked:border-blue-500',
+    bg: 'peer-checked:bg-blue-500/5',
+    shadow: 'peer-checked:shadow-[0_0_20px_rgba(59,130,246,0.2)]',
+  },
   indigo: {
     border: 'peer-checked:border-indigo-500',
     bg: 'peer-checked:bg-indigo-500/5',
@@ -56,6 +90,11 @@ const colorClasses = {
     border: 'peer-checked:border-pink-500',
     bg: 'peer-checked:bg-pink-500/5',
     shadow: 'peer-checked:shadow-[0_0_20px_rgba(236,72,153,0.2)]',
+  },
+  orange: {
+    border: 'peer-checked:border-orange-500',
+    bg: 'peer-checked:bg-orange-500/5',
+    shadow: 'peer-checked:shadow-[0_0_20px_rgba(249,115,22,0.2)]',
   },
 }
 
@@ -74,11 +113,17 @@ export function ProjectTypeSelection({ selected, onSelect }: ProjectTypeSelectio
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {projectTypes.map((type) => {
           const colors = colorClasses[type.color]
+          const Icon = type.icon
           return (
-            <label key={type.id} className="cursor-pointer group">
+            <label key={type.id} className="cursor-pointer group relative">
+              {type.badge && (
+                <div className="absolute -top-2 -right-2 bg-purple-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-lg z-10 border border-white/20">
+                  {type.badge}
+                </div>
+              )}
               <input
                 type="radio"
                 name="project_type"
@@ -89,17 +134,17 @@ export function ProjectTypeSelection({ selected, onSelect }: ProjectTypeSelectio
               />
               <div
                 className={cn(
-                  'h-full bg-zinc-900 border border-zinc-700 rounded-2xl p-6 text-center transition-all hover:-translate-y-1 hover:border-zinc-500',
+                  'h-full bg-zinc-900 border border-zinc-700 rounded-2xl p-5 text-center transition-all hover:-translate-y-1 hover:border-zinc-500',
                   colors.border,
                   colors.bg,
                   colors.shadow
                 )}
               >
-                <div className="w-14 h-14 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-4 text-2xl group-hover:scale-110 transition-transform">
-                  {type.emoji}
+                <div className="w-12 h-12 mx-auto bg-zinc-800 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Icon className="w-6 h-6 text-zinc-300" />
                 </div>
-                <h3 className="font-bold text-white mb-1">{type.title}</h3>
-                <p className="text-xs text-zinc-500">{type.description}</p>
+                <h3 className="font-bold text-white text-sm mb-1">{type.title}</h3>
+                <p className="text-[11px] text-zinc-500 leading-relaxed">{type.description}</p>
               </div>
             </label>
           )

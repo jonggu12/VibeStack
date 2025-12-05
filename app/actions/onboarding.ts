@@ -5,12 +5,17 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export interface OnboardingData {
-  projectType: 'saas' | 'landing' | 'blog'
+  projectType: 'ai_saas' | 'dashboard' | 'community' | 'productivity' | 'quiz' | 'landing'
   experienceLevel: 'vibe_coder' | 'beginner' | 'intermediate' | 'advanced'
   stackPreferences: {
     auth?: boolean
     database?: boolean
     payments?: boolean
+    ai_api?: boolean
+    file_upload?: boolean
+    realtime?: boolean
+    email?: boolean
+    external_api?: boolean
     [key: string]: boolean | undefined
   }
   painPoints: string[]

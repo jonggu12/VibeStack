@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ProjectTypeSelection, type ProjectType } from './project-type-selection'
 import { ExperienceLevelSelection, type ExperienceLevel } from './experience-level-selection'
@@ -22,6 +22,70 @@ const STEPS = {
   STACK_PRESET: 5 as const,
 }
 
+// 프로젝트 타입별 추천 스택 설정
+const PROJECT_TYPE_DEFAULTS: Record<ProjectType, StackPreferences> = {
+  ai_saas: {
+    auth: true,          // 사용자 크레딧 관리
+    database: true,      // 사용 기록 저장
+    ai_api: true,        // 🔥 핵심 기능
+    file_upload: true,   // 문서/이미지 업로드
+    payments: false,     // 선택적 (크레딧 판매)
+    realtime: false,
+    email: false,
+    external_api: false,
+  },
+  dashboard: {
+    auth: true,          // 사용자 대시보드
+    database: true,      // 데이터 저장
+    external_api: true,  // 🔥 데이터 소스 (주가, 날씨 등)
+    realtime: true,      // 실시간 차트 업데이트
+    ai_api: false,
+    file_upload: false,
+    payments: false,
+    email: false,
+  },
+  community: {
+    auth: true,          // 로그인 필수
+    database: true,      // 게시글 저장
+    file_upload: true,   // 🔥 프로필, 게시글 이미지
+    realtime: true,      // 실시간 댓글, 알림
+    ai_api: false,
+    payments: false,
+    email: false,
+    external_api: false,
+  },
+  productivity: {
+    database: true,      // 데이터 저장
+    file_upload: true,   // 🔥 파일 변환/처리
+    email: true,         // 알림 전송
+    auth: false,         // 선택적 (간단한 도구는 불필요)
+    ai_api: false,
+    payments: false,
+    realtime: false,
+    external_api: false,
+  },
+  quiz: {
+    database: true,      // 결과 저장
+    auth: false,         // 선택적
+    file_upload: false,  // 선택적 (이미지/사운드)
+    ai_api: false,
+    payments: false,
+    realtime: false,
+    email: false,
+    external_api: false,
+  },
+  landing: {
+    email: true,         // 🔥 이메일 수집 (핵심)
+    database: true,      // 수집한 이메일 저장
+    auth: false,         // 불필요
+    ai_api: false,
+    file_upload: false,
+    payments: false,
+    realtime: false,
+    external_api: false,
+  },
+}
+
 export function OnboardingWizard() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState<Step>(STEPS.PROJECT_TYPE)
@@ -35,6 +99,13 @@ export function OnboardingWizard() {
   const [stackPreset, setStackPreset] = useState<StackPreset>()
 
   const progress = (currentStep / 5) * 100
+
+  // 프로젝트 타입 선택시 추천 스택 자동 선택
+  useEffect(() => {
+    if (projectType) {
+      setStackPreferences(PROJECT_TYPE_DEFAULTS[projectType])
+    }
+  }, [projectType])
 
   const handleStackToggle = (feature: keyof StackPreferences) => {
     setStackPreferences((prev) => ({
@@ -181,6 +252,7 @@ export function OnboardingWizard() {
               <PainPointSelection
                 selected={painPoints}
                 onToggle={handlePainPointToggle}
+                projectType={projectType}
               />
             )}
 

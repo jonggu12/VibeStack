@@ -1,12 +1,13 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import { Target, Sprout, Zap, Rocket, LucideIcon } from 'lucide-react'
 
 export type ExperienceLevel = 'vibe_coder' | 'beginner' | 'intermediate' | 'advanced'
 
 interface ExperienceLevelOption {
   id: ExperienceLevel
-  emoji: string
+  icon: LucideIcon
   title: string
   description: string
   badge?: string
@@ -16,7 +17,7 @@ interface ExperienceLevelOption {
 const experienceLevels: ExperienceLevelOption[] = [
   {
     id: 'vibe_coder',
-    emoji: '🎯',
+    icon: Target,
     title: '코딩 처음이에요',
     description: 'AI 도구로 개발 시작하는 중',
     badge: 'Vibe Coder',
@@ -24,21 +25,21 @@ const experienceLevels: ExperienceLevelOption[] = [
   },
   {
     id: 'beginner',
-    emoji: '🌱',
+    icon: Sprout,
     title: '1년 미만',
     description: '기본은 아는데 실전 경험 부족',
     color: 'green',
   },
   {
     id: 'intermediate',
-    emoji: '⚡',
+    icon: Zap,
     title: '1~3년 개발자',
     description: '실무 프로젝트 경험 있음',
     color: 'blue',
   },
   {
     id: 'advanced',
-    emoji: '🚀',
+    icon: Rocket,
     title: '3년 이상 시니어',
     description: '새로운 스택 빠르게 습득 원함',
     color: 'orange',
@@ -95,6 +96,7 @@ export function ExperienceLevelSelection({ selected, onSelect }: ExperienceLevel
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {experienceLevels.map((level) => {
           const colors = colorClasses[level.color]
+          const Icon = level.icon
           return (
             <label key={level.id} className="cursor-pointer group">
               <input
@@ -114,7 +116,9 @@ export function ExperienceLevelSelection({ selected, onSelect }: ExperienceLevel
                 )}
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className="text-3xl mb-3">{level.emoji}</div>
+                  <div className="mb-3">
+                    <Icon className="w-8 h-8 text-zinc-300" />
+                  </div>
                   <h3 className="font-bold text-white mb-1">{level.title}</h3>
                   <p className="text-xs text-zinc-500 mb-3">{level.description}</p>
                   {level.badge && (

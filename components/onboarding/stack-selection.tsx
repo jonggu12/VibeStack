@@ -1,43 +1,85 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
+import { Check, Lock, Database, CreditCard, Sparkles, Upload, Zap, Mail, Globe, LucideIcon } from 'lucide-react'
 
 export interface StackPreferences {
   auth?: boolean
   database?: boolean
   payments?: boolean
+  ai_api?: boolean
+  file_upload?: boolean
+  realtime?: boolean
+  email?: boolean
+  external_api?: boolean
   [key: string]: boolean | undefined
 }
 
 interface FeatureOption {
   id: keyof StackPreferences
-  emoji: string
+  icon: LucideIcon
   title: string
   description: string
   defaultChecked: boolean
+  badge?: string
 }
 
 const features: FeatureOption[] = [
   {
     id: 'auth',
-    emoji: '🔐',
+    icon: Lock,
     title: '회원가입 / 로그인',
     description: 'Google 로그인, 이메일 인증 (Clerk)',
     defaultChecked: true,
   },
   {
     id: 'database',
-    emoji: '💾',
+    icon: Database,
     title: '데이터 저장소 (DB)',
     description: '게시글, 사용자 정보 저장 (Supabase)',
     defaultChecked: true,
   },
   {
     id: 'payments',
-    emoji: '💳',
-    title: '결제 기능',
+    icon: CreditCard,
+    title: '결제 / 구독 기능',
     description: '구독, 일회성 결제 시스템 (Stripe)',
+    defaultChecked: false,
+  },
+  {
+    id: 'ai_api',
+    icon: Sparkles,
+    title: 'AI API 연동',
+    description: 'ChatGPT, Claude, DALL-E 등',
+    defaultChecked: false,
+    badge: '🔥 HOT',
+  },
+  {
+    id: 'file_upload',
+    icon: Upload,
+    title: '파일 업로드',
+    description: '이미지, 문서 업로드 (Uploadthing)',
+    defaultChecked: false,
+  },
+  {
+    id: 'realtime',
+    icon: Zap,
+    title: '실시간 기능',
+    description: '실시간 업데이트, 채팅 (Supabase Realtime)',
+    defaultChecked: false,
+  },
+  {
+    id: 'email',
+    icon: Mail,
+    title: '이메일 전송',
+    description: '알림, 뉴스레터 전송 (Resend)',
+    defaultChecked: false,
+  },
+  {
+    id: 'external_api',
+    icon: Globe,
+    title: '외부 API 연동',
+    description: '주가, 날씨, 소셜 미디어 API',
     defaultChecked: false,
   },
 ]
@@ -62,31 +104,37 @@ export function StackSelection({ selected, onToggle }: StackSelectionProps) {
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {features.map((feature) => {
           const isChecked = selected[feature.id] ?? feature.defaultChecked
+          const Icon = feature.icon
 
           return (
             <label key={feature.id} className="relative block cursor-pointer group">
+              {feature.badge && (
+                <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-lg z-10 border border-white/20">
+                  {feature.badge}
+                </div>
+              )}
               <input
                 type="checkbox"
                 checked={isChecked}
                 onChange={() => onToggle(feature.id)}
                 className="peer sr-only"
               />
-              <div className="bg-zinc-900 border border-zinc-700 peer-checked:border-indigo-500 peer-checked:bg-indigo-500/10 p-5 rounded-xl flex items-center justify-between transition-all group-hover:border-zinc-500">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center text-xl">
-                    {feature.emoji}
+              <div className="bg-zinc-900 border border-zinc-700 peer-checked:border-indigo-500 peer-checked:bg-indigo-500/10 p-4 rounded-xl flex items-center justify-between transition-all group-hover:border-zinc-500">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-zinc-300" />
                   </div>
-                  <div>
-                    <h4 className="font-bold text-white">{feature.title}</h4>
-                    <p className="text-xs text-zinc-500">{feature.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-white text-sm">{feature.title}</h4>
+                    <p className="text-[11px] text-zinc-500 truncate">{feature.description}</p>
                   </div>
                 </div>
                 <div
                   className={cn(
-                    'w-6 h-6 rounded-full border flex items-center justify-center transition-all',
+                    'w-6 h-6 rounded-full border flex items-center justify-center transition-all shrink-0 ml-2',
                     isChecked
                       ? 'bg-indigo-500 border-indigo-500 scale-100 opacity-100'
                       : 'border-zinc-600 scale-50 opacity-0'
