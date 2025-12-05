@@ -19,7 +19,6 @@ export interface OnboardingData {
     [key: string]: boolean | undefined
   }
   painPoints: string[]
-  stackPreset: 'saas-kit' | 'ecommerce' | 'custom'
 }
 
 /**
@@ -53,7 +52,6 @@ export async function completeOnboarding(data: OnboardingData) {
         onboarding_completed: true,
         project_type: data.projectType,
         experience_level: data.experienceLevel,
-        stack_preset: data.stackPreset,
         inferred_stack: data.stackPreferences,
         primary_pain_points: data.painPoints,
         updated_at: new Date().toISOString(),
@@ -138,7 +136,7 @@ export async function getOnboardingStatus() {
 
     const { data, error } = await supabase
       .from('users')
-      .select('onboarding_completed, onboarding_dismissed_at, project_type, experience_level, stack_preset, inferred_stack, primary_pain_points')
+      .select('onboarding_completed, onboarding_dismissed_at, project_type, experience_level, inferred_stack, primary_pain_points')
       .eq('clerk_user_id', user.id)
       .single()
 
@@ -156,7 +154,6 @@ export async function getOnboardingStatus() {
       dismissed: dismissedRecently,
       projectType: data.project_type,
       experienceLevel: data.experience_level,
-      stackPreset: data.stack_preset,
       stackPreferences: data.inferred_stack,
       painPoints: data.primary_pain_points,
     }

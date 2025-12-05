@@ -6,20 +6,18 @@ import { ProjectTypeSelection, type ProjectType } from './project-type-selection
 import { ExperienceLevelSelection, type ExperienceLevel } from './experience-level-selection'
 import { StackSelection, type StackPreferences } from './stack-selection'
 import { PainPointSelection, type PainPoint } from './pain-point-selection'
-import { StackPresetSelection, type StackPreset } from './stack-preset-selection'
 import { completeOnboarding, skipOnboarding } from '@/app/actions/onboarding'
 import { toast } from 'sonner'
 import { ArrowRight, Sparkles, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-type Step = 1 | 2 | 3 | 4 | 5
+type Step = 1 | 2 | 3 | 4
 
 const STEPS = {
   PROJECT_TYPE: 1 as const,
   EXPERIENCE_LEVEL: 2 as const,
   STACK_SELECTION: 3 as const,
   PAIN_POINTS: 4 as const,
-  STACK_PRESET: 5 as const,
 }
 
 // 프로젝트 타입별 추천 스택 설정
@@ -96,9 +94,8 @@ export function OnboardingWizard() {
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>()
   const [stackPreferences, setStackPreferences] = useState<StackPreferences>({})
   const [painPoints, setPainPoints] = useState<PainPoint[]>([])
-  const [stackPreset, setStackPreset] = useState<StackPreset>()
 
-  const progress = (currentStep / 5) * 100
+  const progress = (currentStep / 4) * 100
 
   // 프로젝트 타입 선택시 추천 스택 자동 선택
   useEffect(() => {
@@ -133,16 +130,14 @@ export function OnboardingWizard() {
       case STEPS.STACK_SELECTION:
         return Object.keys(stackPreferences).length > 0
       case STEPS.PAIN_POINTS:
-        return painPoints.length > 0
-      case STEPS.STACK_PRESET:
-        return !!stackPreset
+        return true  // 선택 안 해도 넘어갈 수 있음
       default:
         return false
     }
   }
 
   const handleNext = () => {
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       setCurrentStep((prev) => (prev + 1) as Step)
     }
   }
@@ -164,7 +159,7 @@ export function OnboardingWizard() {
   }
 
   const handleComplete = async () => {
-    if (!projectType || !experienceLevel || !stackPreset) {
+    if (!projectType || !experienceLevel) {
       toast.error('필수 항목을 선택해주세요')
       return
     }
@@ -176,7 +171,6 @@ export function OnboardingWizard() {
       experienceLevel,
       stackPreferences,
       painPoints,
-      stackPreset,
     })
 
     setIsSubmitting(false)
@@ -218,7 +212,7 @@ export function OnboardingWizard() {
       </header>
 
       {/* Main Content */}
-      <main className="w-full max-w-2xl z-10">
+      <main className="w-full max-w-5xl z-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -255,13 +249,6 @@ export function OnboardingWizard() {
                 projectType={projectType}
               />
             )}
-
-            {currentStep === STEPS.STACK_PRESET && (
-              <StackPresetSelection
-                selected={stackPreset}
-                onSelect={setStackPreset}
-              />
-            )}
           </motion.div>
         </AnimatePresence>
 
@@ -277,7 +264,7 @@ export function OnboardingWizard() {
             </button>
           )}
 
-          {currentStep < 5 ? (
+          {currentStep < 4 ? (
             <button
               onClick={handleNext}
               disabled={!canProceed() || isSubmitting}

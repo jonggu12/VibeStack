@@ -7,7 +7,7 @@ import { type ProjectType } from './project-type-selection'
 export type PainPoint =
   | 'auth' | 'database' | 'payments' | 'deployment' | 'errors' | 'ai_prompting'
   | 'ai_integration' | 'file_processing' | 'realtime' | 'data_visualization'
-  | 'external_api' | 'email_setup' | 'seo' | 'social_sharing'
+  | 'external_api' | 'email_setup' | 'seo' | 'social_sharing' | 'not_sure'
 
 interface PainPointOption {
   id: PainPoint
@@ -131,6 +131,14 @@ const allPainPoints: PainPointOption[] = [
     keywords: ['프롬프트', 'AI 코딩', '생산성'],
     relevantFor: ['ai_saas', 'dashboard', 'community', 'productivity', 'quiz', 'landing'],
   },
+  {
+    id: 'not_sure',
+    icon: Search,
+    title: '아직 잘 모르겠어요',
+    description: '시작하면서 천천히 알아가고 싶어요',
+    keywords: ['처음', '탐색', '학습'],
+    relevantFor: ['ai_saas', 'dashboard', 'community', 'productivity', 'quiz', 'landing'],
+  },
 ]
 
 interface PainPointSelectionProps {
@@ -148,17 +156,17 @@ export function PainPointSelection({ selected, onToggle, projectType }: PainPoin
     <div>
       <div className="text-center mb-10">
         <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2 block">
-          Step 4 of 5
+          Step 4 of 4
         </span>
         <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
           가장 막히는 부분은 무엇인가요?
         </h1>
         <p className="text-zinc-400">
-          여러 개 선택 가능해요 · 관련 콘텐츠를 우선 추천해드릴게요
+          여러 개 선택 가능해요 · 선택 안 해도 다음 단계로 갈 수 있어요
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {painPoints.map((painPoint) => {
           const isChecked = selected.includes(painPoint.id)
           const Icon = painPoint.icon

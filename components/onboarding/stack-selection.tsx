@@ -52,7 +52,6 @@ const features: FeatureOption[] = [
     title: 'AI API 연동',
     description: 'ChatGPT, Claude, DALL-E 등',
     defaultChecked: false,
-    badge: '🔥 HOT',
   },
   {
     id: 'file_upload',
@@ -90,11 +89,22 @@ interface StackSelectionProps {
 }
 
 export function StackSelection({ selected, onToggle }: StackSelectionProps) {
+  // 선택된 기능을 상단으로 정렬
+  const sortedFeatures = [...features].sort((a, b) => {
+    const aChecked = selected[a.id] ?? a.defaultChecked
+    const bChecked = selected[b.id] ?? b.defaultChecked
+
+    // 선택된 것이 위로
+    if (aChecked && !bChecked) return -1
+    if (!aChecked && bChecked) return 1
+    return 0
+  })
+
   return (
     <div>
       <div className="text-center mb-10">
         <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2 block">
-          Step 3 of 5
+          Step 3 of 4
         </span>
         <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
           어떤 기능이 필요한가요?
@@ -105,17 +115,12 @@ export function StackSelection({ selected, onToggle }: StackSelectionProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {features.map((feature) => {
+        {sortedFeatures.map((feature) => {
           const isChecked = selected[feature.id] ?? feature.defaultChecked
           const Icon = feature.icon
 
           return (
             <label key={feature.id} className="relative block cursor-pointer group">
-              {feature.badge && (
-                <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-lg z-10 border border-white/20">
-                  {feature.badge}
-                </div>
-              )}
               <input
                 type="checkbox"
                 checked={isChecked}

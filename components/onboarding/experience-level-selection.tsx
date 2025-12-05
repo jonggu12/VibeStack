@@ -83,7 +83,7 @@ export function ExperienceLevelSelection({ selected, onSelect }: ExperienceLevel
     <div>
       <div className="text-center mb-10">
         <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2 block">
-          Step 2 of 5
+          Step 2 of 4
         </span>
         <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
           개발 경험이 어느 정도신가요?
