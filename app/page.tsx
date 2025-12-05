@@ -100,6 +100,21 @@ export default function HomePage() {
               <span className="font-bold text-lg tracking-tight hidden sm:block">VibeStack</span>
             </Link>
 
+            {/* Search Bar (Central) */}
+            <div className="hidden md:flex flex-1 max-w-xl relative group">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-12 py-2 bg-zinc-900/50 border border-zinc-700 rounded-full text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-zinc-900 transition-all text-white"
+                placeholder="무엇을 도와드릴까요? (예: '로그인 구현', '에러 해결')"
+              />
+              <div className="absolute inset-y-0 right-2 flex items-center gap-1">
+                <span className="text-[10px] text-zinc-500 bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5">⌘K</span>
+              </div>
+            </div>
+
             {/* Right Actions */}
             <div className="flex items-center gap-3">
               {isSignedIn ? (
@@ -315,25 +330,8 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* Search Bar */}
-              <div className="relative z-10 max-w-2xl mx-auto mt-8 px-4">
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Search className="w-5 h-5 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
-                  </div>
-                  <input
-                    type="text"
-                    className="block w-full pl-12 pr-16 py-4 bg-zinc-900/70 border border-zinc-700 rounded-2xl text-base placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:bg-zinc-900 transition-all text-white shadow-xl"
-                    placeholder="무엇을 도와드릴까요? (예: '로그인 구현', '에러 해결')"
-                  />
-                  <div className="absolute inset-y-0 right-3 flex items-center gap-1">
-                    <span className="text-xs text-zinc-500 bg-zinc-800 border border-zinc-700 rounded px-2 py-1">⌘K</span>
-                  </div>
-                </div>
-              </div>
-
               {/* Static Buttons */}
-              <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+              <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
                 <button onClick={handleSignUp} className="w-full sm:w-auto px-8 py-3.5 bg-white text-black rounded-full font-bold hover:bg-zinc-200 transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2">
                   <FaGithub className="w-5 h-5" />
                   <span>무료로 시작하기</span>
