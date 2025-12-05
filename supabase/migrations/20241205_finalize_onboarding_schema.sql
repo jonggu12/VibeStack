@@ -3,9 +3,11 @@
 -- Migration: 20241205_finalize_onboarding_schema.sql
 -- =====================================================
 
--- 1. First, recreate user_onboarding_status view WITHOUT stack_preset
---    (Must do this before dropping the column)
-CREATE OR REPLACE VIEW user_onboarding_status AS
+-- 1. First, DROP the existing view (required before dropping column)
+DROP VIEW IF EXISTS user_onboarding_status;
+
+-- 2. Now recreate the view WITHOUT stack_preset column
+CREATE VIEW user_onboarding_status AS
 SELECT
   u.id,
   u.clerk_user_id,
@@ -39,11 +41,18 @@ SELECT
   u.primary_pain_points
 FROM users u;
 
--- 2. Now safe to remove deprecated stack_preset column
+-- 3. Now safe to remove deprecated stack_preset column
 ALTER TABLE users
 DROP COLUMN IF EXISTS stack_preset;
 
--- 3. Add CHECK constraint for project_type (6 valid options)
+-- 4. Migrate existing project_type values to new schema
+--    Old values: 'web', 'app', 'backend' → Clear them (set to NULL)
+UPDATE users
+SET project_type = NULL
+WHERE project_type NOT IN ('ai_saas', 'dashboard', 'community', 'productivity', 'quiz', 'landing')
+  AND project_type IS NOT NULL;
+
+-- 5. Add CHECK constraint for project_type (6 valid options)
 DO $$
 BEGIN
     -- Drop existing constraint if any
@@ -60,7 +69,7 @@ BEGIN
     CHECK (project_type IN ('ai_saas', 'dashboard', 'community', 'productivity', 'quiz', 'landing'));
 END $$;
 
--- 4. Add CHECK constraint for primary_pain_points array values
+-- 6. Add CHECK constraint for primary_pain_points array values
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -79,7 +88,7 @@ BEGIN
     END IF;
 END $$;
 
--- 5. Update column comments with new values
+-- 7. Update column comments with new values
 COMMENT ON COLUMN users.project_type IS '프로젝트 타입: ai_saas(AI 기반 웹 서비스), dashboard(대시보드/데이터 앱), community(커뮤니티/소셜), productivity(생산성/자동화), quiz(퀴즈/테스트/게임), landing(랜딩 페이지)';
 
 COMMENT ON COLUMN users.experience_level IS '개발 경험 수준: vibe_coder(코딩 처음), beginner(1년 미만), intermediate(1~3년), advanced(3년 이상)';
@@ -98,7 +107,7 @@ COMMENT ON COLUMN users.inferred_stack IS 'Stack 기능 선택 (JSONB):
   "external_api": boolean    -- 외부 API 연동
 }';
 
--- 6. Grant permissions
+-- 8. Grant permissions
 GRANT SELECT ON user_onboarding_status TO authenticated;
 
 -- Migration complete

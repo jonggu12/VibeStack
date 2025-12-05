@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Rocket, Code, BookOpen, Globe, Smartphone, ArrowRight,
   Search, XIcon, Check, Copy,
   ShoppingBag, PenTool, Clock, CircleCheck,
-  Sparkles, Database, Book, Bot
+  Sparkles, Database, Book, Bot, Languages, Users
 } from 'lucide-react'
 import { FaGithub, FaGoogle, FaStripe, FaDiscord } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
@@ -18,6 +18,7 @@ export default function HomePage() {
   const { isSignedIn } = useUser()
   const [showUserHero, setShowUserHero] = useState(false)
   const [showToast, setShowToast] = useState(false)
+  const [currentSlide, setCurrentSlide] = useState(0)
 
   const handleSignIn = () => {
     router.push('/sign-in')
@@ -47,6 +48,15 @@ export default function HomePage() {
       return
     }
   }
+
+  // Slider auto-advance
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % 3) // 3 slides total
+    }, 4000) // 4 seconds per slide
+
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <>
@@ -211,27 +221,117 @@ export default function HomePage() {
 
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-16">
 
-          {/* VISITOR HERO (Marketing) */}
+          {/* VISITOR HERO (Marketing) - Slider */}
           {!showUserHero && (
-            <section className="text-center py-20 relative hero-gradient transition-all duration-500">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-6 animate-pulse-slow cursor-default">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
-                </span>
-                Vibe Coding: AI 시대의 새로운 표준
+            <section className="text-center py-20 relative hero-gradient transition-all duration-500 min-h-[550px] flex flex-col justify-center overflow-hidden">
+
+              {/* Slider Container */}
+              <div className="relative w-full max-w-5xl mx-auto h-[320px]">
+
+                {/* Slide 1: Main Value */}
+                <Link
+                  href="/snippets"
+                  className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 ease-in-out cursor-pointer group ${
+                    currentSlide === 0
+                      ? 'translate-x-0 opacity-100'
+                      : currentSlide > 0
+                        ? '-translate-x-full opacity-0'
+                        : 'translate-x-full opacity-0'
+                  }`}
+                >
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-6 animate-pulse-slow">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
+                    </span>
+                    Vibe Coding: AI 시대의 새로운 표준
+                  </div>
+                  <h1 className="text-4xl md:text-7xl font-bold mb-6 tracking-tight leading-tight group-hover:scale-105 transition-transform">
+                    <span className="text-white">복붙만 하세요.</span><br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient">
+                      나머지는 AI가 합니다.
+                    </span>
+                  </h1>
+                  <p className="text-zinc-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+                    코딩을 몰라도 괜찮습니다. VibeStack의 가이드를<br className="hidden sm:block" />
+                    Cursor에 붙여넣기만 하면 실제 작동하는 서비스가 완성됩니다.
+                  </p>
+                </Link>
+
+                {/* Slide 2: Glossary Feature */}
+                <Link
+                  href="/docs/glossary"
+                  className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 ease-in-out cursor-pointer group ${
+                    currentSlide === 1
+                      ? 'translate-x-0 opacity-100'
+                      : currentSlide > 1
+                        ? '-translate-x-full opacity-0'
+                        : 'translate-x-full opacity-0'
+                  }`}
+                >
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium mb-6">
+                    <Languages className="w-3 h-3" />
+                    <span>바이브 코더 필수템</span>
+                  </div>
+                  <h1 className="text-4xl md:text-7xl font-bold mb-6 tracking-tight leading-tight group-hover:scale-105 transition-transform">
+                    <span className="text-white">Cursor가 뭐래?</span><br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-400">
+                      API? 배포? 커밋?
+                    </span>
+                  </h1>
+                  <p className="text-zinc-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
+                    AI가 뱉는 개발 용어, 외계어 같나요?<br className="hidden sm:block" />
+                    <span className="text-emerald-300 font-semibold">450개 용어사전</span>이 초등학생도 이해할 수 있는 말로 통역해드립니다.
+                  </p>
+                </Link>
+
+                {/* Slide 3: Success Rate */}
+                <Link
+                  href="/tutorials"
+                  className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 ease-in-out cursor-pointer group ${
+                    currentSlide === 2
+                      ? 'translate-x-0 opacity-100'
+                      : currentSlide > 2
+                        ? '-translate-x-full opacity-0'
+                        : 'translate-x-full opacity-0'
+                  }`}
+                >
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium mb-6">
+                    <CircleCheck className="w-3 h-3" />
+                    <span>검증된 레시피</span>
+                  </div>
+                  <h1 className="text-4xl md:text-7xl font-bold mb-6 tracking-tight leading-tight group-hover:scale-105 transition-transform">
+                    <span className="text-white">성공률</span>{' '}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400">
+                      94%
+                    </span>
+                    <br />
+                    <span className="text-white">실패할 수가 없습니다</span>
+                  </h1>
+                  <p className="text-zinc-400 text-lg mb-6 max-w-xl mx-auto leading-relaxed">
+                    매 단계마다 프롬프트 제공. Cursor에 붙여넣기만 하면 끝.<br className="hidden sm:block" />
+                    <span className="text-blue-300 font-semibold">10,000명</span>이 완성한 검증된 프로젝트 튜토리얼.
+                  </p>
+                  {/* Trust Indicators */}
+                  <div className="flex flex-wrap items-center justify-center gap-6 text-sm mb-4">
+                    <div className="flex items-center gap-2 text-zinc-400">
+                      <Users className="w-4 h-4 text-blue-400" />
+                      <span><strong className="text-white">10,247명</strong> 완성</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-400">
+                      <Clock className="w-4 h-4 text-blue-400" />
+                      <span>평균 <strong className="text-white">1.5시간</strong></span>
+                    </div>
+                    <div className="flex items-center gap-2 text-zinc-400">
+                      <CircleCheck className="w-4 h-4 text-blue-400" />
+                      <span><strong className="text-blue-400">94%</strong> 성공률</span>
+                    </div>
+                  </div>
+                </Link>
               </div>
-              <h1 className="text-4xl md:text-7xl font-bold mb-6 tracking-tight leading-tight">
-                <span className="text-white">복붙만 하세요.</span><br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient">
-                  나머지는 AI가 합니다.
-                </span>
-              </h1>
-              <p className="text-zinc-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-                코딩을 몰라도 괜찮습니다. VibeStack의 가이드를<br className="hidden sm:block" />
-                Cursor에 붙여넣기만 하면 실제 작동하는 서비스가 완성됩니다.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+
+              {/* Static Buttons */}
+              <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
                 <button onClick={handleSignUp} className="w-full sm:w-auto px-8 py-3.5 bg-white text-black rounded-full font-bold hover:bg-zinc-200 transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2">
                   <FaGithub className="w-5 h-5" />
                   <span>무료로 시작하기</span>
@@ -239,6 +339,31 @@ export default function HomePage() {
                 <button className="w-full sm:w-auto px-8 py-3.5 bg-zinc-900 border border-zinc-700 text-zinc-300 rounded-full font-medium hover:bg-zinc-800 transition-colors">
                   작동 원리 보기
                 </button>
+              </div>
+
+              {/* Indicators */}
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2">
+                <button
+                  onClick={() => setCurrentSlide(0)}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    currentSlide === 0 ? 'w-8 bg-white' : 'w-2 bg-zinc-600 hover:bg-zinc-400'
+                  }`}
+                  aria-label="Go to slide 1"
+                />
+                <button
+                  onClick={() => setCurrentSlide(1)}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    currentSlide === 1 ? 'w-8 bg-white' : 'w-2 bg-zinc-600 hover:bg-zinc-400'
+                  }`}
+                  aria-label="Go to slide 2"
+                />
+                <button
+                  onClick={() => setCurrentSlide(2)}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    currentSlide === 2 ? 'w-8 bg-white' : 'w-2 bg-zinc-600 hover:bg-zinc-400'
+                  }`}
+                  aria-label="Go to slide 3"
+                />
               </div>
             </section>
           )}
