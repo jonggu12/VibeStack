@@ -3,19 +3,23 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ProjectTypeSelection, type ProjectType } from './project-type-selection'
+import { ExperienceLevelSelection, type ExperienceLevel } from './experience-level-selection'
 import { StackSelection, type StackPreferences } from './stack-selection'
+import { PainPointSelection, type PainPoint } from './pain-point-selection'
 import { StackPresetSelection, type StackPreset } from './stack-preset-selection'
 import { completeOnboarding, skipOnboarding } from '@/app/actions/onboarding'
 import { toast } from 'sonner'
 import { ArrowRight, Sparkles, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-type Step = 1 | 2 | 3
+type Step = 1 | 2 | 3 | 4 | 5
 
 const STEPS = {
   PROJECT_TYPE: 1 as const,
-  STACK_SELECTION: 2 as const,
-  STACK_PRESET: 3 as const,
+  EXPERIENCE_LEVEL: 2 as const,
+  STACK_SELECTION: 3 as const,
+  PAIN_POINTS: 4 as const,
+  STACK_PRESET: 5 as const,
 }
 
 export function OnboardingWizard() {
@@ -25,10 +29,12 @@ export function OnboardingWizard() {
 
   // User selections
   const [projectType, setProjectType] = useState<ProjectType>()
+  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>()
   const [stackPreferences, setStackPreferences] = useState<StackPreferences>({})
+  const [painPoints, setPainPoints] = useState<PainPoint[]>([])
   const [stackPreset, setStackPreset] = useState<StackPreset>()
 
-  const progress = (currentStep / 3) * 100
+  const progress = (currentStep / 5) * 100
 
   const handleStackToggle = (feature: keyof StackPreferences) => {
     setStackPreferences((prev) => ({
@@ -37,12 +43,26 @@ export function OnboardingWizard() {
     }))
   }
 
+  const handlePainPointToggle = (painPoint: PainPoint) => {
+    setPainPoints((prev) => {
+      if (prev.includes(painPoint)) {
+        return prev.filter((p) => p !== painPoint)
+      } else {
+        return [...prev, painPoint]
+      }
+    })
+  }
+
   const canProceed = () => {
     switch (currentStep) {
       case STEPS.PROJECT_TYPE:
         return !!projectType
+      case STEPS.EXPERIENCE_LEVEL:
+        return !!experienceLevel
       case STEPS.STACK_SELECTION:
         return Object.keys(stackPreferences).length > 0
+      case STEPS.PAIN_POINTS:
+        return painPoints.length > 0
       case STEPS.STACK_PRESET:
         return !!stackPreset
       default:
@@ -51,7 +71,7 @@ export function OnboardingWizard() {
   }
 
   const handleNext = () => {
-    if (currentStep < 3) {
+    if (currentStep < 5) {
       setCurrentStep((prev) => (prev + 1) as Step)
     }
   }
@@ -73,7 +93,7 @@ export function OnboardingWizard() {
   }
 
   const handleComplete = async () => {
-    if (!projectType || !stackPreset) {
+    if (!projectType || !experienceLevel || !stackPreset) {
       toast.error('필수 항목을 선택해주세요')
       return
     }
@@ -82,7 +102,9 @@ export function OnboardingWizard() {
 
     const result = await completeOnboarding({
       projectType,
+      experienceLevel,
       stackPreferences,
+      painPoints,
       stackPreset,
     })
 
@@ -141,10 +163,24 @@ export function OnboardingWizard() {
               />
             )}
 
+            {currentStep === STEPS.EXPERIENCE_LEVEL && (
+              <ExperienceLevelSelection
+                selected={experienceLevel}
+                onSelect={setExperienceLevel}
+              />
+            )}
+
             {currentStep === STEPS.STACK_SELECTION && (
               <StackSelection
                 selected={stackPreferences}
                 onToggle={handleStackToggle}
+              />
+            )}
+
+            {currentStep === STEPS.PAIN_POINTS && (
+              <PainPointSelection
+                selected={painPoints}
+                onToggle={handlePainPointToggle}
               />
             )}
 
@@ -169,7 +205,7 @@ export function OnboardingWizard() {
             </button>
           )}
 
-          {currentStep < 3 ? (
+          {currentStep < 5 ? (
             <button
               onClick={handleNext}
               disabled={!canProceed() || isSubmitting}

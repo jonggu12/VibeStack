@@ -64,7 +64,7 @@ export function ProjectTypeSelection({ selected, onSelect }: ProjectTypeSelectio
     <div>
       <div className="text-center mb-10">
         <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2 block">
-          Step 1 of 3
+          Step 1 of 5
         </span>
         <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
           어떤 서비스를 만드실 건가요?

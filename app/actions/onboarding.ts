@@ -6,12 +6,14 @@ import { revalidatePath } from 'next/cache'
 
 export interface OnboardingData {
   projectType: 'saas' | 'landing' | 'blog'
+  experienceLevel: 'vibe_coder' | 'beginner' | 'intermediate' | 'advanced'
   stackPreferences: {
     auth?: boolean
     database?: boolean
     payments?: boolean
     [key: string]: boolean | undefined
   }
+  painPoints: string[]
   stackPreset: 'saas-kit' | 'ecommerce' | 'custom'
 }
 
@@ -45,8 +47,10 @@ export async function completeOnboarding(data: OnboardingData) {
       .update({
         onboarding_completed: true,
         project_type: data.projectType,
+        experience_level: data.experienceLevel,
         stack_preset: data.stackPreset,
         inferred_stack: data.stackPreferences,
+        primary_pain_points: data.painPoints,
         updated_at: new Date().toISOString(),
       })
       .eq('id', dbUser.id)
@@ -129,7 +133,7 @@ export async function getOnboardingStatus() {
 
     const { data, error } = await supabase
       .from('users')
-      .select('onboarding_completed, onboarding_dismissed_at, project_type, stack_preset, inferred_stack')
+      .select('onboarding_completed, onboarding_dismissed_at, project_type, experience_level, stack_preset, inferred_stack, primary_pain_points')
       .eq('clerk_user_id', user.id)
       .single()
 
@@ -146,8 +150,10 @@ export async function getOnboardingStatus() {
       completed: data.onboarding_completed || false,
       dismissed: dismissedRecently,
       projectType: data.project_type,
+      experienceLevel: data.experience_level,
       stackPreset: data.stack_preset,
       stackPreferences: data.inferred_stack,
+      painPoints: data.primary_pain_points,
     }
   } catch (error) {
     console.error('Error in getOnboardingStatus:', error)

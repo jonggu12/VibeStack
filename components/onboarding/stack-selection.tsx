@@ -52,7 +52,7 @@ export function StackSelection({ selected, onToggle }: StackSelectionProps) {
     <div>
       <div className="text-center mb-10">
         <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2 block">
-          Step 2 of 3
+          Step 3 of 5
         </span>
         <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
           어떤 기능이 필요한가요?

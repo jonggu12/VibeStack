@@ -50,7 +50,7 @@ export function StackPresetSelection({
     <div>
       <div className="text-center mb-10">
         <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2 block">
-          Step 3 of 3
+          Step 5 of 5
         </span>
         <h1 className="text-3xl md:text-4xl font-bold mb-3 text-white">
           시작 템플릿을 선택하세요
