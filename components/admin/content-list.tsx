@@ -8,7 +8,7 @@ type Content = {
   id: string
   title: string
   slug: string
-  type: 'doc' | 'tutorial' | 'snippet' | 'bundle'
+  type: 'doc' | 'tutorial' | 'snippet' | 'bundle' | 'glossary'
   status: 'draft' | 'published' | 'archived'
   views?: number
   updated_at?: string
@@ -23,6 +23,7 @@ const typeColors = {
   doc: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   tutorial: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
   bundle: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  glossary: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
 }
 
 const statusColors = {
@@ -83,6 +84,7 @@ export function ContentList({ contents }: ContentListProps) {
             <option value="doc">Doc</option>
             <option value="tutorial">Tutorial</option>
             <option value="bundle">Bundle</option>
+            <option value="glossary">Glossary</option>
           </select>
 
           {/* Filter: Status */}
@@ -154,6 +156,8 @@ export function ContentList({ contents }: ContentListProps) {
                       return `/snippets/${content.slug}`
                     case 'bundle':
                       return `/bundles/${content.slug}`
+                    case 'glossary':
+                      return `/docs/glossary/${content.slug}`
                     default:
                       return null
                   }

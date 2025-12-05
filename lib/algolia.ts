@@ -26,7 +26,7 @@ export const ALGOLIA_INDICES = {
 // Content Record Type (Algolia에 저장될 형태)
 export interface AlgoliaContentRecord {
     objectID: string
-    type: 'doc' | 'tutorial' | 'snippet'
+    type: 'doc' | 'tutorial' | 'snippet' | 'bundle' | 'glossary'
     title: string
     description: string
     slug: string
@@ -47,7 +47,7 @@ export interface AlgoliaContentRecord {
 export interface SearchOptions {
     query: string
     filters?: {
-        type?: 'doc' | 'tutorial' | 'snippet'
+        type?: 'doc' | 'tutorial' | 'snippet' | 'bundle' | 'glossary'
         difficulty?: 'beginner' | 'intermediate' | 'advanced'
         isPremium?: boolean
         tags?: string[]

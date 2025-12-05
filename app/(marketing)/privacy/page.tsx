@@ -8,26 +8,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-950">
-      {/* Header */}
-      <header className="border-b border-zinc-800 h-16 bg-zinc-950/80 backdrop-blur sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-bold text-lg">
-              V
-            </div>
-            <span className="font-bold text-lg tracking-tight">VibeStack</span>
-          </Link>
-          <Link
-            href="/"
-            className="text-sm text-zinc-400 hover:text-white transition-colors"
-          >
-            홈으로 돌아가기
-          </Link>
-        </div>
-      </header>
-
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-12">
+    <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-12">
         <div className="flex flex-col lg:flex-row gap-12">
           {/* Sidebar Nav */}
           <aside className="w-full lg:w-64 shrink-0 lg:sticky lg:top-24 h-fit">
@@ -151,11 +132,6 @@ export default function PrivacyPage() {
             </div>
           </article>
         </div>
-      </main>
-
-      <footer className="border-t border-zinc-800 py-8 text-center text-sm text-zinc-600 bg-zinc-950">
-        &copy; 2024 VibeStack Inc. All rights reserved.
-      </footer>
-    </div>
+    </main>
   )
 }

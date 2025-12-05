@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams
 
     const query = searchParams.get('q') || ''
-    const type = searchParams.get('type') as 'doc' | 'tutorial' | 'snippet' | undefined
+    const type = searchParams.get('type') as 'doc' | 'tutorial' | 'snippet' | 'bundle' | 'glossary' | undefined
     const difficulty = searchParams.get('difficulty') as 'beginner' | 'intermediate' | 'advanced' | undefined
     const isPremiumParam = searchParams.get('isPremium')
     const tags = searchParams.get('tags')?.split(',').filter(Boolean)

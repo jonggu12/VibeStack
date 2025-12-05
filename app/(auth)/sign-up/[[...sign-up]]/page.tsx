@@ -7,7 +7,7 @@ export default function SignUpPage() {
     return (
         <div className="w-full max-w-sm animate-fade-in">
             <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-white mb-2">VibeStack 시작하기 🚀</h1>
+                <h1 className="text-2xl font-bold text-white mb-2">VibeStack 시작하기</h1>
                 <p className="text-sm text-zinc-400">무료로 가입하고 프로젝트를 시작하세요.</p>
             </div>
 

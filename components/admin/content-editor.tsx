@@ -11,7 +11,7 @@ interface ContentEditorProps {
   initialContent?: DBContent
 }
 
-type ContentType = 'doc' | 'tutorial' | 'snippet' | 'bundle'
+type ContentType = 'doc' | 'tutorial' | 'snippet' | 'bundle' | 'glossary'
 type ContentStatus = 'draft' | 'published' | 'archived'
 type Difficulty = 'beginner' | 'intermediate' | 'advanced'
 
@@ -245,6 +245,7 @@ export function ContentEditor({ initialContent }: ContentEditorProps) {
                 <option value="doc">Doc</option>
                 <option value="tutorial">Tutorial</option>
                 <option value="bundle">Bundle</option>
+                <option value="glossary">Glossary (용어사전)</option>
               </select>
             </div>
 

@@ -1,5 +1,5 @@
 // Content types
-export type ContentType = 'doc' | 'tutorial' | 'snippet' | 'bundle'
+export type ContentType = 'doc' | 'tutorial' | 'snippet' | 'bundle' | 'glossary'
 export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced'
 export type ContentStatus = 'draft' | 'published' | 'archived'
 

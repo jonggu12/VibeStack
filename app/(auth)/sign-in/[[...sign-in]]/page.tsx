@@ -7,7 +7,7 @@ export default function SignInPage() {
     return (
         <div className="w-full max-w-sm animate-fade-in">
             <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-white mb-2">다시 오신 것을 환영해요 👋</h1>
+                <h1 className="text-2xl font-bold text-white mb-2">다시 오신 것을 환영해요</h1>
                 <p className="text-sm text-zinc-400">계속하려면 로그인이 필요합니다.</p>
             </div>
 

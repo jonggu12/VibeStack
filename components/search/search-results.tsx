@@ -18,6 +18,8 @@ const contentTypeConfig = {
     doc: { icon: FileText, label: '문서', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
     tutorial: { icon: BookOpen, label: '튜토리얼', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
     snippet: { icon: Code2, label: '스니펫', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+    bundle: { icon: BookOpen, label: '번들', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' },
+    glossary: { icon: FileText, label: '용어사전', color: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200' },
 }
 
 const difficultyConfig = {
@@ -41,6 +43,10 @@ function getContentUrl(content: AlgoliaContentRecord): string {
             return `/tutorials/${content.slug}`
         case 'snippet':
             return `/snippets/${content.slug}`
+        case 'bundle':
+            return `/bundles/${content.slug}`
+        case 'glossary':
+            return `/docs/glossary/${content.slug}`
         default:
             return `/${content.type}/${content.slug}`
     }
