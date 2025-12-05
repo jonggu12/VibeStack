@@ -44,14 +44,7 @@ export default function TutorialsPage() {
               <span className="font-bold text-lg tracking-tight hidden sm:block">VibeStack</span>
             </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-              <Link href="/tutorials" className="text-white border-b-2 border-indigo-500 h-16 flex items-center">프로젝트</Link>
-              <Link href="/docs" className="text-zinc-400 hover:text-white transition-colors">문서</Link>
-              <Link href="/snippets" className="text-zinc-400 hover:text-white transition-colors">스니펫</Link>
-            </nav>
-
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 ml-auto">
               {isSignedIn ? (
                 <UserMenu />
               ) : (
