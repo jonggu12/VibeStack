@@ -100,21 +100,6 @@ export default function HomePage() {
               <span className="font-bold text-lg tracking-tight hidden sm:block">VibeStack</span>
             </Link>
 
-            {/* Search Bar (Central) */}
-            <div className="hidden md:flex flex-1 max-w-xl relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
-              </div>
-              <input
-                type="text"
-                className="block w-full pl-10 pr-12 py-2 bg-zinc-900/50 border border-zinc-700 rounded-full text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-zinc-900 transition-all text-white"
-                placeholder="무엇을 도와드릴까요? (예: '로그인 구현', '에러 해결')"
-              />
-              <div className="absolute inset-y-0 right-2 flex items-center gap-1">
-                <span className="text-[10px] text-zinc-500 bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5">⌘K</span>
-              </div>
-            </div>
-
             {/* Right Actions */}
             <div className="flex items-center gap-3">
               {isSignedIn ? (
@@ -330,8 +315,25 @@ export default function HomePage() {
                 </Link>
               </div>
 
+              {/* Search Bar */}
+              <div className="relative z-10 max-w-2xl mx-auto mt-8 px-4">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Search className="w-5 h-5 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
+                  </div>
+                  <input
+                    type="text"
+                    className="block w-full pl-12 pr-16 py-4 bg-zinc-900/70 border border-zinc-700 rounded-2xl text-base placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:bg-zinc-900 transition-all text-white shadow-xl"
+                    placeholder="무엇을 도와드릴까요? (예: '로그인 구현', '에러 해결')"
+                  />
+                  <div className="absolute inset-y-0 right-3 flex items-center gap-1">
+                    <span className="text-xs text-zinc-500 bg-zinc-800 border border-zinc-700 rounded px-2 py-1">⌘K</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Static Buttons */}
-              <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+              <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
                 <button onClick={handleSignUp} className="w-full sm:w-auto px-8 py-3.5 bg-white text-black rounded-full font-bold hover:bg-zinc-200 transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2">
                   <FaGithub className="w-5 h-5" />
                   <span>무료로 시작하기</span>
@@ -418,8 +420,8 @@ export default function HomePage() {
           <section>
             <div className="flex items-end justify-between mb-6 border-b border-zinc-800 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-white mb-1">🔥 코딩 몰라도 1시간 컷!</h3>
-                <p className="text-zinc-500 text-sm">Cursor에 복붙만 하면 완성되는 검증된 레시피</p>
+                <h3 className="text-xl font-bold text-white mb-1">1시간에 끝내는 실전 프로젝트</h3>
+                <p className="text-zinc-500 text-sm">AI에 붙여넣기만 하면 되는 실패 없는 튜토리얼</p>
               </div>
               <Link href="/tutorials" className="hidden sm:flex items-center text-sm font-medium text-zinc-400 hover:text-indigo-400 transition-colors group">
                 전체 프로젝트 <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -500,13 +502,12 @@ export default function HomePage() {
             <div className="flex items-end justify-between mb-6 border-b border-zinc-800 pb-4">
               <div>
                 <h3 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
-                  🚑 바이브 코더 생존 키트
-                  <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded-full border border-red-500/20 animate-pulse">SOS</span>
+                  바이브 코딩 솔루션 키트
                 </h3>
-                <p className="text-zinc-500 text-sm">에러가 났거나 AI가 말을 안 들을 때 꺼내보세요.</p>
+                <p className="text-zinc-500 text-sm">예상치 못한 에러와 부정확한 AI 답변을 즉시 해결하는 솔루션</p>
               </div>
               <Link href="/docs" className="hidden sm:flex items-center text-sm font-medium text-zinc-400 hover:text-indigo-400 transition-colors group">
-                문서 보관소 <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                전체 문서 보기 <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
 
@@ -588,8 +589,8 @@ export default function HomePage() {
           <section>
             <div className="flex items-end justify-between mb-6 border-b border-zinc-800 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-white mb-1">🔧 5초 만에 적용하는 필수 기능</h3>
-                <p className="text-zinc-500 text-sm">이해할 필요 없습니다. 복사해서 프롬프트에 붙여넣으세요.</p>
+                <h3 className="text-xl font-bold text-white mb-1">핵심 기능 스니펫</h3>
+                <p className="text-zinc-500 text-sm">복잡한 코드 분석 없이, 프롬프트 입력만으로 기능을 구현하세요.</p>
               </div>
               <Link href="/snippets" className="hidden sm:flex items-center text-sm font-medium text-zinc-400 hover:text-indigo-400 transition-colors group">
                 모든 스니펫 보기 <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />

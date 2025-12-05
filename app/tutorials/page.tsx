@@ -61,22 +61,6 @@ export default function TutorialsPage() {
           </div>
         </header>
 
-        {/* SEARCH SECTION */}
-        <section className="w-full bg-zinc-950 border-b border-zinc-800 py-6">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="max-w-2xl mx-auto relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
-              </div>
-              <input
-                type="text"
-                className="block w-full pl-12 pr-4 py-3 bg-zinc-900 border border-zinc-700 rounded-full text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-white transition-all"
-                placeholder="프로젝트 검색 (예: 쇼핑몰, 챗봇, 블로그...)"
-              />
-            </div>
-          </div>
-        </section>
-
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-12">
           {/* HERO SECTION */}
           <section className="text-center py-10 relative">
@@ -87,10 +71,24 @@ export default function TutorialsPage() {
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
               <span className="text-white">무엇을 만들고 싶으신가요?</span>
             </h1>
-            <p className="text-zinc-400 max-w-2xl mx-auto">
+            <p className="text-zinc-400 max-w-2xl mx-auto mb-8">
               이론 공부는 그만하세요. 만들고 싶은 결과물을 선택하고,<br className="hidden sm:block" />
               AI에게 프롬프트를 던져서 <strong>오늘 안에 완성</strong>하세요.
             </p>
+
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto px-4">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="w-5 h-5 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-12 pr-4 py-4 bg-zinc-900 border border-zinc-700 rounded-2xl text-base placeholder-zinc-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 text-white transition-all shadow-lg"
+                  placeholder="프로젝트 검색 (예: 쇼핑몰, 챗봇, 블로그...)"
+                />
+              </div>
+            </div>
           </section>
 
           {/* CONTINUE LEARNING */}
