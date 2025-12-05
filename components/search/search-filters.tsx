@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { FileText, BookOpen, Code2, X } from 'lucide-react'
 
 export interface SearchFiltersState {
-    type?: 'doc' | 'tutorial' | 'snippet'
+    type?: 'doc' | 'tutorial' | 'snippet' | 'bundle' | 'glossary'
     difficulty?: 'beginner' | 'intermediate' | 'advanced'
     isPremium?: boolean
     tags?: string[]
