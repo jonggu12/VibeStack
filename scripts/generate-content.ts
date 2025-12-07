@@ -113,7 +113,7 @@ async function generateAndSaveContent(options: GenerateOptions) {
       content: generatedContent,
       slug,
       stack: stackJson,
-      tags,
+      // tags, // TODO: Add tags column to Supabase table
       difficulty,
       estimated_time_mins: estimatedTime,
       is_premium: isPremium,
