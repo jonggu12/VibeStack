@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getContentBySlug } from '@/app/actions/content'
+import { getContentBySlug, getContents } from '@/app/actions/content'
 import { compileMDXContent, extractTOC, calculateReadingTime } from '@/lib/mdx'
 import { Search, ChevronRight, Users, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { ViewTracker } from '@/components/content/view-tracker'
@@ -15,33 +15,22 @@ interface DocPageProps {
   params: Promise<{ slug: string }>
 }
 
-// 문서 카테고리 정의 (실제로는 DB에서 가져올 수 있음)
-const docCategories = [
-  {
-    title: '시작하기 (Start)',
-    items: [
-      { title: 'Cursor 설치 및 설정', slug: 'cursor-setup' },
-      { title: '첫 프롬프트 작성법', slug: 'first-prompt' },
-      { title: 'Github 연동하기', slug: 'github-integration' },
-    ],
-  },
-  {
-    title: '에러 해결 (Troubleshoot)',
-    items: [
-      { title: 'Module not found 해결', slug: 'module-not-found' },
-      { title: 'Environment Variable 설정', slug: 'env-variables' },
-      { title: 'Hydration Failed 에러', slug: 'hydration-error' },
-      { title: '배포 후 404 에러', slug: 'deployment-404' },
-    ],
-  },
-  {
-    title: '개념 사전 (Dictionary)',
-    items: [
-      { title: 'localhost가 뭐예요?', slug: 'what-is-localhost' },
-      { title: 'API, JSON이 뭔가요?', slug: 'what-is-api-json' },
-    ],
-  },
-]
+// Tags 기반 카테고리 결정 헬퍼
+function getCategoryFromTags(tags: string[]): string {
+  if (tags.some(t => ['cursor', 'nextjs', 'react', 'getting-started', 'start'].includes(t))) return 'getting-started'
+  if (tags.some(t => ['error', 'troubleshooting', 'debug', 'fix'].includes(t))) return 'error-solving'
+  if (tags.some(t => ['concept', 'glossary', 'dictionary', 'basic'].includes(t))) return 'concept'
+  if (tags.some(t => ['clerk', 'supabase', 'stripe', 'database', 'development'].includes(t))) return 'development'
+  return 'development'
+}
+
+// 카테고리 이름 매핑
+const categoryNames: Record<string, string> = {
+  'getting-started': '시작하기 (Start)',
+  'error-solving': '에러 해결 (Troubleshoot)',
+  'concept': '개념 사전 (Dictionary)',
+  'development': '개발 가이드 (Development)',
+}
 
 export default async function DocsDetailPage({ params }: DocPageProps) {
   const { slug } = await params
@@ -52,6 +41,33 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
   if (!content) {
     notFound()
   }
+
+  // DB에서 모든 doc 타입의 published 콘텐츠 가져오기
+  const allDocs = await getContents({ type: 'doc', status: 'published', limit: 100 })
+
+  // 카테고리별로 그룹핑
+  const docsByCategory: Record<string, Array<{ title: string; slug: string }>> = {}
+
+  allDocs.forEach((doc: any) => {
+    const tags = doc.tags || []
+    const category = getCategoryFromTags(tags)
+
+    if (!docsByCategory[category]) {
+      docsByCategory[category] = []
+    }
+
+    docsByCategory[category].push({
+      title: doc.title,
+      slug: doc.slug,
+    })
+  })
+
+  // 카테고리 배열로 변환
+  const docCategories = Object.entries(docsByCategory).map(([categoryId, items]) => ({
+    title: categoryNames[categoryId] || categoryId,
+    categoryId,
+    items,
+  }))
 
   // MDX 콘텐츠가 없으면 기본 메시지
   if (!content.content) {
@@ -74,11 +90,10 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
   // 읽기 시간
   const readingTime = content.estimated_time_mins || calculateReadingTime(content.content)
 
-  // 카테고리 찾기 (현재 문서가 속한 카테고리)
-  const currentCategory = docCategories.find((cat) =>
-    cat.items.some((item) => item.slug === slug)
-  )
-  const categoryName = currentCategory?.title.split(' ')[0] || '문서'
+  // 현재 문서의 카테고리 찾기
+  const contentTags = (content as any).tags || []
+  const currentCategoryId = getCategoryFromTags(contentTags)
+  const categoryName = categoryNames[currentCategoryId]?.split(' ')[0] || '문서'
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col font-sans text-zinc-100 selection:bg-indigo-500/30">

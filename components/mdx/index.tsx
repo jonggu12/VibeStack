@@ -29,6 +29,67 @@ import { Feedback } from './feedback'
 import { PromptCopy } from '../tutorial/prompt-copy'
 import { Checklist } from '../tutorial/checklist'
 
+// React Icons - AI 생성 콘텐츠에서 사용
+import {
+  AiOutlineInfoCircle,
+  AiOutlineCode,
+  AiOutlineCheckCircle,
+  AiOutlineWarning,
+  AiOutlineBulb,
+  AiOutlineFileText,
+  AiOutlineApi,
+  AiOutlineTool,
+  AiOutlineRocket,
+  AiOutlineThunderbolt,
+  AiOutlineDatabase,
+  AiOutlineSetting,
+  AiOutlineExperiment,
+  AiOutlineCloudUpload,
+  AiOutlineSafety,
+  AiOutlineKey,
+} from 'react-icons/ai'
+
+import {
+  FaReact,
+  FaNode,
+  FaDatabase,
+  FaCode,
+  FaTerminal,
+  FaGithub,
+  FaDocker,
+  FaCog,
+  FaLock,
+  FaKey,
+  FaPlug,
+  FaBolt,
+  FaRocket,
+  FaBook,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaExclamationTriangle,
+} from 'react-icons/fa'
+
+import {
+  MdError,
+  MdWarning,
+  MdInfo,
+  MdCheckCircle,
+  MdSettings,
+  MdCode,
+  MdBuild,
+  MdCloud,
+  MdSecurity,
+  MdSpeed,
+} from 'react-icons/md'
+
+import {
+  HiOutlineInformationCircle,
+  HiOutlineExclamation,
+  HiOutlineLightBulb,
+  HiOutlineCode,
+  HiOutlineCheck,
+} from 'react-icons/hi'
+
 // children에서 텍스트 추출하여 slug 생성
 function getTextFromChildren(children: React.ReactNode): string {
     if (typeof children === 'string') return children
@@ -168,4 +229,53 @@ export const mdxComponents = {
     // Tutorial 컴포넌트들
     PromptCopy,
     Checklist,
+    // React Icons (AI 생성 콘텐츠용)
+    AiOutlineInfoCircle,
+    AiOutlineCode,
+    AiOutlineCheckCircle,
+    AiOutlineWarning,
+    AiOutlineBulb,
+    AiOutlineFileText,
+    AiOutlineApi,
+    AiOutlineTool,
+    AiOutlineRocket,
+    AiOutlineThunderbolt,
+    AiOutlineDatabase,
+    AiOutlineSetting,
+    AiOutlineExperiment,
+    AiOutlineCloudUpload,
+    AiOutlineSafety,
+    AiOutlineKey,
+    FaReact,
+    FaNode,
+    FaDatabase,
+    FaCode,
+    FaTerminal,
+    FaGithub,
+    FaDocker,
+    FaCog,
+    FaLock,
+    FaKey,
+    FaPlug,
+    FaBolt,
+    FaRocket,
+    FaBook,
+    FaCheckCircle,
+    FaTimesCircle,
+    FaExclamationTriangle,
+    MdError,
+    MdWarning,
+    MdInfo,
+    MdCheckCircle,
+    MdSettings,
+    MdCode,
+    MdBuild,
+    MdCloud,
+    MdSecurity,
+    MdSpeed,
+    HiOutlineInformationCircle,
+    HiOutlineExclamation,
+    HiOutlineLightBulb,
+    HiOutlineCode,
+    HiOutlineCheck,
 }
