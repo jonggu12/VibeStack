@@ -33,7 +33,10 @@ const categoryNames: Record<string, string> = {
 }
 
 export default async function DocsDetailPage({ params }: DocPageProps) {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+
+  // URL 디코딩 (한글 slug 처리)
+  const slug = decodeURIComponent(rawSlug)
 
   // DB에서 콘텐츠 조회
   const content = await getContentBySlug(slug, 'doc')
@@ -278,7 +281,8 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
 
 // Metadata
 export async function generateMetadata({ params }: DocPageProps) {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+  const slug = decodeURIComponent(rawSlug)
   const content = await getContentBySlug(slug, 'doc')
 
   if (!content) {

@@ -32,7 +32,10 @@ const mockTechStack = [
 ]
 
 export default async function TutorialDetailPage({ params }: TutorialPageProps) {
-  const { slug } = await params
+  const { slug: rawSlug } = await params
+
+  // URL 디코딩 (한글 slug 처리)
+  const slug = decodeURIComponent(rawSlug)
 
   // DB에서 콘텐츠 조회
   const content = await getContentBySlug(slug, 'tutorial')
