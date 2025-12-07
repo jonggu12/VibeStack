@@ -12,9 +12,22 @@ export interface ExtractedMetadata {
   description: string
 }
 
+export interface GlossaryMetadata {
+  category: string
+  relatedTerms: string[]
+  synonyms: string[]
+  analogy: string
+}
+
 export function extractMetadata(content: string): ExtractedMetadata {
+  // OpenAI가 코드 블록으로 감싸서 반환하는 경우 제거
+  let cleanContent = content.trim()
+  if (cleanContent.startsWith('```mdx') || cleanContent.startsWith('```')) {
+    cleanContent = cleanContent.replace(/^```(mdx)?\n/, '').replace(/\n```$/, '')
+  }
+
   // Frontmatter에서 메타데이터 추출
-  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/)
+  const frontmatterMatch = cleanContent.match(/^---\n([\s\S]*?)\n---/)
 
   if (frontmatterMatch) {
     const frontmatter = frontmatterMatch[1]
@@ -30,11 +43,11 @@ export function extractMetadata(content: string): ExtractedMetadata {
   }
 
   // Frontmatter가 없으면 본문에서 추출
-  const titleMatch = content.match(/^#\s+(.+)$/m)
+  const titleMatch = cleanContent.match(/^#\s+(.+)$/m)
   const title = titleMatch ? titleMatch[1] : '제목 없음'
 
   // 첫 번째 단락을 설명으로 사용
-  const paragraphs = content
+  const paragraphs = cleanContent
     .split('\n\n')
     .filter(p => !p.startsWith('#') && !p.startsWith('```') && p.trim().length > 0)
 
@@ -113,4 +126,62 @@ export function stackToJson(stack: string[]): Record<string, string> {
   })
 
   return stackMap
+}
+
+export function extractGlossaryMetadata(content: string): GlossaryMetadata {
+  // OpenAI가 코드 블록으로 감싸서 반환하는 경우 제거
+  let cleanContent = content.trim()
+  if (cleanContent.startsWith('```mdx') || cleanContent.startsWith('```')) {
+    cleanContent = cleanContent.replace(/^```(mdx)?\n/, '').replace(/\n```$/, '')
+  }
+
+  // Frontmatter에서 용어사전 전용 메타데이터 추출
+  const frontmatterMatch = cleanContent.match(/^---\n([\s\S]*?)\n---/)
+
+  if (frontmatterMatch) {
+    const frontmatter = frontmatterMatch[1]
+
+    // term_category 추출
+    const categoryMatch = frontmatter.match(/term_category:\s*["'](.+?)["']/)
+    const category = categoryMatch ? categoryMatch[1] : '개념'
+
+    // related_terms 추출 (배열)
+    const relatedMatch = frontmatter.match(/related_terms:\s*\[([\s\S]*?)\]/)
+    let relatedTerms: string[] = []
+    if (relatedMatch) {
+      relatedTerms = relatedMatch[1]
+        .split(',')
+        .map(term => term.trim().replace(/["']/g, ''))
+        .filter(Boolean)
+    }
+
+    // synonyms 추출 (배열)
+    const synonymsMatch = frontmatter.match(/synonyms:\s*\[([\s\S]*?)\]/)
+    let synonyms: string[] = []
+    if (synonymsMatch) {
+      synonyms = synonymsMatch[1]
+        .split(',')
+        .map(term => term.trim().replace(/["']/g, ''))
+        .filter(Boolean)
+    }
+
+    // analogy 추출
+    const analogyMatch = frontmatter.match(/analogy:\s*["'](.+?)["']/s)
+    const analogy = analogyMatch ? analogyMatch[1] : ''
+
+    return {
+      category,
+      relatedTerms,
+      synonyms,
+      analogy,
+    }
+  }
+
+  // Frontmatter가 없으면 기본값
+  return {
+    category: '개념',
+    relatedTerms: [],
+    synonyms: [],
+    analogy: '',
+  }
 }

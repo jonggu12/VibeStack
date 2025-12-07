@@ -4,7 +4,14 @@ import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
 import { generateContent } from './utils/openai-client'
 import { backupToFile, ContentType } from './utils/backup'
-import { slugify, extractMetadata, extractTags, stackToJson } from './utils/content-parser'
+import {
+  slugify,
+  extractMetadata,
+  extractTags,
+  stackToJson,
+  extractGlossaryMetadata,
+  GlossaryMetadata,
+} from './utils/content-parser'
 import {
   buildTutorialPrompt,
   TutorialPromptOptions,
@@ -93,6 +100,12 @@ async function generateAndSaveContent(options: GenerateOptions) {
   const tags = extractTags(generatedContent, stack)
   const stackJson = stackToJson(stack)
 
+  // 용어사전 전용 메타데이터 추출
+  let glossaryMeta: GlossaryMetadata | null = null
+  if (type === 'glossary') {
+    glossaryMeta = extractGlossaryMetadata(generatedContent)
+  }
+
   console.log(`\n📋 Metadata:`)
   console.log(`  Title: ${metadata.title}`)
   console.log(`  Slug: ${slug}`)
@@ -119,6 +132,21 @@ async function generateAndSaveContent(options: GenerateOptions) {
       is_premium: isPremium,
       status: 'draft', // 검수 후 published로 변경
       published_at: null,
+      // 추가된 필수 필드들
+      price_cents: isPremium ? 1200 : 0,
+      author_id: null,
+      views: 0,
+      completions: 0,
+      avg_rating: 0,
+      meta_title: metadata.title,
+      meta_description: metadata.description,
+      // 용어사전 전용 필드 (조건부)
+      ...(glossaryMeta && {
+        term_category: glossaryMeta.category,
+        related_terms: glossaryMeta.relatedTerms,
+        synonyms: glossaryMeta.synonyms,
+        analogy: glossaryMeta.analogy,
+      }),
     })
     .select()
     .single()

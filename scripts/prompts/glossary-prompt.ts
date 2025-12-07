@@ -23,6 +23,10 @@ export function buildGlossaryPrompt(options: GlossaryPromptOptions): string {
 ---
 title: "${term}"
 description: "${term}에 대한 간단한 한 줄 정의"
+term_category: "개념|도구|패턴|기술|프레임워크"
+related_terms: ["관련용어1", "관련용어2", "관련용어3"]
+synonyms: ["동의어1", "동의어2"]
+analogy: "쉬운 비유 설명 (일상적인 예시로)"
 ---
 
 # ${term}
@@ -95,6 +99,26 @@ ${term}는 다음과 같은 상황에서 사용됩니다:
 4. **비유 활용**: 어려운 개념은 일상적인 비유로 설명하세요
 5. **관련 용어**: 관련된 다른 용어와의 연결고리를 제공하세요
 6. **한국어**: 모든 내용은 한국어로 작성하세요
+
+# Frontmatter 필드 설명
+
+**중요**: Frontmatter에 다음 필드를 **반드시** 포함하세요:
+
+- **term_category**: "${term}"이 속하는 카테고리를 정확히 분류하세요
+  - "개념": 추상적인 아이디어나 원리 (예: Hydration, Reconciliation)
+  - "도구": 실제 사용하는 라이브러리나 도구 (예: ESLint, Prettier)
+  - "패턴": 코딩 패턴이나 설계 방법 (예: HOC, Render Props)
+  - "기술": 구체적인 기술이나 메커니즘 (예: SSR, CSR)
+  - "프레임워크": 프레임워크 관련 (예: Next.js App Router)
+
+- **related_terms**: 이 용어와 함께 알면 좋은 용어 3-5개 (배열 형태)
+  예: ["Server Components", "Client Components", "Streaming"]
+
+- **synonyms**: 같은 의미의 다른 표현 1-3개 (없으면 빈 배열)
+  예: ["서버 사이드 렌더링", "SSR"]
+
+- **analogy**: 일상 생활의 비유로 쉽게 설명 (한 문장)
+  예: "레스토랑에서 주방(서버)이 완성된 요리(HTML)를 테이블(클라이언트)에 가져다주는 것"
 
 이제 위 형식에 맞춰 완전한 용어사전 항목을 작성해주세요.
 `
