@@ -29,7 +29,7 @@ export function CodeBlock({
     const lines = children.split('\n')
 
     return (
-        <div className="my-6 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
+        <div className="my-6 rounded-xl overflow-hidden border border-zinc-800 bg-gray-900">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900 border-b border-zinc-800">
                 <div className="flex items-center gap-3">

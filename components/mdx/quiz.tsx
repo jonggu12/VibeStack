@@ -36,11 +36,11 @@ export function Quiz({ question, options, explanation }: QuizProps) {
     const isCorrect = selectedIndex !== null && options[selectedIndex]?.correct
 
     return (
-        <div className="my-6 p-6 bg-gray-50 rounded-lg border">
+        <div className="my-6 p-6 bg-zinc-900/50 rounded-lg border border-zinc-800">
             {/* 질문 */}
             <div className="flex items-start gap-3 mb-4">
-                <HelpCircle className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
-                <h3 className="font-semibold text-gray-900">{question}</h3>
+                <HelpCircle className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
+                <h3 className="font-semibold text-white">{question}</h3>
             </div>
 
             {/* 옵션들 */}
@@ -49,28 +49,28 @@ export function Quiz({ question, options, explanation }: QuizProps) {
                     const isSelected = selectedIndex === index
                     const isOptionCorrect = option.correct
 
-                    let bgColor = 'bg-white hover:bg-gray-100'
-                    let borderColor = 'border-gray-200'
-                    let textColor = 'text-gray-700'
+                    let bgColor = 'bg-zinc-800 hover:bg-zinc-700'
+                    let borderColor = 'border-zinc-700'
+                    let textColor = 'text-zinc-300'
 
                     if (showResult && isSelected) {
                         if (isOptionCorrect) {
-                            bgColor = 'bg-green-50'
-                            borderColor = 'border-green-500'
-                            textColor = 'text-green-700'
+                            bgColor = 'bg-green-500/10'
+                            borderColor = 'border-green-500/30'
+                            textColor = 'text-green-400'
                         } else {
-                            bgColor = 'bg-red-50'
-                            borderColor = 'border-red-500'
-                            textColor = 'text-red-700'
+                            bgColor = 'bg-red-500/10'
+                            borderColor = 'border-red-500/30'
+                            textColor = 'text-red-400'
                         }
                     } else if (showResult && isOptionCorrect) {
-                        bgColor = 'bg-green-50'
-                        borderColor = 'border-green-500'
-                        textColor = 'text-green-700'
+                        bgColor = 'bg-green-500/10'
+                        borderColor = 'border-green-500/30'
+                        textColor = 'text-green-400'
                     } else if (isSelected) {
-                        bgColor = 'bg-blue-50'
-                        borderColor = 'border-blue-500'
-                        textColor = 'text-blue-700'
+                        bgColor = 'bg-blue-500/10'
+                        borderColor = 'border-blue-500/30'
+                        textColor = 'text-blue-400'
                     }
 
                     return (
@@ -106,23 +106,23 @@ export function Quiz({ question, options, explanation }: QuizProps) {
                     <button
                         onClick={handleSubmit}
                         disabled={selectedIndex === null}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-zinc-700 disabled:text-zinc-500 disabled:cursor-not-allowed transition-colors"
                     >
                         정답 확인
                     </button>
                 ) : (
                     <div className="space-y-3">
-                        <div className={`p-3 rounded-lg ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
-                            <p className={`font-semibold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                        <div className={`p-3 rounded-lg ${isCorrect ? 'bg-green-500/10 border border-green-500/30' : 'bg-red-500/10 border border-red-500/30'}`}>
+                            <p className={`font-semibold ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
                                 {isCorrect ? '🎉 정답입니다!' : '❌ 틀렸습니다.'}
                             </p>
                             {explanation && (
-                                <p className="text-sm text-gray-600 mt-1">{explanation}</p>
+                                <p className="text-sm text-zinc-400 mt-1">{explanation}</p>
                             )}
                         </div>
                         <button
                             onClick={handleReset}
-                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                            className="px-4 py-2 bg-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-600 transition-colors"
                         >
                             다시 풀기
                         </button>
