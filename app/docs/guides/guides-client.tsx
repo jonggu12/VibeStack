@@ -42,7 +42,7 @@ interface GuidesClientProps {
 }
 
 export function GuidesClient({ gettingStarted, development, errorSolving, deployment }: GuidesClientProps) {
-  const { isSignedIn } = useUser()
+  const { isSignedIn } = useUser() || { isSignedIn: false }
   const pathname = usePathname()
 
   return (

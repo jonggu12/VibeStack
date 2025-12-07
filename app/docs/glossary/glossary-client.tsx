@@ -50,7 +50,7 @@ interface GlossaryClientProps {
 }
 
 export function GlossaryClient({ glossaryTerms, categories, popularTerms }: GlossaryClientProps) {
-  const { isSignedIn } = useUser()
+  const { isSignedIn } = useUser() || { isSignedIn: false }
   const pathname = usePathname()
 
   return (
