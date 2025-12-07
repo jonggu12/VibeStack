@@ -22,8 +22,8 @@ export function Checkpoint({ id, title, children }: CheckpointProps) {
         <div
             className={`my-6 p-4 rounded-lg border-2 transition-colors ${
                 completed
-                    ? 'bg-green-50 border-green-300'
-                    : 'bg-gray-50 border-gray-200 hover:border-blue-300'
+                    ? 'bg-green-950/20 border-green-500/50'
+                    : 'bg-zinc-900/50 border-zinc-700 hover:border-indigo-500/50'
             }`}
         >
             <button
@@ -31,13 +31,13 @@ export function Checkpoint({ id, title, children }: CheckpointProps) {
                 className="flex items-center gap-3 w-full text-left"
             >
                 {completed ? (
-                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
+                    <CheckCircle className="w-6 h-6 text-green-400 shrink-0" />
                 ) : (
-                    <Circle className="w-6 h-6 text-gray-400 shrink-0" />
+                    <Circle className="w-6 h-6 text-zinc-500 shrink-0" />
                 )}
                 <span
                     className={`font-semibold ${
-                        completed ? 'text-green-700 line-through' : 'text-gray-900'
+                        completed ? 'text-green-400 line-through' : 'text-white'
                     }`}
                 >
                     {title}
@@ -45,7 +45,7 @@ export function Checkpoint({ id, title, children }: CheckpointProps) {
             </button>
 
             {children && (
-                <div className={`mt-3 ml-9 text-sm ${completed ? 'text-green-600' : 'text-gray-600'}`}>
+                <div className={`mt-3 ml-9 text-sm ${completed ? 'text-green-300' : 'text-zinc-400'}`}>
                     {children}
                 </div>
             )}
