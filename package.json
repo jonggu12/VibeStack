@@ -11,7 +11,8 @@
     "test:api": "jest --config jest.api.config.js",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "generate": "tsx scripts/generate-content.ts"
+    "generate": "tsx scripts/generate-content.ts",
+    "seed:batch": "tsx scripts/seed-batch.ts"
   },
   "dependencies": {
     "@algolia/autocomplete-js": "^1.19.4",
