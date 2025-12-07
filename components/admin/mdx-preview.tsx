@@ -52,33 +52,33 @@ export function MDXPreview({ content }: MDXPreviewProps) {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px] bg-gray-50 rounded-lg">
-                <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                <span className="ml-2 text-gray-500">미리보기 생성 중...</span>
+            <div className="flex items-center justify-center min-h-[400px] bg-zinc-900/50 rounded-lg">
+                <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+                <span className="ml-2 text-zinc-500">미리보기 생성 중...</span>
             </div>
         )
     }
 
     if (error) {
         return (
-            <div className="min-h-[400px] bg-red-50 rounded-lg p-4">
-                <p className="text-red-600 font-semibold">컴파일 오류</p>
-                <pre className="mt-2 text-sm text-red-700 whitespace-pre-wrap">{error}</pre>
+            <div className="min-h-[400px] bg-red-950/20 border border-red-900/50 rounded-lg p-4">
+                <p className="text-red-400 font-semibold">컴파일 오류</p>
+                <pre className="mt-2 text-sm text-red-300 whitespace-pre-wrap">{error}</pre>
             </div>
         )
     }
 
     if (!mdxSource) {
         return (
-            <div className="min-h-[400px] bg-gray-50 rounded-lg p-4 flex items-center justify-center">
-                <p className="text-gray-500">콘텐츠를 입력하면 미리보기가 표시됩니다.</p>
+            <div className="min-h-[400px] bg-zinc-900/50 rounded-lg p-4 flex items-center justify-center">
+                <p className="text-zinc-500">콘텐츠를 입력하면 미리보기가 표시됩니다.</p>
             </div>
         )
     }
 
     return (
-        <div className="p-6 bg-white rounded-lg border min-h-[400px] max-w-none prose prose-lg">
-            <Suspense fallback={<div>Loading...</div>}>
+        <div className="p-6 bg-zinc-900 rounded-lg border border-zinc-800 min-h-[400px] max-w-none prose prose-lg prose-invert">
+            <Suspense fallback={<div className="text-zinc-500">Loading...</div>}>
                 <MDXRemote {...mdxSource} components={mdxComponents} />
             </Suspense>
         </div>
