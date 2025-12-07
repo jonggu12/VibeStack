@@ -101,6 +101,23 @@ import {
   HiOutlineCheck,
 } from 'react-icons/hi'
 
+// Callout aliases for MDX (프롬프트 템플릿용)
+function Info({ children, title }: { children: React.ReactNode; title?: string }) {
+    return <Callout type="info" title={title}>{children}</Callout>
+}
+
+function Tip({ children, title }: { children: React.ReactNode; title?: string }) {
+    return <Callout type="tip" title={title}>{children}</Callout>
+}
+
+function Warning({ children, title }: { children: React.ReactNode; title?: string }) {
+    return <Callout type="warning" title={title}>{children}</Callout>
+}
+
+function Highlight({ children, title }: { children: React.ReactNode; title?: string }) {
+    return <Callout type="info" title={title}>{children}</Callout>
+}
+
 // children에서 텍스트 추출하여 slug 생성
 function getTextFromChildren(children: React.ReactNode): string {
     if (typeof children === 'string') return children
@@ -240,6 +257,11 @@ export const mdxComponents = {
     // Tutorial 컴포넌트들
     PromptCopy,
     Checklist,
+    // Callout aliases (프롬프트 템플릿용)
+    Info,
+    Tip,
+    Warning,
+    Highlight,
     // React Icons (AI 생성 콘텐츠용)
     AiOutlineInfoCircle,
     AiOutlineCode,

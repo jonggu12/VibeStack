@@ -1,8 +1,8 @@
 'use client'
 
-import { AlertCircle, Info, AlertTriangle, CheckCircle, Lightbulb } from 'lucide-react'
+import { AlertCircle, Info, AlertTriangle, CheckCircle, Lightbulb, HelpCircle } from 'lucide-react'
 
-type CalloutType = 'info' | 'warning' | 'error' | 'success' | 'tip'
+type CalloutType = 'info' | 'warning' | 'error' | 'success' | 'tip' | 'question'
 
 interface CalloutProps {
     type?: CalloutType
@@ -41,6 +41,12 @@ const calloutStyles: Record<CalloutType, { bg: string; border: string; icon: typ
         icon: Lightbulb,
         iconColor: 'text-purple-300',
     },
+    question: {
+        bg: 'bg-indigo-500/10',
+        border: 'border-indigo-500/30',
+        icon: HelpCircle,
+        iconColor: 'text-indigo-300',
+    },
 }
 
 const defaultTitles: Record<CalloutType, string> = {
@@ -49,6 +55,7 @@ const defaultTitles: Record<CalloutType, string> = {
     error: '오류',
     success: '완료',
     tip: '팁',
+    question: '질문',
 }
 
 export function Callout({ type = 'info', title, children }: CalloutProps) {
