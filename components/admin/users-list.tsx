@@ -1,8 +1,24 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Search, FileDown, UserPlus, MoreVertical } from 'lucide-react'
+import { Search, FileDown, UserPlus, MoreVertical, Ban, Shield, Eye, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { toggleUserBan, toggleUserRole } from '@/app/actions/user'
+import { useRouter } from 'next/navigation'
 
 type User = {
   id: string
@@ -30,10 +46,13 @@ type UsersListProps = {
 }
 
 export function UsersList({ users, totalCount, hasError = false }: UsersListProps) {
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState<string>('all')
   const [filterPlan, setFilterPlan] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -78,6 +97,56 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
     if (days === 0) return '오늘 만료'
     if (days <= 7) return `${days}일 남음`
     return formatDate(endDate)
+  }
+
+  // 사용자 정지/해제
+  const handleToggleBan = async (userId: string, currentBanned: boolean) => {
+    if (currentBanned) {
+      // 정지 해제 확인
+      const confirmed = confirm('이 사용자의 계정 정지를 해제하시겠습니까?')
+      if (!confirmed) return
+
+      const result = await toggleUserBan(userId)
+      if (result.success) {
+        router.refresh()
+      } else {
+        alert(result.error || '오류가 발생했습니다.')
+      }
+    } else {
+      // 정지 사유 입력
+      const reason = prompt(
+        '계정 정지 사유를 입력하세요:\n\n예시:\n- 스팸 행위 반복\n- 서비스 악용\n- 부적절한 콘텐츠 업로드\n- 다중 계정 악용'
+      )
+
+      if (reason === null) return // 취소
+      if (!reason.trim()) {
+        alert('정지 사유를 입력해주세요.')
+        return
+      }
+
+      const result = await toggleUserBan(userId, reason.trim())
+      if (result.success) {
+        router.refresh()
+      } else {
+        alert(result.error || '오류가 발생했습니다.')
+      }
+    }
+  }
+
+  // 사용자 권한 변경
+  const handleToggleRole = async (userId: string) => {
+    const result = await toggleUserRole(userId)
+    if (result.success) {
+      router.refresh()
+    } else {
+      alert(result.error || '오류가 발생했습니다.')
+    }
+  }
+
+  // 사용자 상세 정보 보기
+  const handleViewDetail = (user: User) => {
+    setSelectedUser(user)
+    setIsDetailOpen(true)
   }
 
   return (
@@ -249,7 +318,7 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
                           Pro
                         </span>
                       ) : (
-                        <span className="bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs px-2 py-0.5 rounded">
+                        <span className="bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs px-2 py-0.5 rounded w-fit">
                           Free
                         </span>
                       )}
@@ -289,9 +358,53 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
 
                   {/* 관리 */}
                   <td className="px-6 py-4 text-right">
-                    <button className="text-zinc-500 hover:text-white p-2 rounded hover:bg-zinc-800 transition-colors">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="text-zinc-500 hover:text-white p-2 rounded hover:bg-zinc-800 transition-colors">
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48 bg-zinc-900 border-zinc-800">
+                        {/* 사용자 상세 정보 */}
+                        <DropdownMenuItem
+                          onClick={() => handleViewDetail(user)}
+                          className="text-zinc-300 hover:text-white hover:bg-zinc-800 cursor-pointer"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          사용자 상세 정보
+                        </DropdownMenuItem>
+
+                        <DropdownMenuSeparator className="bg-zinc-800" />
+
+                        {/* 계정 정지/해제 */}
+                        {user.status === 'banned' ? (
+                          <DropdownMenuItem
+                            onClick={() => handleToggleBan(user.id, true)}
+                            className="text-green-400 hover:text-green-300 hover:bg-zinc-800 cursor-pointer"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            계정 정지 해제
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => handleToggleBan(user.id, false)}
+                            className="text-red-400 hover:text-red-300 hover:bg-zinc-800 cursor-pointer"
+                          >
+                            <Ban className="w-4 h-4 mr-2" />
+                            계정 정지
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 권한 변경 */}
+                        <DropdownMenuItem
+                          onClick={() => handleToggleRole(user.id)}
+                          className="text-purple-400 hover:text-purple-300 hover:bg-zinc-800 cursor-pointer"
+                        >
+                          <Shield className="w-4 h-4 mr-2" />
+                          {user.role === 'admin' ? 'User로 강등' : 'Admin으로 승격'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))
@@ -318,6 +431,112 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
           </div>
         </div>
       </div>
+
+      {/* 사용자 상세 정보 모달 */}
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">사용자 상세 정보</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              {selectedUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedUser && (
+            <div className="space-y-6 mt-4">
+              {/* 기본 정보 */}
+              <div className="flex items-center gap-4 p-4 bg-zinc-950 rounded-lg border border-zinc-800">
+                {selectedUser.avatar_url ? (
+                  <Image
+                    src={selectedUser.avatar_url}
+                    alt={selectedUser.name || selectedUser.email}
+                    width={64}
+                    height={64}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div
+                    className={`w-16 h-16 rounded-full bg-gradient-to-br ${getAvatarColor(
+                      selectedUser.clerk_user_id
+                    )}`}
+                  ></div>
+                )}
+                <div>
+                  <h3 className="text-lg font-bold">{selectedUser.name || '이름 없음'}</h3>
+                  <p className="text-sm text-zinc-400">{selectedUser.email}</p>
+                </div>
+              </div>
+
+              {/* 상세 정보 그리드 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-zinc-950 rounded-lg border border-zinc-800">
+                  <p className="text-xs text-zinc-500 mb-1">권한</p>
+                  <p className="text-sm font-bold">
+                    {selectedUser.role === 'admin' ? (
+                      <span className="text-purple-400">Admin</span>
+                    ) : (
+                      <span className="text-zinc-300">User</span>
+                    )}
+                  </p>
+                </div>
+
+                <div className="p-4 bg-zinc-950 rounded-lg border border-zinc-800">
+                  <p className="text-xs text-zinc-500 mb-1">구독 플랜</p>
+                  <p className="text-sm font-bold">
+                    {selectedUser.plan === 'pro' ? (
+                      <span className="text-indigo-400">Pro</span>
+                    ) : (
+                      <span className="text-zinc-400">Free</span>
+                    )}
+                  </p>
+                </div>
+
+                <div className="p-4 bg-zinc-950 rounded-lg border border-zinc-800">
+                  <p className="text-xs text-zinc-500 mb-1">상태</p>
+                  <p className="text-sm font-bold">
+                    {selectedUser.status === 'banned' ? (
+                      <span className="text-red-400">Banned</span>
+                    ) : (
+                      <span className="text-emerald-400">Active</span>
+                    )}
+                  </p>
+                </div>
+
+                <div className="p-4 bg-zinc-950 rounded-lg border border-zinc-800">
+                  <p className="text-xs text-zinc-500 mb-1">구매 횟수</p>
+                  <p className="text-sm font-bold text-zinc-300">{selectedUser.purchaseCount || 0}회</p>
+                </div>
+
+                <div className="p-4 bg-zinc-950 rounded-lg border border-zinc-800">
+                  <p className="text-xs text-zinc-500 mb-1">가입일</p>
+                  <p className="text-sm font-bold text-zinc-300">{formatDate(selectedUser.created_at)}</p>
+                </div>
+
+                <div className="p-4 bg-zinc-950 rounded-lg border border-zinc-800">
+                  <p className="text-xs text-zinc-500 mb-1">구매 크레딧</p>
+                  <p className="text-sm font-bold text-zinc-300">{selectedUser.purchase_credits || 0}</p>
+                </div>
+              </div>
+
+              {/* 구독 정보 */}
+              {selectedUser.plan === 'pro' && selectedUser.subscriptionEnd && (
+                <div className="p-4 bg-indigo-950/20 rounded-lg border border-indigo-800/30">
+                  <p className="text-xs text-indigo-400 mb-1">구독 만료일</p>
+                  <p className="text-sm font-bold text-indigo-300">
+                    {formatExpiration(selectedUser.subscriptionEnd)}
+                  </p>
+                </div>
+              )}
+
+              {/* Clerk ID */}
+              <div className="p-4 bg-zinc-950 rounded-lg border border-zinc-800">
+                <p className="text-xs text-zinc-500 mb-1">Clerk User ID</p>
+                <p className="text-xs font-mono text-zinc-400 break-all">{selectedUser.clerk_user_id}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

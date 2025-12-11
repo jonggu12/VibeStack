@@ -2,7 +2,9 @@
 
 import { supabase, supabaseAdmin } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import type { ContentType, DifficultyLevel, ContentStatus } from '@/types/content'
+import { getCurrentUser } from './user'
 
 // DB에서 가져온 콘텐츠 타입
 export interface DBContent {
@@ -44,6 +46,16 @@ interface GetContentsOptions {
 }
 
 /**
+ * 정지된 사용자 체크 (콘텐츠 접근 차단)
+ */
+async function checkUserBanned(): Promise<void> {
+    const user = await getCurrentUser()
+    if (user?.banned) {
+        redirect('/banned')
+    }
+}
+
+/**
  * ID로 콘텐츠 조회
  */
 export async function getContent(id: string, bypassRLS = false): Promise<DBContent | null> {
@@ -71,6 +83,9 @@ export async function getContentBySlug(
     slug: string,
     type?: ContentType
 ): Promise<DBContent | null> {
+    // 정지된 사용자 차단
+    await checkUserBanned()
+
     let query = supabase
         .from('contents')
         .select('*')

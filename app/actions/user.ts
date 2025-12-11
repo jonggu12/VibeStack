@@ -12,6 +12,10 @@ export interface CurrentUser {
   role: UserRole
   avatar_url: string | null
   created_at: string
+  banned: boolean
+  ban_reason: string | null
+  banned_at: string | null
+  banned_by: string | null
 }
 
 /**
@@ -44,6 +48,10 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     role: data.role as UserRole,
     avatar_url: data.avatar_url,
     created_at: data.created_at,
+    banned: data.banned || false,
+    ban_reason: data.ban_reason || null,
+    banned_at: data.banned_at || null,
+    banned_by: data.banned_by || null,
   }
 }
 
@@ -70,4 +78,103 @@ export async function requireAdmin(): Promise<CurrentUser> {
   }
 
   return user
+}
+
+/**
+ * Toggle user ban status (Admin only)
+ */
+export async function toggleUserBan(
+  userId: string,
+  banReason?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Check admin permission and get admin user
+    const admin = await requireAdmin()
+
+    // Get current user status
+    const { data: user, error: fetchError } = await supabaseAdmin
+      .from('users')
+      .select('banned')
+      .eq('id', userId)
+      .single()
+
+    if (fetchError || !user) {
+      return { success: false, error: '사용자를 찾을 수 없습니다.' }
+    }
+
+    // Toggle ban status
+    if (user.banned) {
+      // Unban: Clear all ban-related fields
+      const { error: updateError } = await supabaseAdmin
+        .from('users')
+        .update({
+          banned: false,
+          ban_reason: null,
+          banned_at: null,
+          banned_by: null,
+        })
+        .eq('id', userId)
+
+      if (updateError) {
+        return { success: false, error: '정지 해제에 실패했습니다.' }
+      }
+    } else {
+      // Ban: Set ban fields
+      const { error: updateError } = await supabaseAdmin
+        .from('users')
+        .update({
+          banned: true,
+          ban_reason: banReason || '관리자에 의해 정지됨',
+          banned_at: new Date().toISOString(),
+          banned_by: admin.id,
+        })
+        .eq('id', userId)
+
+      if (updateError) {
+        return { success: false, error: '계정 정지에 실패했습니다.' }
+      }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling user ban:', error)
+    return { success: false, error: '권한이 없습니다.' }
+  }
+}
+
+/**
+ * Toggle user role (Admin only)
+ */
+export async function toggleUserRole(userId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Check admin permission
+    await requireAdmin()
+
+    // Get current user role
+    const { data: user, error: fetchError } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('id', userId)
+      .single()
+
+    if (fetchError || !user) {
+      return { success: false, error: '사용자를 찾을 수 없습니다.' }
+    }
+
+    // Toggle role
+    const newRole = user.role === 'admin' ? 'user' : 'admin'
+    const { error: updateError } = await supabaseAdmin
+      .from('users')
+      .update({ role: newRole })
+      .eq('id', userId)
+
+    if (updateError) {
+      return { success: false, error: '권한 변경에 실패했습니다.' }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling user role:', error)
+    return { success: false, error: '권한이 없습니다.' }
+  }
 }
