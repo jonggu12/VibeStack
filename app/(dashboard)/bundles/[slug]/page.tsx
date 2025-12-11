@@ -54,7 +54,7 @@ export default async function BundleDetailPage({ params }: { params: { slug: str
               </div>
             )}
             <div className="text-3xl font-bold">
-              ₩{(bundle.price_cents / 100).toLocaleString()}
+              ₩{((bundle.price_cents ?? 0) / 100).toLocaleString()}
             </div>
             <button className="mt-4 w-full bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90">
               Purchase Bundle
