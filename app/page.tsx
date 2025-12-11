@@ -6,8 +6,8 @@ import {
   Rocket, Code, BookOpen, Globe, Smartphone, ArrowRight,
   Search, XIcon, Check, Copy,
   ShoppingBag, PenTool, Clock, CircleCheck,
-  Sparkles, Database, Book, Bot, Languages, Users,
-  AlertCircle, Layers, Zap
+  Sparkles, Database, Languages, Users,
+  AlertCircle, Layers, Zap, Flag, TriangleAlert
 } from 'lucide-react'
 import { FaGithub, FaGoogle, FaStripe, FaDiscord } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
@@ -20,6 +20,7 @@ export default function HomePage() {
   const [showUserHero, setShowUserHero] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [activeSnippet, setActiveSnippet] = useState(0)
 
   const handleSignIn = () => {
     router.push('/sign-in')
@@ -49,6 +50,90 @@ export default function HomePage() {
       return
     }
   }
+
+  // Snippet Items (IDE Style)
+  const snippetItems = [
+    {
+      title: 'Google Login',
+      category: 'Auth',
+      icon: 'react',
+      iconColor: 'text-blue-400',
+      code: `import { useAuth } from '@clerk/nextjs';
+
+export default function LoginBtn() {
+  const { signIn } = useAuth();
+
+  return (
+    <button onClick={() => signIn('google')}>
+      구글 로그인 시작
+    </button>
+  );
+}`,
+    },
+    {
+      title: 'Stripe Payments',
+      category: 'Pay',
+      icon: 'stripe',
+      iconColor: 'text-indigo-400',
+      code: `import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+export async function createCheckout() {
+  const session = await stripe.checkout.sessions.create({
+    line_items: [{ price: 'price_xxx', quantity: 1 }],
+    mode: 'payment',
+    success_url: 'https://example.com/success',
+  });
+
+  return session.url;
+}`,
+    },
+    {
+      title: 'Supabase Setup',
+      category: 'DB',
+      icon: 'database',
+      iconColor: 'text-emerald-400',
+      code: `import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+export async function getUsers() {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*');
+
+  return data;
+}`,
+    },
+    {
+      title: 'Email Service',
+      category: 'API',
+      icon: 'mail',
+      iconColor: 'text-yellow-400',
+      code: `import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+export async function sendEmail(to: string, subject: string) {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    html: '<h1>안녕하세요</h1>',
+  });
+}`,
+    },
+  ]
 
   // Quick Menu Items (App Icon Style)
   const quickMenuItems = [
@@ -480,10 +565,7 @@ export default function HomePage() {
           {/* QUICK ICON MENU (App Icon Style) */}
           <section className="border-y border-zinc-800/50 bg-zinc-950/30 backdrop-blur-sm">
             <div className="max-w-7xl mx-auto px-4 py-10">
-              {/* Section Header */}
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest text-center mb-8">
-                Popular Stacks
-              </p>
+             
 
               {/* Icon Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6">
@@ -597,182 +679,229 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* SURVIVAL KIT (DOCS) */}
-          <section>
-            <div className="flex items-end justify-between mb-6 border-b border-zinc-800 pb-4">
-              <div>
-                <h3 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
-                  바이브 코딩 솔루션 키트
-                </h3>
-                <p className="text-zinc-500 text-sm">예상치 못한 에러와 부정확한 AI 답변을 즉시 해결하는 솔루션</p>
+          {/* DOCS SECTION: Bento Grid Layout */}
+          <section id="docs" className="py-20 border-t border-zinc-800/50">
+            <div className="max-w-7xl mx-auto px-4">
+              {/* Title */}
+              <div className="mb-10 flex items-end justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-white mb-2">지식 보관소</h2>
+                  <p className="text-zinc-400">개발의 시작부터 에러 해결까지, 필요한 모든 가이드.</p>
+                </div>
+                <Link href="/docs" className="hidden sm:flex items-center text-sm text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                  전체보기 <ArrowRight className="w-4 h-4 ml-1" />
+                </Link>
               </div>
-              <Link href="/docs" className="hidden sm:flex items-center text-sm font-medium text-zinc-400 hover:text-indigo-400 transition-colors group">
-                전체 문서 보기 <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* BENTO GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 md:h-[500px]">
 
-              {/* Card 1: Terminal Style */}
-              <Link href="/" className="group relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-red-500/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-red-900/10">
-                <div className="bg-zinc-950 px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                {/* 1. 시작 가이드 (Large Vertical - Main Focus) */}
+                <Link
+                  href="/docs/guides"
+                  className="md:col-span-2 md:row-span-2 group relative overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 p-8 flex flex-col justify-end hover:border-indigo-500/50 transition-all min-h-[400px] md:min-h-0"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent z-10" />
+
+                  {/* Background Icon/Image */}
+                  <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Flag className="w-36 h-36 text-indigo-500" />
                   </div>
-                  <span className="text-[10px] text-zinc-500 font-mono ml-2">error_log.txt</span>
-                </div>
-                <div className="p-5">
-                  <div className="text-red-400 font-mono text-xs mb-3 p-2 bg-red-500/10 rounded border border-red-500/20 truncate">
-                    Error: Module not found...
+
+                  <div className="relative z-20">
+                    <div className="inline-block px-3 py-1 mb-4 text-xs font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+                      필독
+                    </div>
+                    <h3 className="text-3xl font-bold text-white mb-2">시작 가이드</h3>
+                    <p className="text-zinc-400 mb-6 max-w-sm">
+                      AI 코딩이 처음이신가요? 환경 설정부터 첫 배포까지, 가장 완벽한 로드맵을 따라오세요.
+                    </p>
+                    <button className="bg-white text-black px-6 py-2.5 rounded-lg font-bold hover:bg-zinc-200 transition-colors inline-flex items-center gap-2">
+                      <span>로드맵 시작하기</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
-                  <h4 className="font-bold text-zinc-100 text-lg mb-1 group-hover:text-red-400 transition-colors">
-                    "모듈을 찾을 수 없대요"
+                </Link>
+
+                {/* 2. 에러 해결 (Horizontal - Alert Style) */}
+                <Link
+                  href="/docs"
+                  className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-red-500/50 transition-all group relative overflow-hidden flex flex-col justify-center min-h-[200px] md:min-h-0"
+                >
+                  <div className="absolute top-4 right-4 text-red-500/10 group-hover:text-red-500/20 transition-colors">
+                    <TriangleAlert className="w-24 h-24" />
+                  </div>
+                  <h4 className="text-xl font-bold text-white mb-1 group-hover:text-red-400 transition-colors">
+                    🚨 에러 해결소
                   </h4>
-                  <p className="text-sm text-zinc-400 line-clamp-2">
-                    npm install을 안 했거나 경로가 틀렸을 때. 1분 만에 해결하는 프롬프트.
+                  <p className="text-sm text-zinc-400">
+                    "빨간 줄이 떴어요..." 당황하지 마세요. 자주 발생하는 에러와 해결책을 모았습니다.
                   </p>
-                </div>
-              </Link>
+                </Link>
 
-              {/* Card 2: Chat Style */}
-              <Link href="/" className="group relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-indigo-500/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-900/10">
-                <div className="bg-zinc-950 px-4 py-2 border-b border-zinc-800 flex items-center justify-between">
-                  <span className="text-[10px] text-indigo-400 font-mono flex items-center gap-1">
-                    <Bot className="w-3 h-3" /> AI Chat
-                  </span>
-                  <span className="text-[10px] text-zinc-600">Now</span>
-                </div>
-                <div className="p-5">
-                  <div className="flex gap-2 mb-3">
-                    <div className="w-1 bg-indigo-500 rounded-full" />
-                    <p className="text-xs text-zinc-500 italic">"코드는 짰는데 작동을 안 해요..."</p>
+                {/* 3. 기능 구현 가이드 (Square) */}
+                <Link
+                  href="/docs"
+                  className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group flex flex-col justify-between min-h-[200px] md:min-h-0"
+                >
+                  <div className="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center text-xl mb-4">
+                    <Code className="w-6 h-6" />
                   </div>
-                  <h4 className="font-bold text-zinc-100 text-lg mb-1 group-hover:text-indigo-400 transition-colors">
-                    AI 질문 공식 (프롬프트)
-                  </h4>
-                  <p className="text-sm text-zinc-400 line-clamp-2">
-                    개떡같이 말해도 찰떡같이 알아듣게 시키는 '3단계 질문' 구조.
-                  </p>
-                </div>
-              </Link>
-
-              {/* Card 3: Dictionary Style */}
-              <Link href="/" className="group relative bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-emerald-500/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-900/10">
-                <div className="bg-zinc-950 px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
-                  <Book className="w-3 h-3 text-zinc-500" />
-                  <span className="text-[10px] text-zinc-500 font-mono">dictionary.md</span>
-                </div>
-                <div className="p-5">
-                  <div className="flex gap-2 mb-3 flex-wrap">
-                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">localhost?</span>
-                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">API?</span>
+                  <div>
+                    <h4 className="text-lg font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">
+                      기능 구현
+                    </h4>
+                    <p className="text-xs text-zinc-500">
+                      로그인, 결제, 게시판 등<br />필수 기능 원리 파악
+                    </p>
                   </div>
-                  <h4 className="font-bold text-zinc-100 text-lg mb-1 group-hover:text-emerald-400 transition-colors">
-                    비개발자용 용어 사전
-                  </h4>
-                  <p className="text-sm text-zinc-400 line-clamp-2">
-                    "서버가 죽었다"는게 무슨 뜻이죠? 개발자들의 외계어, 쉽게 통역해 드립니다.
-                  </p>
-                </div>
-              </Link>
+                </Link>
 
-            </div>
+                {/* 4. 프롬프트 작성법 (Square) */}
+                <Link
+                  href="/docs"
+                  className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-purple-500/50 transition-all group flex flex-col justify-between min-h-[200px] md:min-h-0"
+                >
+                  <div className="w-10 h-10 bg-purple-500/10 text-purple-400 rounded-lg flex items-center justify-center text-xl mb-4">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white mb-1 group-hover:text-purple-400 transition-colors">
+                      프롬프트 공식
+                    </h4>
+                    <p className="text-xs text-zinc-500">
+                      AI가 찰떡같이 알아듣는<br />질문 작성 노하우
+                    </p>
+                  </div>
+                </Link>
 
-            <div className="mt-4 sm:hidden text-center">
-              <Link href="/docs" className="text-sm font-medium text-zinc-400 hover:text-white">전체 문서 보기 →</Link>
+              </div>
+
+              {/* Bottom Row: Concepts/Glossary (Wide Bar) */}
+              <div className="mt-4 grid grid-cols-1">
+                <Link
+                  href="/docs/glossary"
+                  className="group flex items-center justify-between p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-900 transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:bg-zinc-700 transition-all">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">개념 & 용어 사전</h4>
+                      <p className="text-xs text-zinc-500">API, 서버, 클라이언트... 개발 용어가 외계어 같다면?</p>
+                    </div>
+                  </div>
+                  <div className="text-zinc-600 group-hover:text-white pr-2 transition-colors">
+                    <ArrowRight className="w-5 h-5" />
+                  </div>
+                </Link>
+              </div>
+
+              {/* Mobile "전체보기" link */}
+              <div className="mt-4 sm:hidden text-center">
+                <Link href="/docs" className="text-sm font-medium text-zinc-400 hover:text-white">전체 문서 보기 →</Link>
+              </div>
             </div>
           </section>
 
-          {/* SNIPPETS SECTION */}
-          <section>
-            <div className="flex items-end justify-between mb-6 border-b border-zinc-800 pb-4">
-              <div>
-                <h3 className="text-xl font-bold text-white mb-1">핵심 기능 스니펫</h3>
-                <p className="text-zinc-500 text-sm">복잡한 코드 분석 없이, 프롬프트 입력만으로 기능을 구현하세요.</p>
+          {/* SNIPPETS SECTION: IDE Style */}
+          <section id="snippets" className="py-20">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="mb-10">
+                <h2 className="text-3xl font-bold text-white mb-2">필수 기능 스니펫</h2>
+                <p className="text-zinc-400">복잡한 구현? 복사-붙여넣기 한 번이면 끝납니다.</p>
               </div>
-              <Link href="/snippets" className="hidden sm:flex items-center text-sm font-medium text-zinc-400 hover:text-indigo-400 transition-colors group">
-                모든 스니펫 보기 <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Snippet 1 */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 transition-all">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-2">
-                    <FaGoogle className="w-4 h-4 text-zinc-400" />
-                    <span className="font-bold text-zinc-200 text-sm">구글 로그인</span>
+              {/* IDE Container */}
+              <div className="bg-[#1e1e1e] rounded-xl border border-zinc-800 overflow-hidden shadow-2xl flex flex-col md:flex-row h-auto md:h-[500px]">
+
+                {/* Sidebar (List) */}
+                <div className="w-full md:w-1/3 border-r border-zinc-800 bg-zinc-900/50 flex flex-col">
+                  <div className="p-4 border-b border-zinc-800 text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                    EXPLORER
                   </div>
-                  <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase">Auth</span>
-                </div>
-                <div className="bg-black/40 rounded p-2.5 mb-3 font-mono text-[10px] text-zinc-500 border border-zinc-800 truncate select-none">
-                  createClerkClient()...
-                </div>
-                <button onClick={handleCopyClick} className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-2 group active:scale-95">
-                  <Copy className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                  <span>프롬프트 복사</span>
-                </button>
-              </div>
-
-              {/* Snippet 2 */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 transition-all">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-2">
-                    <FaStripe className="w-4 h-4 text-zinc-400" />
-                    <span className="font-bold text-zinc-200 text-sm">결제 모달</span>
+                  <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                    {snippetItems.map((snippet, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setActiveSnippet(index)}
+                        className={`w-full text-left px-4 py-3 rounded border-l-2 text-sm font-medium flex items-center justify-between group transition-colors ${
+                          activeSnippet === index
+                            ? 'bg-zinc-800 border-indigo-500 text-white'
+                            : 'border-transparent text-zinc-400 hover:bg-zinc-800/50'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          {snippet.icon === 'react' && <Code className={snippet.iconColor} />}
+                          {snippet.icon === 'stripe' && <FaStripe className={snippet.iconColor} />}
+                          {snippet.icon === 'database' && <Database className={snippet.iconColor} />}
+                          {snippet.icon === 'mail' && <Sparkles className={snippet.iconColor} />}
+                          {snippet.title}
+                        </span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                          activeSnippet === index ? 'bg-zinc-950 text-zinc-400' : 'bg-zinc-950/50 text-zinc-600'
+                        }`}>
+                          {snippet.category}
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                  <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase">Pay</span>
-                </div>
-                <div className="bg-black/40 rounded p-2.5 mb-3 font-mono text-[10px] text-zinc-500 border border-zinc-800 truncate select-none">
-                  stripe.checkout.sessions...
-                </div>
-                <button onClick={handleCopyClick} className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-2 group active:scale-95">
-                  <Copy className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                  <span>프롬프트 복사</span>
-                </button>
-              </div>
-
-              {/* Snippet 3 */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 transition-all">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-2">
-                    <Database className="w-4 h-4 text-zinc-400" />
-                    <span className="font-bold text-zinc-200 text-sm">DB 연결</span>
+                  <div className="p-4 border-t border-zinc-800">
+                    <Link
+                      href="/snippets"
+                      className="block w-full text-center py-2 text-xs font-bold text-zinc-500 hover:text-white border border-zinc-800 rounded hover:bg-zinc-800 transition-colors"
+                    >
+                      스니펫 전체보기
+                    </Link>
                   </div>
-                  <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase">Data</span>
                 </div>
-                <div className="bg-black/40 rounded p-2.5 mb-3 font-mono text-[10px] text-zinc-500 border border-zinc-800 truncate select-none">
-                  createClient(URL, KEY)...
+
+                {/* Main Code Area */}
+                <div className="flex-1 bg-[#1e1e1e] flex flex-col min-h-[300px]">
+                  {(() => {
+                    const currentSnippet = snippetItems[activeSnippet]
+                    if (!currentSnippet) return null
+
+                    return (
+                      <>
+                        {/* Tab Bar */}
+                        <div className="h-10 bg-[#252526] flex items-center px-2 gap-1 border-b border-zinc-800">
+                          <div className="px-3 py-1.5 bg-[#1e1e1e] text-zinc-300 text-xs flex items-center gap-2 border-t border-indigo-500 rounded-t-sm">
+                            {currentSnippet.icon === 'react' && <Code className={`w-3 h-3 ${currentSnippet.iconColor}`} />}
+                            {currentSnippet.icon === 'stripe' && <FaStripe className={`w-3 h-3 ${currentSnippet.iconColor}`} />}
+                            {currentSnippet.icon === 'database' && <Database className={`w-3 h-3 ${currentSnippet.iconColor}`} />}
+                            {currentSnippet.icon === 'mail' && <Sparkles className={`w-3 h-3 ${currentSnippet.iconColor}`} />}
+                            {currentSnippet.title}.tsx
+                          </div>
+                        </div>
+
+                        {/* Code Content */}
+                        <div className="flex-1 p-6 font-mono text-sm overflow-auto relative group">
+                          {/* Copy Button */}
+                          <button
+                            onClick={handleCopyClick}
+                            className="absolute top-4 right-4 bg-zinc-800 hover:bg-indigo-600 text-zinc-300 hover:text-white px-3 py-1.5 rounded text-xs font-bold transition-colors flex items-center gap-2 shadow-lg z-10"
+                          >
+                            <Copy className="w-3 h-3" /> 복사하기
+                          </button>
+
+                          {/* Code Display */}
+                          <pre className="text-zinc-400 leading-relaxed whitespace-pre-wrap">
+                            {currentSnippet.code}
+                          </pre>
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
-                <button onClick={handleCopyClick} className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-2 group active:scale-95">
-                  <Copy className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                  <span>프롬프트 복사</span>
-                </button>
+
               </div>
 
-              {/* Snippet 4 */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 transition-all">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-zinc-400" />
-                    <span className="font-bold text-zinc-200 text-sm">SEO 자동화</span>
-                  </div>
-                  <span className="text-[10px] font-bold bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase">SEO</span>
-                </div>
-                <div className="bg-black/40 rounded p-2.5 mb-3 font-mono text-[10px] text-zinc-500 border border-zinc-800 truncate select-none">
-                  export const metadata = ...
-                </div>
-                <button onClick={handleCopyClick} className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-2 group active:scale-95">
-                  <Copy className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                  <span>프롬프트 복사</span>
-                </button>
+              {/* Mobile "전체보기" link */}
+              <div className="mt-4 sm:hidden text-center">
+                <Link href="/snippets" className="text-sm font-medium text-zinc-400 hover:text-white">전체 스니펫 보기 →</Link>
               </div>
-            </div>
-
-            <div className="mt-4 sm:hidden text-center">
-              <Link href="/snippets" className="text-sm font-medium text-zinc-400 hover:text-white">전체 스니펫 보기 →</Link>
             </div>
           </section>
 
