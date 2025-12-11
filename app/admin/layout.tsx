@@ -1,10 +1,20 @@
 import { AdminSidebar } from '@/components/layout/admin-sidebar'
+import { requireAdmin } from '@/app/actions/user'
+import { redirect } from 'next/navigation'
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Check admin access
+  try {
+    await requireAdmin()
+  } catch (error) {
+    // Not admin - redirect to home
+    redirect('/')
+  }
+
   return (
     <div className="min-h-screen flex bg-zinc-950">
       {/* Sidebar */}

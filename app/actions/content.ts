@@ -27,6 +27,10 @@ export interface DBContent {
     published_at: string | null
     created_at: string
     updated_at: string
+
+    // Bundle-specific fields (only populated when type='bundle')
+    discount_pct: number | null
+    thumbnail_url: string | null
 }
 
 // 콘텐츠 목록 조회 옵션
@@ -355,8 +359,61 @@ export async function deleteContent(id: string): Promise<{ success: boolean; err
         revalidatePath(`/docs/${content.slug}`)
         revalidatePath(`/tutorials/${content.slug}`)
         revalidatePath(`/snippets/${content.slug}`)
+        revalidatePath(`/bundles/${content.slug}`)
     }
     revalidatePath('/admin/content')
 
     return { success: true }
+}
+
+/**
+ * Bundle with children relationship
+ */
+export interface BundleWithChildren extends DBContent {
+    children?: Array<{
+        id: string
+        displayOrder: number
+        content: DBContent
+    }>
+}
+
+/**
+ * Get bundle by slug with its children contents
+ */
+export async function getBundleBySlug(slug: string): Promise<BundleWithChildren | null> {
+    // Get bundle content
+    const bundle = await getContentBySlug(slug, 'bundle')
+    if (!bundle) return null
+
+    // Get children contents
+    const { data: children, error } = await supabase
+        .from('content_children')
+        .select(`
+            id,
+            display_order,
+            content:contents(*)
+        `)
+        .eq('parent_content_id', bundle.id)
+        .order('display_order', { ascending: true })
+
+    if (error) {
+        console.error('Error fetching bundle children:', error)
+        return bundle as BundleWithChildren
+    }
+
+    return {
+        ...bundle,
+        children: children?.map(child => ({
+            id: child.id,
+            displayOrder: child.display_order,
+            content: child.content as unknown as DBContent,
+        })) || [],
+    } as BundleWithChildren
+}
+
+/**
+ * Get all bundles
+ */
+export async function getBundles(limit = 20): Promise<DBContent[]> {
+    return getContents({ type: 'bundle', limit })
 }

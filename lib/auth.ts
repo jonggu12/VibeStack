@@ -7,7 +7,8 @@
 
 import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { isAdmin as checkIsAdmin, type ClerkPublicMetadata } from './clerk'
+import { supabaseAdmin } from './supabase'
+import { type ClerkPublicMetadata } from './clerk'
 
 /**
  * User type with typed metadata
@@ -44,17 +45,28 @@ export async function requireAuth(redirectUrl?: string): Promise<AuthenticatedUs
 /**
  * Require admin role for a route/action
  * Redirects to home if user is not an admin
+ * Checks Supabase users.role column (not Clerk metadata)
  *
  * @returns The authenticated admin user
  *
  * @example
  * const adminUser = await requireAdmin()
- * console.log(adminUser.publicMetadata.role) // 'admin'
  */
 export async function requireAdmin(): Promise<AuthenticatedUser> {
   const user = await currentUser()
 
-  if (!checkIsAdmin(user)) {
+  if (!user) {
+    redirect('/')
+  }
+
+  // Check Supabase database for admin role
+  const { data: dbUser } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('clerk_user_id', user.id)
+    .single()
+
+  if (!dbUser || dbUser.role !== 'admin') {
     redirect('/')
   }
 
@@ -100,6 +112,7 @@ export async function isAuthenticated(): Promise<boolean> {
 
 /**
  * Check if current user is an admin
+ * Checks Supabase users.role column (not Clerk metadata)
  *
  * @returns True if user is an admin
  *
@@ -110,7 +123,19 @@ export async function isAuthenticated(): Promise<boolean> {
  */
 export async function isAdmin(): Promise<boolean> {
   const user = await currentUser()
-  return checkIsAdmin(user)
+
+  if (!user) {
+    return false
+  }
+
+  // Check Supabase database for admin role
+  const { data: dbUser } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('clerk_user_id', user.id)
+    .single()
+
+  return dbUser?.role === 'admin'
 }
 
 /**
@@ -171,6 +196,7 @@ export async function requireAuthAction(): Promise<AuthResult<AuthenticatedUser>
 /**
  * Require admin for server actions (non-redirecting)
  * Returns an error instead of redirecting
+ * Checks Supabase users.role column (not Clerk metadata)
  *
  * @returns AuthResult with admin user data or error
  *
@@ -195,7 +221,14 @@ export async function requireAdminAction(): Promise<AuthResult<AuthenticatedUser
     }
   }
 
-  if (!checkIsAdmin(user)) {
+  // Check Supabase database for admin role
+  const { data: dbUser } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('clerk_user_id', user.id)
+    .single()
+
+  if (!dbUser || dbUser.role !== 'admin') {
     return {
       success: false,
       error: 'FORBIDDEN',

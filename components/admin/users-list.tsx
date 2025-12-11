@@ -14,10 +14,13 @@ type User = {
   created_at: string
   updated_at: string
   onboarding_completed: boolean
+  banned?: boolean
   // 추가 필드 (subscription 테이블에서 조인)
   role?: 'admin' | 'user'
   plan?: 'pro' | 'free'
   status?: 'active' | 'banned'
+  subscriptionEnd?: string | null  // 구독 만료일
+  purchaseCount?: number  // 구매 횟수
 }
 
 type UsersListProps = {
@@ -65,6 +68,16 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
       month: '2-digit',
       day: '2-digit',
     })
+  }
+
+  // 구독 만료일 포맷팅
+  const formatExpiration = (endDate: string | null) => {
+    if (!endDate) return null
+    const days = Math.ceil((new Date(endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    if (days < 0) return '만료됨'
+    if (days === 0) return '오늘 만료'
+    if (days <= 7) return `${days}일 남음`
+    return formatDate(endDate)
   }
 
   return (
@@ -154,6 +167,9 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
                 상태
               </th>
               <th scope="col" className="px-6 py-4 font-medium">
+                구매 횟수
+              </th>
+              <th scope="col" className="px-6 py-4 font-medium">
                 가입일
               </th>
               <th scope="col" className="px-6 py-4 font-medium text-right">
@@ -164,7 +180,7 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
           <tbody className="divide-y divide-zinc-800">
             {hasError ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center">
+                <td colSpan={7} className="px-6 py-12 text-center">
                   <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 text-red-400 inline-block">
                     사용자 데이터를 불러오는 중 오류가 발생했습니다.
                   </div>
@@ -172,7 +188,7 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
               </tr>
             ) : filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
+                <td colSpan={7} className="px-6 py-12 text-center text-zinc-500">
                   {searchTerm || filterRole !== 'all' || filterPlan !== 'all' || filterStatus !== 'all'
                     ? '검색 결과가 없습니다.'
                     : '등록된 사용자가 없습니다.'}
@@ -219,38 +235,53 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
 
                   {/* 구독 플랜 */}
                   <td className="px-6 py-4">
-                    {user.plan === 'pro' ? (
-                      <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs px-2 py-0.5 rounded font-bold flex w-fit items-center gap-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="w-3 h-3"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" />
-                        </svg>
-                        Pro
-                      </span>
-                    ) : (
-                      <span className="bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs px-2 py-0.5 rounded">
-                        Free
-                      </span>
-                    )}
+                    <div className="flex flex-col gap-1">
+                      {user.plan === 'pro' ? (
+                        <span className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs px-2 py-0.5 rounded font-bold flex w-fit items-center gap-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-3 h-3"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" />
+                          </svg>
+                          Pro
+                        </span>
+                      ) : (
+                        <span className="bg-zinc-800 text-zinc-400 border border-zinc-700 text-xs px-2 py-0.5 rounded">
+                          Free
+                        </span>
+                      )}
+                      {/* 구독 만료일 표시 (Pro 사용자만) */}
+                      {user.plan === 'pro' && user.subscriptionEnd && (
+                        <span className="text-xs text-zinc-500">
+                          {formatExpiration(user.subscriptionEnd)}
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* 상태 */}
                   <td className="px-6 py-4">
-                    {user.status === 'active' ? (
-                      <span className="flex items-center gap-1.5 text-emerald-400 text-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        Active
-                      </span>
-                    ) : (
+                    {user.status === 'banned' ? (
                       <span className="flex items-center gap-1.5 text-red-400 text-xs">
                         <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
                         Banned
                       </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-emerald-400 text-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        Active
+                      </span>
                     )}
+                  </td>
+
+                  {/* 구매 횟수 */}
+                  <td className="px-6 py-4">
+                    <span className="text-xs text-zinc-400">
+                      {user.purchaseCount || 0}회
+                    </span>
                   </td>
 
                   {/* 가입일 */}

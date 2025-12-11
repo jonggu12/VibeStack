@@ -15,6 +15,19 @@ export interface Content {
   priceCents: number
   isPremium: boolean
   status: ContentStatus
+
+  // Bundle-specific fields (only used when type='bundle')
+  discountPct?: number
+  thumbnailUrl?: string
+
   createdAt: string
   updatedAt: string
+}
+
+// Bundle children relationship (replaces bundle_contents)
+export interface ContentChild {
+  id: string
+  parentContentId: string  // parent content (type='bundle')
+  contentId: string         // child content
+  displayOrder: number
 }
