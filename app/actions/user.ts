@@ -15,6 +15,7 @@ export interface CurrentUser {
   banned: boolean
   ban_reason: string | null
   banned_at: string | null
+  banned_until: string | null
   banned_by: string | null
 }
 
@@ -51,6 +52,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     banned: data.banned || false,
     ban_reason: data.ban_reason || null,
     banned_at: data.banned_at || null,
+    banned_until: data.banned_until || null,
     banned_by: data.banned_by || null,
   }
 }
@@ -85,7 +87,8 @@ export async function requireAdmin(): Promise<CurrentUser> {
  */
 export async function toggleUserBan(
   userId: string,
-  banReason?: string
+  banReason?: string,
+  durationDays?: number | null // null = permanent
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Check admin permission and get admin user
@@ -111,6 +114,7 @@ export async function toggleUserBan(
           banned: false,
           ban_reason: null,
           banned_at: null,
+          banned_until: null,
           banned_by: null,
         })
         .eq('id', userId)
@@ -120,12 +124,19 @@ export async function toggleUserBan(
       }
     } else {
       // Ban: Set ban fields
+      const now = new Date()
+      const bannedUntil =
+        durationDays !== null && durationDays !== undefined
+          ? new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000).toISOString()
+          : null // null = permanent
+
       const { error: updateError } = await supabaseAdmin
         .from('users')
         .update({
           banned: true,
           ban_reason: banReason || '관리자에 의해 정지됨',
-          banned_at: new Date().toISOString(),
+          banned_at: now.toISOString(),
+          banned_until: bannedUntil,
           banned_by: admin.id,
         })
         .eq('id', userId)

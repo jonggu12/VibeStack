@@ -51,12 +51,35 @@ export default clerkMiddleware(async (auth, req) => {
       try {
         const { data: user } = await supabaseAdmin
           .from('users')
-          .select('banned')
+          .select('banned, banned_until')
           .eq('clerk_user_id', userId)
           .single()
 
-        // 정지된 사용자는 /banned 페이지로 리다이렉트
         if (user?.banned) {
+          // 정지 기간이 만료되었는지 확인
+          if (user.banned_until) {
+            const now = new Date()
+            const bannedUntil = new Date(user.banned_until)
+
+            if (now >= bannedUntil) {
+              // 자동 정지 해제
+              await supabaseAdmin
+                .from('users')
+                .update({
+                  banned: false,
+                  ban_reason: null,
+                  banned_at: null,
+                  banned_until: null,
+                  banned_by: null,
+                })
+                .eq('clerk_user_id', userId)
+
+              // 정지 해제되었으므로 계속 진행
+              return NextResponse.next()
+            }
+          }
+
+          // 정지 중인 사용자는 /banned 페이지로 리다이렉트
           const bannedUrl = new URL('/banned', req.url)
           return NextResponse.redirect(bannedUrl)
         }

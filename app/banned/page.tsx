@@ -55,6 +55,20 @@ export default async function BannedPage() {
                   </span>
                 </div>
               )}
+              {user.banned_until && (
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">해제 예정</span>
+                  <span className="text-emerald-400 font-bold">
+                    {new Date(user.banned_until).toLocaleString('ko-KR')}
+                  </span>
+                </div>
+              )}
+              {!user.banned_until && (
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">정지 기간</span>
+                  <span className="text-red-400 font-bold">영구 정지</span>
+                </div>
+              )}
               {user.ban_reason && (
                 <div className="pt-2 border-t border-zinc-800">
                   <p className="text-zinc-500 mb-1">정지 사유</p>

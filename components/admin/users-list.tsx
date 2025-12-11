@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { BanUserDialog } from './BanUserDialog'
 import { toggleUserBan, toggleUserRole } from '@/app/actions/user'
 import { useRouter } from 'next/navigation'
 
@@ -53,6 +54,8 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
+  const [isBanDialogOpen, setIsBanDialogOpen] = useState(false)
+  const [userToBan, setUserToBan] = useState<User | null>(null)
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -100,36 +103,46 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
   }
 
   // 사용자 정지/해제
-  const handleToggleBan = async (userId: string, currentBanned: boolean) => {
+  const handleToggleBan = async (user: User, currentBanned: boolean) => {
     if (currentBanned) {
       // 정지 해제 확인
       const confirmed = confirm('이 사용자의 계정 정지를 해제하시겠습니까?')
       if (!confirmed) return
 
-      const result = await toggleUserBan(userId)
+      const result = await toggleUserBan(user.id)
       if (result.success) {
         router.refresh()
       } else {
         alert(result.error || '오류가 발생했습니다.')
       }
     } else {
-      // 정지 사유 입력
-      const reason = prompt(
-        '계정 정지 사유를 입력하세요:\n\n예시:\n- 스팸 행위 반복\n- 서비스 악용\n- 부적절한 콘텐츠 업로드\n- 다중 계정 악용'
-      )
+      // 정지 다이얼로그 열기
+      setUserToBan(user)
+      setIsBanDialogOpen(true)
+    }
+  }
 
-      if (reason === null) return // 취소
-      if (!reason.trim()) {
-        alert('정지 사유를 입력해주세요.')
-        return
-      }
+  // 정지 확인 핸들러
+  const handleBanConfirm = async (reason: string, duration: '1day' | '3days' | '7days' | '30days' | 'permanent') => {
+    if (!userToBan) return
 
-      const result = await toggleUserBan(userId, reason.trim())
-      if (result.success) {
-        router.refresh()
-      } else {
-        alert(result.error || '오류가 발생했습니다.')
-      }
+    const durationMap = {
+      '1day': 1,
+      '3days': 3,
+      '7days': 7,
+      '30days': 30,
+      'permanent': null,
+    }
+
+    const durationDays = durationMap[duration]
+    const result = await toggleUserBan(userToBan.id, reason, durationDays)
+
+    if (result.success) {
+      setIsBanDialogOpen(false)
+      setUserToBan(null)
+      router.refresh()
+    } else {
+      alert(result.error || '오류가 발생했습니다.')
     }
   }
 
@@ -379,7 +392,7 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
                         {/* 계정 정지/해제 */}
                         {user.status === 'banned' ? (
                           <DropdownMenuItem
-                            onClick={() => handleToggleBan(user.id, true)}
+                            onClick={() => handleToggleBan(user, true)}
                             className="text-green-400 hover:text-green-300 hover:bg-zinc-800 cursor-pointer"
                           >
                             <CheckCircle className="w-4 h-4 mr-2" />
@@ -387,7 +400,7 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
                           </DropdownMenuItem>
                         ) : (
                           <DropdownMenuItem
-                            onClick={() => handleToggleBan(user.id, false)}
+                            onClick={() => handleToggleBan(user, false)}
                             className="text-red-400 hover:text-red-300 hover:bg-zinc-800 cursor-pointer"
                           >
                             <Ban className="w-4 h-4 mr-2" />
@@ -537,6 +550,17 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
           )}
         </DialogContent>
       </Dialog>
+
+      {/* 계정 정지 다이얼로그 */}
+      {userToBan && (
+        <BanUserDialog
+          open={isBanDialogOpen}
+          onOpenChange={setIsBanDialogOpen}
+          userName={userToBan.name || '이름 없음'}
+          userEmail={userToBan.email}
+          onConfirm={handleBanConfirm}
+        />
+      )}
     </div>
   )
 }

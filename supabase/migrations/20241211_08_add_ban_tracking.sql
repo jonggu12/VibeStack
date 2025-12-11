@@ -7,11 +7,13 @@
 ALTER TABLE users
 ADD COLUMN ban_reason TEXT,                        -- 정지 사유
 ADD COLUMN banned_at TIMESTAMPTZ,                  -- 정지 일시
+ADD COLUMN banned_until TIMESTAMPTZ,               -- 정지 종료 예정일 (null = 영구)
 ADD COLUMN banned_by UUID REFERENCES users(id);    -- 정지 처리한 관리자
 
 -- Step 2: Add comments for documentation
 COMMENT ON COLUMN users.ban_reason IS 'Reason for account suspension';
 COMMENT ON COLUMN users.banned_at IS 'Timestamp when account was banned';
+COMMENT ON COLUMN users.banned_until IS 'Ban expiration timestamp (NULL = permanent)';
 COMMENT ON COLUMN users.banned_by IS 'Admin user ID who banned this account';
 
 -- Step 3: Create index for banned_by (for admin audit logs)
