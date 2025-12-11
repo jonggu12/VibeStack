@@ -6,7 +6,8 @@ import {
   Rocket, Code, BookOpen, Globe, Smartphone, ArrowRight,
   Search, XIcon, Check, Copy,
   ShoppingBag, PenTool, Clock, CircleCheck,
-  Sparkles, Database, Book, Bot, Languages, Users
+  Sparkles, Database, Book, Bot, Languages, Users,
+  AlertCircle, Layers, Zap
 } from 'lucide-react'
 import { FaGithub, FaGoogle, FaStripe, FaDiscord } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
@@ -48,6 +49,68 @@ export default function HomePage() {
       return
     }
   }
+
+  // Quick Menu Items (App Icon Style)
+  const quickMenuItems = [
+    {
+      title: '시작 가이드',
+      icon: Rocket,
+      href: '/docs/guides',
+      hoverBorder: 'group-hover:border-blue-500/50',
+      hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(59,130,246,0.15)]',
+      hoverIcon: 'group-hover:text-blue-400',
+    },
+    {
+      title: '기능 구현',
+      icon: Code,
+      href: '/docs',
+      hoverBorder: 'group-hover:border-purple-500/50',
+      hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(168,85,247,0.15)]',
+      hoverIcon: 'group-hover:text-purple-400',
+    },
+    {
+      title: '프롬프트',
+      icon: Sparkles,
+      href: '/docs',
+      hoverBorder: 'group-hover:border-indigo-500/50',
+      hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(99,102,241,0.15)]',
+      hoverIcon: 'group-hover:text-indigo-400',
+      badgeColor: 'bg-indigo-500',
+    },
+    {
+      title: '에러 해결',
+      icon: AlertCircle,
+      href: '/docs',
+      hoverBorder: 'group-hover:border-red-500/50',
+      hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]',
+      hoverIcon: 'group-hover:text-red-400',
+      badgeColor: 'bg-red-500',
+    },
+    {
+      title: '용어 사전',
+      icon: BookOpen,
+      href: '/docs/glossary',
+      hoverBorder: 'group-hover:border-emerald-500/50',
+      hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(16,185,129,0.15)]',
+      hoverIcon: 'group-hover:text-emerald-400',
+    },
+    {
+      title: '튜토리얼',
+      icon: Layers,
+      href: '/tutorials',
+      hoverBorder: 'group-hover:border-orange-500/50',
+      hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(249,115,22,0.15)]',
+      hoverIcon: 'group-hover:text-orange-400',
+    },
+    {
+      title: '스니펫',
+      icon: Zap,
+      href: '/snippets',
+      hoverBorder: 'group-hover:border-cyan-500/50',
+      hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]',
+      hoverIcon: 'group-hover:text-cyan-400',
+    },
+  ]
 
   // Slider auto-advance
   useEffect(() => {
@@ -413,6 +476,45 @@ export default function HomePage() {
               </div>
             </section>
           )}
+
+          {/* QUICK ICON MENU (App Icon Style) */}
+          <section className="border-y border-zinc-800/50 bg-zinc-950/30 backdrop-blur-sm">
+            <div className="max-w-7xl mx-auto px-4 py-10">
+              {/* Section Header */}
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest text-center mb-8">
+                Popular Stacks
+              </p>
+
+              {/* Icon Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 md:gap-6">
+                {quickMenuItems.map((item, index) => {
+                  const IconComponent = item.icon
+                  return (
+                    <Link
+                      key={index}
+                      href={item.href}
+                      className="group flex flex-col items-center gap-3"
+                    >
+                      <div className={`relative w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center transition-all duration-300 ${item.hoverBorder} group-hover:bg-zinc-800 ${item.hoverGlow} group-hover:-translate-y-1`}>
+                        {/* Subtle inner glow on hover */}
+                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+
+                        {/* Icon */}
+                        <IconComponent className={`w-7 h-7 text-zinc-400 ${item.hoverIcon} transition-colors relative z-10`} />
+
+                        
+                      </div>
+
+                      {/* Label */}
+                      <span className="text-[11px] font-medium text-zinc-500 group-hover:text-zinc-300 transition-colors text-center">
+                        {item.title}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          </section>
 
           {/* PROJECTS SECTION */}
           <section>
