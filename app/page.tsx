@@ -21,6 +21,7 @@ export default function HomePage() {
   const [showToast, setShowToast] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [activeSnippet, setActiveSnippet] = useState(0)
+  const [showAllTutorials, setShowAllTutorials] = useState(false)
 
   const handleSignIn = () => {
     router.push('/sign-in')
@@ -598,84 +599,228 @@ export async function sendEmail(to: string, subject: string) {
             </div>
           </section>
 
-          {/* PROJECTS SECTION */}
-          <section>
-            <div className="flex items-end justify-between mb-6 border-b border-zinc-800 pb-4">
-              <div>
-                <h3 className="text-xl font-bold text-white mb-1">1시간에 끝내는 실전 프로젝트</h3>
-                <p className="text-zinc-500 text-sm">AI에 붙여넣기만 하면 되는 실패 없는 튜토리얼</p>
+          {/* PROJECTS SECTION - Gallery Grid (3x2) */}
+          <section id="tutorials" className="py-20 border-t border-zinc-800/50">
+            <div className="max-w-7xl mx-auto px-4">
+              {/* Header */}
+              <div className="text-center mb-16">
+                <span className="text-indigo-400 font-bold tracking-wider text-xs uppercase mb-2 block">Project Gallery</span>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  상상을 현실로 만드는 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">실전 레시피</span>
+                </h2>
+                <p className="text-zinc-400 max-w-2xl mx-auto">
+                  이론은 건너뛰세요. 검증된 프로젝트 가이드를 따라하며 내 서비스를 완성하세요.
+                </p>
               </div>
-              <Link href="/tutorials" className="hidden sm:flex items-center text-sm font-medium text-zinc-400 hover:text-indigo-400 transition-colors group">
-                전체 프로젝트 <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Card 1 */}
-              <div onClick={handleCardClick} className="group bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition-all cursor-pointer hover:shadow-xl hover:shadow-indigo-500/5">
-                <div className="h-40 bg-zinc-800 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 to-purple-900/40 group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute bottom-3 left-3 flex gap-2">
-                    <span className="bg-black/40 backdrop-blur text-[10px] font-bold px-2 py-1 rounded text-white border border-white/10 uppercase tracking-wide">Next.js 14</span>
-                    <span className="bg-black/40 backdrop-blur text-[10px] font-bold px-2 py-1 rounded text-white border border-white/10 uppercase tracking-wide">SaaS</span>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h4 className="font-bold text-lg text-zinc-100 group-hover:text-indigo-400 transition-colors mb-3">45분 만에 만드는 Todo 앱</h4>
-                  <div className="flex items-center gap-4 text-xs text-zinc-400 mb-5">
-                    <span className="flex items-center gap-1.5 text-emerald-400 font-bold"><CircleCheck className="w-3 h-3" /> 94% 성공</span>
-                    <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> 43분</span>
-                  </div>
-                  <button className="w-full bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-white text-sm font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:border-zinc-700">
-                    <span>시작하기</span>
-                    <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
-              </div>
-              {/* Card 2 */}
-              <div onClick={handleCardClick} className="group bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition-all cursor-pointer hover:shadow-xl hover:shadow-emerald-500/5">
-                <div className="h-40 bg-zinc-800 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 to-teal-900/40 group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute bottom-3 left-3 flex gap-2">
-                    <span className="bg-black/40 backdrop-blur text-[10px] font-bold px-2 py-1 rounded text-white border border-white/10 uppercase tracking-wide">Supabase</span>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h4 className="font-bold text-lg text-zinc-100 group-hover:text-emerald-400 transition-colors mb-3">대기자 명단 (이메일 수집)</h4>
-                  <div className="flex items-center gap-4 text-xs text-zinc-400 mb-5">
-                    <span className="flex items-center gap-1.5 text-emerald-400 font-bold"><CircleCheck className="w-3 h-3" /> 98% 성공</span>
-                    <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> 30분</span>
-                  </div>
-                  <button className="w-full bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-white text-sm font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:border-zinc-700">
-                    <span>시작하기</span>
-                    <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
-              </div>
-              {/* Card 3 */}
-              <div onClick={handleCardClick} className="group bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition-all cursor-pointer hover:shadow-xl hover:shadow-orange-500/5">
-                <div className="h-40 bg-zinc-800 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-900/40 to-red-900/40 group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute bottom-3 left-3 flex gap-2">
-                    <span className="bg-black/40 backdrop-blur text-[10px] font-bold px-2 py-1 rounded text-white border border-white/10 uppercase tracking-wide">MDX</span>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h4 className="font-bold text-lg text-zinc-100 group-hover:text-orange-400 transition-colors mb-3">나만의 개발 블로그</h4>
-                  <div className="flex items-center gap-4 text-xs text-zinc-400 mb-5">
-                    <span className="flex items-center gap-1.5 text-emerald-400 font-bold"><CircleCheck className="w-3 h-3" /> 91% 성공</span>
-                    <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> 1.5시간</span>
-                  </div>
-                  <button className="w-full bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-white text-sm font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:border-zinc-700">
-                    <span>시작하기</span>
-                    <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
-              </div>
-            </div>
+              {/* GRID CONTAINER */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
 
-            <div className="mt-4 sm:hidden text-center">
-              <Link href="/tutorials" className="text-sm font-medium text-zinc-400 hover:text-white">전체 프로젝트 보기 →</Link>
+                {/* Item 1 */}
+                <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                  {/* Thumbnail */}
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-indigo-500/50 transition-all shadow-lg group-hover:shadow-indigo-500/10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-zinc-950 z-10" />
+                    {/* Icon/Image Placeholder */}
+                    <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <Check className="w-20 h-20 text-indigo-500/30" />
+                    </div>
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 z-20 flex gap-1.5">
+                      <span className="bg-black/80 backdrop-blur border border-zinc-700 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded">SaaS</span>
+                      <span className="bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded">HOT</span>
+                    </div>
+                  </div>
+                  {/* Info */}
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 45분</span>
+                      <span className="flex items-center gap-1 text-emerald-400"><Flag className="w-3 h-3" /> 초급</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-indigo-400 transition-colors">45분 컷 Todo 앱 만들기</h3>
+                    <p className="text-sm text-zinc-400 line-clamp-2">Next.js 14와 Supabase를 활용하여 회원가입부터 CRUD까지 완벽 구현.</p>
+                  </div>
+                </Link>
+
+                {/* Item 2 */}
+                <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-pink-500/50 transition-all shadow-lg group-hover:shadow-pink-500/10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-pink-900/20 to-zinc-950 z-10" />
+                    <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <Users className="w-20 h-20 text-pink-500/30" />
+                    </div>
+                    <div className="absolute top-3 left-3 z-20 flex gap-1.5">
+                      <span className="bg-black/80 backdrop-blur border border-zinc-700 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded">Marketing</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 30분</span>
+                      <span className="flex items-center gap-1 text-emerald-400"><Flag className="w-3 h-3" /> 초급</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-pink-400 transition-colors">대기자 명단 수집 페이지</h3>
+                    <p className="text-sm text-zinc-400 line-clamp-2">서비스 출시 전 수요 검증 필수템. 이메일 자동 수집 및 환영 메일 발송.</p>
+                  </div>
+                </Link>
+
+                {/* Item 3 */}
+                <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-emerald-500/50 transition-all shadow-lg group-hover:shadow-emerald-500/10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/20 to-zinc-950 z-10" />
+                    <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <PenTool className="w-20 h-20 text-emerald-500/30" />
+                    </div>
+                    <div className="absolute top-3 left-3 z-20 flex gap-1.5">
+                      <span className="bg-black/80 backdrop-blur border border-zinc-700 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded">Blog</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 60분</span>
+                      <span className="flex items-center gap-1 text-yellow-400"><Flag className="w-3 h-3" /> 중급</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">MDX 개발 블로그</h3>
+                    <p className="text-sm text-zinc-400 line-clamp-2">Notion 말고 내 블로그. 마크다운으로 글 쓰고 SEO 최적화까지 한 번에.</p>
+                  </div>
+                </Link>
+
+                {/* Item 4 */}
+                <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-blue-500/50 transition-all shadow-lg group-hover:shadow-blue-500/10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-zinc-950 z-10" />
+                    <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <ShoppingBag className="w-20 h-20 text-blue-500/30" />
+                    </div>
+                    <div className="absolute top-3 left-3 z-20 flex gap-1.5">
+                      <span className="bg-black/80 backdrop-blur border border-zinc-700 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded">Payment</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 2시간</span>
+                      <span className="flex items-center gap-1 text-red-400"><Flag className="w-3 h-3" /> 고급</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">Stripe 결제 시스템 연동</h3>
+                    <p className="text-sm text-zinc-400 line-clamp-2">구독 결제 모델 구현. 실제 카드 승인부터 영수증 발급까지.</p>
+                  </div>
+                </Link>
+
+                {/* Item 5 */}
+                <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-purple-500/50 transition-all shadow-lg group-hover:shadow-purple-500/10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-zinc-950 z-10" />
+                    <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <Sparkles className="w-20 h-20 text-purple-500/30" />
+                    </div>
+                    <div className="absolute top-3 left-3 z-20 flex gap-1.5">
+                      <span className="bg-black/80 backdrop-blur border border-zinc-700 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded">AI Wrap</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 1.5시간</span>
+                      <span className="flex items-center gap-1 text-yellow-400"><Flag className="w-3 h-3" /> 중급</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-purple-400 transition-colors">ChatGPT 챗봇 클론</h3>
+                    <p className="text-sm text-zinc-400 line-clamp-2">OpenAI API 연동. 나만의 페르소나를 가진 AI 채팅 서비스 만들기.</p>
+                  </div>
+                </Link>
+
+                {/* Item 6 */}
+                <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-orange-500/50 transition-all shadow-lg group-hover:shadow-orange-500/10">
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-900/20 to-zinc-950 z-10" />
+                    <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <Layers className="w-20 h-20 text-orange-500/30" />
+                    </div>
+                    <div className="absolute top-3 left-3 z-20 flex gap-1.5">
+                      <span className="bg-black/80 backdrop-blur border border-zinc-700 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded">Admin</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 3시간</span>
+                      <span className="flex items-center gap-1 text-red-400"><Flag className="w-3 h-3" /> 고급</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-orange-400 transition-colors">관리자 대시보드 구축</h3>
+                    <p className="text-sm text-zinc-400 line-clamp-2">차트 라이브러리 연동 및 데이터 시각화. 매출 현황 한눈에 보기.</p>
+                  </div>
+                </Link>
+
+                {/* HIDDEN ITEMS (shown when Load More is clicked) */}
+                {showAllTutorials && (
+                  <>
+                    <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-cyan-500/50 transition-all shadow-lg group-hover:shadow-cyan-500/10">
+                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-zinc-950 z-10" />
+                        <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                          <Smartphone className="w-20 h-20 text-cyan-500/30" />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 4시간</span>
+                          <span className="flex items-center gap-1 text-red-400"><Flag className="w-3 h-3" /> 고급</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-1 group-hover:text-cyan-400 transition-colors">React Native 앱 기초</h3>
+                        <p className="text-sm text-zinc-400 line-clamp-2">웹 개발 지식으로 iOS, Android 앱 동시에 만들기.</p>
+                      </div>
+                    </Link>
+
+                    <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-teal-500/50 transition-all shadow-lg group-hover:shadow-teal-500/10">
+                        <div className="absolute inset-0 bg-gradient-to-br from-teal-900/20 to-zinc-950 z-10" />
+                        <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                          <Database className="w-20 h-20 text-teal-500/30" />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 2.5시간</span>
+                          <span className="flex items-center gap-1 text-yellow-400"><Flag className="w-3 h-3" /> 중급</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-1 group-hover:text-teal-400 transition-colors">실시간 채팅 앱</h3>
+                        <p className="text-sm text-zinc-400 line-clamp-2">WebSocket으로 구현하는 라이브 메시징 서비스.</p>
+                      </div>
+                    </Link>
+
+                    <Link href="/tutorials" onClick={handleCardClick} className="group flex flex-col">
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4 group-hover:border-violet-500/50 transition-all shadow-lg group-hover:shadow-violet-500/10">
+                        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/20 to-zinc-950 z-10" />
+                        <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                          <Globe className="w-20 h-20 text-violet-500/30" />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-xs text-zinc-500 mb-2">
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 1시간</span>
+                          <span className="flex items-center gap-1 text-emerald-400"><Flag className="w-3 h-3" /> 초급</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-1 group-hover:text-violet-400 transition-colors">포트폴리오 사이트</h3>
+                        <p className="text-sm text-zinc-400 line-clamp-2">반응형 디자인으로 나를 소개하는 멋진 랜딩 페이지.</p>
+                      </div>
+                    </Link>
+                  </>
+                )}
+
+              </div>
+
+              {/* LOAD MORE BUTTON */}
+              {!showAllTutorials && (
+                <div className="mt-16 text-center">
+                  <button
+                    onClick={() => setShowAllTutorials(true)}
+                    className="group relative inline-flex items-center gap-2 px-8 py-3 bg-zinc-900 border border-zinc-700 rounded-full text-zinc-300 font-bold hover:bg-zinc-800 hover:text-white hover:border-zinc-500 transition-all active:scale-95"
+                  >
+                    <span>더 많은 프로젝트 보기</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+
+                    {/* Glow Effect */}
+                    <div className="absolute inset-0 rounded-full bg-indigo-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
+                </div>
+              )}
+
             </div>
           </section>
 
