@@ -49,7 +49,7 @@ export default async function BundlesPage() {
                     </span>
                   )}
                   <span className="font-bold">
-                    ₩{(bundle.price_cents / 100).toLocaleString()}
+                    ₩{((bundle.price_cents ?? 0) / 100).toLocaleString()}
                   </span>
                 </div>
 
