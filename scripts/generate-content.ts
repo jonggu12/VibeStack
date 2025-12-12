@@ -35,6 +35,8 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+type DocCategory = 'getting-started' | 'implementation' | 'prompts' | 'errors' | 'concepts'
+
 interface GenerateOptions {
   type: ContentType
   topic: string
@@ -42,10 +44,11 @@ interface GenerateOptions {
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   estimatedTime?: number
   isPremium?: boolean
+  category?: DocCategory // doc type일 때 사용할 카테고리
 }
 
 async function generateAndSaveContent(options: GenerateOptions) {
-  const { type, topic, stack, difficulty, estimatedTime = 30, isPremium = false } = options
+  const { type, topic, stack, difficulty, estimatedTime = 30, isPremium = false, category: userCategory } = options
 
   console.log('\n' + '='.repeat(60))
   console.log(`🚀 Generating ${type.toUpperCase()}: ${topic}`)
@@ -117,10 +120,15 @@ async function generateAndSaveContent(options: GenerateOptions) {
   // 5. Supabase에 저장
   console.log(`\n💾 Saving to Supabase...`)
 
+  // Glossary는 이제 doc type with concepts category로 저장
+  const actualType = type === 'glossary' ? 'doc' : type
+  const category = type === 'glossary' ? 'concepts' : (type === 'doc' ? userCategory : undefined)
+
   const { data, error } = await supabase
     .from('contents')
     .insert({
-      type,
+      type: actualType,
+      ...(category && { category }), // glossary일 경우 category 추가
       title: metadata.title,
       description: metadata.description,
       content: generatedContent,
@@ -128,7 +136,7 @@ async function generateAndSaveContent(options: GenerateOptions) {
       stack: stackJson,
       // tags, // TODO: Add tags column to Supabase table
       difficulty,
-      estimated_time_mins: estimatedTime,
+      estimated_time_mins: type === 'glossary' ? 5 : estimatedTime, // Glossary는 기본 5분
       is_premium: isPremium,
       status: 'draft', // 검수 후 published로 변경
       published_at: null,
@@ -140,7 +148,7 @@ async function generateAndSaveContent(options: GenerateOptions) {
       avg_rating: 0,
       meta_title: metadata.title,
       meta_description: metadata.description,
-      // 용어사전 전용 필드 (조건부)
+      // 용어사전 전용 필드 (조건부) - glossary일 때만
       ...(glossaryMeta && {
         term_category: glossaryMeta.category,
         related_terms: glossaryMeta.relatedTerms,
@@ -174,12 +182,13 @@ async function main() {
 
   if (args.length < 4) {
     console.log(`
-Usage: npm run generate -- <type> <topic> <stack> <difficulty> [estimatedTime] [isPremium]
+Usage: npm run generate -- <type> <topic> <stack> <difficulty> [estimatedTime] [isPremium] [category]
 
 Examples:
   npm run generate -- tutorial "Next.js 인증 구현" "nextjs,clerk,typescript" intermediate 45
   npm run generate -- snippet "useDebounce 훅" "react,typescript" beginner
-  npm run generate -- doc "Server Components 가이드" "nextjs,react" beginner
+  npm run generate -- doc "Server Components 가이드" "nextjs,react" beginner 10 false getting-started
+  npm run generate -- doc "Stripe 결제 구현" "nextjs,stripe" intermediate 20 false implementation
   npm run generate -- glossary "Server Actions" "nextjs" beginner
 
 Arguments:
@@ -189,6 +198,8 @@ Arguments:
   difficulty    beginner | intermediate | advanced
   estimatedTime (선택) 예상 소요 시간 (분) - default: 30
   isPremium     (선택) true | false - default: false
+  category      (선택, doc only) getting-started | implementation | prompts | errors | concepts
+                glossary는 자동으로 concepts 카테고리로 설정됨
 `)
     process.exit(1)
   }
@@ -199,6 +210,7 @@ Arguments:
   const difficulty = args[3] as 'beginner' | 'intermediate' | 'advanced'
   const estimatedTime = args[4] ? parseInt(args[4]) : 30
   const isPremium = args[5] === 'true'
+  const category = args[6] as DocCategory | undefined
 
   try {
     await generateAndSaveContent({
@@ -208,6 +220,7 @@ Arguments:
       difficulty,
       estimatedTime,
       isPremium,
+      category,
     })
     process.exit(0)
   } catch (error) {

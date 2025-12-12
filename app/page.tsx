@@ -141,7 +141,7 @@ export async function sendEmail(to: string, subject: string) {
     {
       title: '시작 가이드',
       icon: Rocket,
-      href: '/docs/guides',
+      href: '/docs?category=getting-started',
       hoverBorder: 'group-hover:border-blue-500/50',
       hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(59,130,246,0.15)]',
       hoverIcon: 'group-hover:text-blue-400',
@@ -149,7 +149,7 @@ export async function sendEmail(to: string, subject: string) {
     {
       title: '기능 구현',
       icon: Code,
-      href: '/docs',
+      href: '/docs?category=implementation',
       hoverBorder: 'group-hover:border-purple-500/50',
       hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(168,85,247,0.15)]',
       hoverIcon: 'group-hover:text-purple-400',
@@ -157,7 +157,7 @@ export async function sendEmail(to: string, subject: string) {
     {
       title: '프롬프트',
       icon: Sparkles,
-      href: '/docs',
+      href: '/docs?category=prompts',
       hoverBorder: 'group-hover:border-indigo-500/50',
       hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(99,102,241,0.15)]',
       hoverIcon: 'group-hover:text-indigo-400',
@@ -166,7 +166,7 @@ export async function sendEmail(to: string, subject: string) {
     {
       title: '에러 해결',
       icon: AlertCircle,
-      href: '/docs',
+      href: '/docs?category=errors',
       hoverBorder: 'group-hover:border-red-500/50',
       hoverGlow: 'group-hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]',
       hoverIcon: 'group-hover:text-red-400',
@@ -843,7 +843,7 @@ export async function sendEmail(to: string, subject: string) {
 
                 {/* 1. 시작 가이드 (Large Vertical - Main Focus) */}
                 <Link
-                  href="/docs/guides"
+                  href="/docs?category=getting-started"
                   className="md:col-span-2 md:row-span-2 group relative overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 p-8 flex flex-col justify-end hover:border-indigo-500/50 transition-all min-h-[400px] md:min-h-0"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent z-10" />
@@ -870,7 +870,7 @@ export async function sendEmail(to: string, subject: string) {
 
                 {/* 2. 에러 해결 (Horizontal - Alert Style) */}
                 <Link
-                  href="/docs"
+                  href="/docs?category=errors"
                   className="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-red-500/50 transition-all group relative overflow-hidden flex flex-col justify-center min-h-[200px] md:min-h-0"
                 >
                   <div className="absolute top-4 right-4 text-red-500/10 group-hover:text-red-500/20 transition-colors">
@@ -886,7 +886,7 @@ export async function sendEmail(to: string, subject: string) {
 
                 {/* 3. 기능 구현 가이드 (Square) */}
                 <Link
-                  href="/docs"
+                  href="/docs?category=implementation"
                   className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-emerald-500/50 transition-all group flex flex-col justify-between min-h-[200px] md:min-h-0"
                 >
                   <div className="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center text-xl mb-4">
@@ -904,7 +904,7 @@ export async function sendEmail(to: string, subject: string) {
 
                 {/* 4. 프롬프트 작성법 (Square) */}
                 <Link
-                  href="/docs"
+                  href="/docs?category=prompts"
                   className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-purple-500/50 transition-all group flex flex-col justify-between min-h-[200px] md:min-h-0"
                 >
                   <div className="w-10 h-10 bg-purple-500/10 text-purple-400 rounded-lg flex items-center justify-center text-xl mb-4">
