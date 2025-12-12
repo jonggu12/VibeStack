@@ -14,7 +14,7 @@ export default async function BundleDetailPage({ params }: { params: { slug: str
     tutorial: '/tutorials',
     snippet: '/snippets',
     bundle: '/bundles',
-    glossary: '/docs/glossary',
+    glossary: '/docs?category=concepts',
   }
 
   return (

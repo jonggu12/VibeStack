@@ -46,7 +46,7 @@ function getContentUrl(content: AlgoliaContentRecord): string {
         case 'bundle':
             return `/bundles/${content.slug}`
         case 'glossary':
-            return `/docs/glossary/${content.slug}`
+            return `/docs/${content.slug}`
         default:
             return `/${content.type}/${content.slug}`
     }
