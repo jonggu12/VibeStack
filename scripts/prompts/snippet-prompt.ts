@@ -6,13 +6,20 @@ export interface SnippetPromptOptions {
 
 export function buildSnippetPrompt(options: SnippetPromptOptions): string {
   const { topic, stack, difficulty } = options
+  const safeIdentifier = topic.replace(/[^A-Za-z0-9]/g, '') || 'SnippetExample'
 
   return `
 당신은 VibeStack에서 **코드 스니펫 문서를 작성하는 전문 기술 문서 작가**입니다.  
 이 문서의 목적은 **바로 복사해서 사용할 수 있는 실용적인 코드 스니펫**을 제공하는 것입니다.
 
-이 문서에서는 **React Icons를 사용하지 않습니다.**  
-대신 **Callout, Info, Tip, Highlight, Warning 등의 MDX 컴포넌트를 활용**해 섹션을 구조화해주세요.
+⚠️ 금지/필수 사항(중복 안내 금지, 한 번만 확인)
+- React Icons 금지, 이모지는 문단 내 최소 사용(섹션 제목에는 사용하지 않음)
+- 코드 길이 20~40줄, import/export 포함
+- 함수/타입/파일명은 영문 lowerCamelCase/Train-Case 사용 (토픽이 한글이어도 식별자는 영어)
+- 각 섹션 2~3문장, 코드 블록은 섹션당 1개
+- MDX 컴포넌트(Callout/Info/Tip/Highlight/Warning)는 섹션당 1회 이하 사용
+- 문서 시작부에 예상 소요 시간과 난이도 표시
+- "AI에 복붙할 프롬프트"와 체크박스 체크포인트, "왜 이렇게 하나요?" 설명을 포함
 
 예시:
 
@@ -32,6 +39,14 @@ export function buildSnippetPrompt(options: SnippetPromptOptions): string {
 
 ---
 
+# 🤖 AI에 복붙할 프롬프트 (스니펫 생성용)
+
+${topic}에 대한 실무 스니펫을 작성해줘.
+스택은 ${stack.join(', ')}이고, TypeScript 코드 1개(20~40줄)로 제공해.
+import/export 포함, 주석은 한국어로 간결하게.
+React Icons/섹션 제목 이모지는 쓰지 말고, MDX 컴포넌트는 Callout/Tip/Highlight/Warning/Info만 섹션당 1회 이내로 사용해.
+문서 상단에 예상 소요 시간과 난이도를 표시해줘.
+
 # 출력 형식 안내
 
 아래 **MDX 템플릿을 그대로 활용**해 스니펫 문서를 작성해주세요.  
@@ -42,6 +57,9 @@ export function buildSnippetPrompt(options: SnippetPromptOptions): string {
 title: "${topic}"
 description: "이 스니펫이 어떤 상황에서 유용한지 한 줄로 요약 (80자 이내)"
 ---
+
+> ⏱️ 예상 소요 시간: 7분
+> 🎯 난이도: ${difficulty}
 
 # ${topic}
 
@@ -54,6 +72,16 @@ description: "이 스니펫이 어떤 상황에서 유용한지 한 줄로 요�
 - [사용 사례 1]  
 - [사용 사례 2]  
 
+### 🤖 AI에 복붙할 프롬프트
+${topic} 스니펫의 용도와 사용 사례 2개를 2~3문장으로 요약해줘. MDX Info 블록 1개를 포함해.
+
+### ✅ 체크포인트
+- [ ] 사용 사례가 2개인가요?  
+- [ ] Info 블록이 1개인가요?
+
+### 💡 방금 뭘 한 거예요?
+스니펫의 목적과 활용 맥락을 명확히 해 사용자가 바로 적용할 수 있도록 돕습니다.
+
 ## 코드
 
 \`\`\`typescript
@@ -62,10 +90,21 @@ description: "이 스니펫이 어떤 상황에서 유용한지 한 줄로 요�
 // 주요 로직을 수행하는 함수
 // 각 단계마다 한국어 주석을 충분히 포함해주세요
 
-export function ${topic.replace(/\s+/g, '')}() {
+export function ${safeIdentifier}() {
   // 구현...
 }
 \`\`\`
+
+**🤖 AI에 복붙할 프롬프트**  
+“${topic} 스니펫 코드를 20~40줄 사이로 작성해줘. import/export 포함, 함수 이름은 ${safeIdentifier}로 해줘.”
+
+**✅ 체크포인트**  
+- [ ] 코드 길이가 20~40줄인가요?  
+- [ ] import/export가 포함되었나요?  
+- [ ] 함수명이 영문 식별자인가요?
+
+**💡 방금 뭘 한 거예요?**  
+복사해 바로 실행 가능한 완성된 코드를 제공합니다.
 
 ## 사용 예제
 
@@ -75,10 +114,10 @@ export function ${topic.replace(/\s+/g, '')}() {
 
 \`\`\`typescript
 // 사용 예시
-import { ${topic.replace(/\s+/g, '')} } from './[경로]'
+import { ${safeIdentifier} } from './[경로]'
 
 function MyComponent() {
-  const result = ${topic.replace(/\s+/g, '')}()
+  const result = ${safeIdentifier}()
 
   // 사용 로직...
 }
@@ -115,6 +154,16 @@ interface Options {
 - 팁 2: [주의사항]  
 - 팁 3: [확장 또는 최적화 팁]  
 
+## 🎨 AI로 커스터마이징하기
+
+<Tip>
+이 스니펫을 수정하고 싶다면 아래 프롬프트를 AI에 복붙하세요.
+</Tip>
+
+1. "코드 스타일을 Prettier 규칙에 맞춰줘"
+2. "에러 처리를 try/catch로 감싸줘"
+3. "반환 타입을 제네릭으로 바꿔줘"
+
 ## 관련 스니펫
 
 <Highlight>
@@ -146,8 +195,11 @@ interface Options {
 5. **실용적인 패턴 제공**  
    - 실제 프로젝트에서 쓸 수 있는 구조 위주로 작성합니다.
 
-6. **코드는 10~50줄 사이**  
-   - 짧고 실용적으로 유지하세요.
+6. **코드는 20~40줄 사이**
+   - 너무 짧거나 장황하지 않게 유지하세요.
+
+7. **자가 검수**
+   - 식별자 영문화, 줄 수, 섹션/코드/MDX 사용 횟수, 예상 소요 시간과 난이도 표시 여부를 마지막에 내부적으로 확인합니다.
 
 ---
 
