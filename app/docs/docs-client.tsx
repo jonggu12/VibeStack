@@ -79,6 +79,45 @@ const CATEGORY_CONFIG: Record<'all' | DocCategory, CategoryConfig> = {
   },
 } as const
 
+// 섹션 설정 (표시 순서와 메타데이터)
+const SECTION_CONFIG = [
+  {
+    key: 'errors' as const,
+    title: '🚨 자주 발생하는 에러 해결',
+    description: '90%가 겪는 에러, 1분 안에 해결하세요',
+    accentColor: 'bg-red-500',
+    gridCols: 'grid-cols-1 md:grid-cols-3',
+  },
+  {
+    key: 'prompts' as const,
+    title: '💬 프롬프트 작성법',
+    description: 'AI한테 정확하게 말하는 방법',
+    accentColor: 'bg-indigo-500',
+    gridCols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+  },
+  {
+    key: 'getting-started' as const,
+    title: '🚀 시작 가이드',
+    description: '처음 시작하는 분들을 위한 필수 가이드',
+    accentColor: 'bg-blue-500',
+    gridCols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+  },
+  {
+    key: 'implementation' as const,
+    title: '🔨 기능 구현 가이드',
+    description: '실전 기능 구현 단계별 가이드',
+    accentColor: 'bg-purple-500',
+    gridCols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+  },
+  {
+    key: 'concepts' as const,
+    title: '📖 개념 & 용어',
+    description: '비개발자도 이해하는 쉬운 용어 설명',
+    accentColor: 'bg-emerald-500',
+    gridCols: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5',
+  },
+]
+
 // Difficulty 라벨
 function getDifficultyLabel(difficulty: string) {
   if (difficulty === 'beginner') return { label: '초급', color: 'text-emerald-400' }
@@ -135,6 +174,18 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
 
     return result
   }, [docs, activeCategory, difficultyFilter, searchQuery])
+
+  // 카테고리별로 문서 그룹핑
+  const docsByCategory = useMemo(() => ({
+    errors: docs.filter(d => d.category === 'errors'),
+    prompts: docs.filter(d => d.category === 'prompts'),
+    'getting-started': docs.filter(d => d.category === 'getting-started'),
+    implementation: docs.filter(d => d.category === 'implementation'),
+    concepts: docs.filter(d => d.category === 'concepts'),
+  }), [docs])
+
+  // 섹션별 표시 여부 (전체 보기 + 필터 없음 + 검색 없음)
+  const showSectionView = activeCategory === 'all' && difficultyFilter === 'all' && !searchQuery.trim()
 
   const handleCategoryChange = (category: string) => {
     if (category === 'all') {
@@ -278,103 +329,213 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
             </div>
           </section>
 
-          {/* 문서 그리드 (3열) */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDocs.map((doc) => {
-              const difficultyInfo = getDifficultyLabel(doc.difficulty)
-              const categoryConfig = CATEGORY_CONFIG[doc.category]
-              const isGlossaryStyle = !!doc.termCategory // Glossary 스타일 문서인지 확인
+          {/* 문서 표시: 섹션 뷰 or 그리드 뷰 */}
+          {showSectionView ? (
+            // ===== 섹션 뷰 (전체 보기) =====
+            <div className="space-y-16">
+              {SECTION_CONFIG.map((section) => {
+                const sectionDocs = docsByCategory[section.key]
+                if (sectionDocs.length === 0) return null
 
-              return (
-                <Link
-                  key={doc.id}
-                  href={`/docs/${doc.slug}`}
-                  className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
-                >
-                  {/* 카테고리 아이콘 섹션 */}
-                  <div className={`h-32 ${categoryConfig.bgColor} relative overflow-hidden flex items-center justify-center`}>
-                    <categoryConfig.icon className={`w-16 h-16 ${categoryConfig.color} opacity-30 group-hover:opacity-50 transition-opacity`} />
-                    {doc.isPremium && (
-                      <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> 프리미엄
-                      </div>
-                    )}
-                    {/* Glossary 스타일 표시 */}
-                    {isGlossaryStyle && (
-                      <div className="absolute top-3 left-3 bg-black/80 backdrop-blur text-yellow-400 text-xs font-bold px-2 py-1 rounded">
-                        용어사전
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 컨텐츠 */}
-                  <div className="p-5">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <span className={`text-xs px-2 py-0.5 rounded ${categoryConfig.bgColor} ${categoryConfig.color}`}>
-                        {categoryConfig.label}
-                      </span>
-                      {isGlossaryStyle && doc.termCategory && (
-                        <span className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">
-                          {doc.termCategory}
-                        </span>
-                      )}
-                      <span className={`text-xs ${difficultyInfo.color}`}>
-                        {difficultyInfo.label}
-                      </span>
+                return (
+                  <section key={section.key}>
+                    {/* 섹션 헤더 */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-2 h-6 ${section.accentColor} rounded-full`} />
+                      <h2 className="text-2xl font-bold text-white">{section.title}</h2>
                     </div>
+                    <p className="text-zinc-400 text-sm mb-6">{section.description}</p>
 
-                    <h3 className="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors line-clamp-2">
-                      {doc.title}
-                    </h3>
+                    {/* 섹션 그리드 */}
+                    <div className={`grid ${section.gridCols} gap-6`}>
+                      {sectionDocs.map((doc) => {
+                        const difficultyInfo = getDifficultyLabel(doc.difficulty)
+                        const categoryConfig = CATEGORY_CONFIG[doc.category]
+                        const isGlossaryStyle = !!doc.termCategory
 
-                    {/* Glossary 스타일: 동의어 표시 */}
-                    {isGlossaryStyle && doc.synonyms && doc.synonyms.length > 0 && (
-                      <p className="text-xs text-zinc-500 mb-2">
-                        동의어: {doc.synonyms.join(', ')}
-                      </p>
-                    )}
+                        return (
+                          <Link
+                            key={doc.id}
+                            href={`/docs/${doc.slug}`}
+                            className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
+                          >
+                            {/* 카테고리 아이콘 섹션 */}
+                            <div className={`h-32 ${categoryConfig.bgColor} relative overflow-hidden flex items-center justify-center`}>
+                              <categoryConfig.icon className={`w-16 h-16 ${categoryConfig.color} opacity-30 group-hover:opacity-50 transition-opacity`} />
+                              {doc.isPremium && (
+                                <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                                  <Lock className="w-3 h-3" /> 프리미엄
+                                </div>
+                              )}
+                              {isGlossaryStyle && (
+                                <div className="absolute top-3 left-3 bg-black/80 backdrop-blur text-yellow-400 text-xs font-bold px-2 py-1 rounded">
+                                  용어사전
+                                </div>
+                              )}
+                            </div>
 
-                    <p className="text-sm text-zinc-400 line-clamp-2 mb-4">
-                      {doc.description}
-                    </p>
+                            {/* 컨텐츠 */}
+                            <div className="p-5">
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                <span className={`text-xs px-2 py-0.5 rounded ${categoryConfig.bgColor} ${categoryConfig.color}`}>
+                                  {categoryConfig.label}
+                                </span>
+                                {isGlossaryStyle && doc.termCategory && (
+                                  <span className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">
+                                    {doc.termCategory}
+                                  </span>
+                                )}
+                                <span className={`text-xs ${difficultyInfo.color}`}>
+                                  {difficultyInfo.label}
+                                </span>
+                              </div>
 
-                    {/* Glossary 스타일: 비유 미리보기 */}
-                    {isGlossaryStyle && doc.analogy && (
-                      <p className="text-xs text-indigo-400 italic mb-3 line-clamp-1">
-                        💡 "{doc.analogy}"
-                      </p>
-                    )}
+                              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors line-clamp-2">
+                                {doc.title}
+                              </h3>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-zinc-800 text-xs text-zinc-500">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {doc.estimatedTime}분
-                      </span>
-                      <span>{doc.views} views</span>
+                              {isGlossaryStyle && doc.synonyms && doc.synonyms.length > 0 && (
+                                <p className="text-xs text-zinc-500 mb-2">
+                                  동의어: {doc.synonyms.join(', ')}
+                                </p>
+                              )}
+
+                              <p className="text-sm text-zinc-400 line-clamp-2 mb-4">
+                                {doc.description}
+                              </p>
+
+                              {isGlossaryStyle && doc.analogy && (
+                                <p className="text-xs text-indigo-400 italic mb-3 line-clamp-1">
+                                  💡 "{doc.analogy}"
+                                </p>
+                              )}
+
+                              <div className="flex items-center justify-between pt-4 border-t border-zinc-800 text-xs text-zinc-500">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> {doc.estimatedTime}분
+                                </span>
+                                <span>{doc.views} views</span>
+                              </div>
+
+                              {isGlossaryStyle && doc.relatedTerms && doc.relatedTerms.length > 0 && (
+                                <div className="mt-3 pt-3 border-t border-zinc-800">
+                                  <p className="text-xs text-zinc-500 mb-1">관련 용어:</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {doc.relatedTerms.slice(0, 3).map((term, idx) => (
+                                      <span key={idx} className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">
+                                        {term}
+                                      </span>
+                                    ))}
+                                    {doc.relatedTerms.length > 3 && (
+                                      <span className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-500">
+                                        +{doc.relatedTerms.length - 3}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </Link>
+                        )
+                      })}
                     </div>
+                  </section>
+                )
+              })}
+            </div>
+          ) : (
+            // ===== 그리드 뷰 (필터/검색 사용시) =====
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredDocs.map((doc) => {
+                const difficultyInfo = getDifficultyLabel(doc.difficulty)
+                const categoryConfig = CATEGORY_CONFIG[doc.category]
+                const isGlossaryStyle = !!doc.termCategory
 
-                    {/* Glossary 스타일: 관련 용어 */}
-                    {isGlossaryStyle && doc.relatedTerms && doc.relatedTerms.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-zinc-800">
-                        <p className="text-xs text-zinc-500 mb-1">관련 용어:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {doc.relatedTerms.slice(0, 3).map((term, idx) => (
-                            <span key={idx} className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">
-                              {term}
-                            </span>
-                          ))}
-                          {doc.relatedTerms.length > 3 && (
-                            <span className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-500">
-                              +{doc.relatedTerms.length - 3}
-                            </span>
-                          )}
+                return (
+                  <Link
+                    key={doc.id}
+                    href={`/docs/${doc.slug}`}
+                    className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
+                  >
+                    <div className={`h-32 ${categoryConfig.bgColor} relative overflow-hidden flex items-center justify-center`}>
+                      <categoryConfig.icon className={`w-16 h-16 ${categoryConfig.color} opacity-30 group-hover:opacity-50 transition-opacity`} />
+                      {doc.isPremium && (
+                        <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> 프리미엄
                         </div>
+                      )}
+                      {isGlossaryStyle && (
+                        <div className="absolute top-3 left-3 bg-black/80 backdrop-blur text-yellow-400 text-xs font-bold px-2 py-1 rounded">
+                          용어사전
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-5">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className={`text-xs px-2 py-0.5 rounded ${categoryConfig.bgColor} ${categoryConfig.color}`}>
+                          {categoryConfig.label}
+                        </span>
+                        {isGlossaryStyle && doc.termCategory && (
+                          <span className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">
+                            {doc.termCategory}
+                          </span>
+                        )}
+                        <span className={`text-xs ${difficultyInfo.color}`}>
+                          {difficultyInfo.label}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                </Link>
-              )
-            })}
-          </section>
+
+                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors line-clamp-2">
+                        {doc.title}
+                      </h3>
+
+                      {isGlossaryStyle && doc.synonyms && doc.synonyms.length > 0 && (
+                        <p className="text-xs text-zinc-500 mb-2">
+                          동의어: {doc.synonyms.join(', ')}
+                        </p>
+                      )}
+
+                      <p className="text-sm text-zinc-400 line-clamp-2 mb-4">
+                        {doc.description}
+                      </p>
+
+                      {isGlossaryStyle && doc.analogy && (
+                        <p className="text-xs text-indigo-400 italic mb-3 line-clamp-1">
+                          💡 "{doc.analogy}"
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between pt-4 border-t border-zinc-800 text-xs text-zinc-500">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {doc.estimatedTime}분
+                        </span>
+                        <span>{doc.views} views</span>
+                      </div>
+
+                      {isGlossaryStyle && doc.relatedTerms && doc.relatedTerms.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-zinc-800">
+                          <p className="text-xs text-zinc-500 mb-1">관련 용어:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {doc.relatedTerms.slice(0, 3).map((term, idx) => (
+                              <span key={idx} className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">
+                                {term}
+                              </span>
+                            ))}
+                            {doc.relatedTerms.length > 3 && (
+                              <span className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-500">
+                                +{doc.relatedTerms.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+            </section>
+          )}
 
           {/* Empty State */}
           {filteredDocs.length === 0 && (
