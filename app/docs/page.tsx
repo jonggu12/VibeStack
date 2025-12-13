@@ -22,11 +22,12 @@ export interface Doc {
 }
 
 interface DocsPageProps {
-  searchParams: { category?: string }
+  searchParams: Promise<{ category?: string }>
 }
 
 export default async function DocsPage({ searchParams }: DocsPageProps) {
-  const selectedCategory = searchParams.category as DocCategory | undefined
+  const params = await searchParams
+  const selectedCategory = params.category as DocCategory | undefined
 
   // Fetch all published docs
   const { data: docsData, error } = await supabase

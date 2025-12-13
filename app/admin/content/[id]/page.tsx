@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getContent } from '@/app/actions/content'
 import { ContentEditor } from '@/components/admin/content-editor'
 import { currentUser } from '@clerk/nextjs/server'
+import { supabaseAdmin } from '@/lib/supabase'
 import { Bell } from 'lucide-react'
 
 // 빌드 시 정적 생성 방지 (DB 의존성)
@@ -12,9 +13,26 @@ interface EditContentPageProps {
 }
 
 export default async function EditContentPage({ params }: EditContentPageProps) {
-  // 관리자 권한 체크
+  // 관리자 권한 체크 (Clerk metadata 또는 Supabase DB)
   const user = await currentUser()
-  if (!user || user.publicMetadata?.role !== 'admin') {
+  if (!user) {
+    redirect('/')
+  }
+
+  // Check 1: Clerk metadata
+  const isClerkAdmin = user.publicMetadata?.role === 'admin'
+
+  // Check 2: Supabase database
+  const { data: dbUser } = await supabaseAdmin
+    .from('users')
+    .select('role')
+    .eq('clerk_user_id', user.id)
+    .single()
+
+  const isSupabaseAdmin = dbUser?.role === 'admin'
+
+  // Redirect if neither method confirms admin
+  if (!isClerkAdmin && !isSupabaseAdmin) {
     redirect('/')
   }
 

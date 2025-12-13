@@ -3,12 +3,78 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search, Clock, BookOpen, Lock, ChevronDown } from 'lucide-react'
+import { Search, Clock, BookOpen, Lock, ChevronDown, ChevronRight } from 'lucide-react'
 import { FaRocket, FaCode, FaLightbulb, FaBug, FaBook } from 'react-icons/fa'
 import type { IconType } from 'react-icons'
 import { useUser } from '@clerk/nextjs'
 import { UserMenu } from '@/components/layout/user-menu'
 import type { Doc, DocCategory } from './page'
+
+// 브랜드 로고 컴포넌트
+function TechLogo({ title }: { title: string }) {
+  const titleLower = title.toLowerCase()
+
+  // Next.js
+  if (titleLower.includes('next')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-black border border-zinc-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <span className="text-white font-bold text-xl">N</span>
+      </div>
+    )
+  }
+
+  // Supabase
+  if (titleLower.includes('supabase')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <span className="text-emerald-400 font-bold text-xl">S</span>
+      </div>
+    )
+  }
+
+  // Clerk
+  if (titleLower.includes('clerk')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <span className="text-purple-400 font-bold text-xl">C</span>
+      </div>
+    )
+  }
+
+  // Stripe
+  if (titleLower.includes('stripe')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <span className="text-indigo-400 font-bold text-xl">$</span>
+      </div>
+    )
+  }
+
+  // Resend
+  if (titleLower.includes('resend') || titleLower.includes('이메일')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <span className="text-blue-400 font-bold text-xl">✉</span>
+      </div>
+    )
+  }
+
+  // Cursor
+  if (titleLower.includes('cursor')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <span className="text-zinc-300 font-bold text-xl">⌘</span>
+      </div>
+    )
+  }
+
+  // Default
+  return (
+    <div className="w-12 h-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+      <FaRocket className="text-zinc-400 text-xl" />
+    </div>
+  )
+}
 
 interface DocsClientProps {
   docs: Doc[]
@@ -82,20 +148,6 @@ const CATEGORY_CONFIG: Record<'all' | DocCategory, CategoryConfig> = {
 // 섹션 설정 (표시 순서와 메타데이터)
 const SECTION_CONFIG = [
   {
-    key: 'errors' as const,
-    title: '🚨 자주 발생하는 에러 해결',
-    description: '90%가 겪는 에러, 1분 안에 해결하세요',
-    accentColor: 'bg-red-500',
-    gridCols: 'grid-cols-1 md:grid-cols-3',
-  },
-  {
-    key: 'prompts' as const,
-    title: '💬 프롬프트 작성법',
-    description: 'AI한테 정확하게 말하는 방법',
-    accentColor: 'bg-indigo-500',
-    gridCols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
-  },
-  {
     key: 'getting-started' as const,
     title: '🚀 시작 가이드',
     description: '처음 시작하는 분들을 위한 필수 가이드',
@@ -107,7 +159,21 @@ const SECTION_CONFIG = [
     title: '🔨 기능 구현 가이드',
     description: '실전 기능 구현 단계별 가이드',
     accentColor: 'bg-purple-500',
-    gridCols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+    gridCols: 'grid-cols-1 md:grid-cols-2',
+  },
+  {
+    key: 'prompts' as const,
+    title: '💬 프롬프트 작성법',
+    description: 'AI한테 정확하게 말하는 방법',
+    accentColor: 'bg-indigo-500',
+    gridCols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-fr',
+  },
+  {
+    key: 'errors' as const,
+    title: '🚨 자주 발생하는 에러 해결',
+    description: '90%가 겪는 에러, 1분 안에 해결하세요',
+    accentColor: 'bg-red-500',
+    gridCols: 'grid-cols-1 md:grid-cols-3',
   },
   {
     key: 'concepts' as const,
@@ -337,18 +403,43 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                 const sectionDocs = docsByCategory[section.key]
                 if (sectionDocs.length === 0) return null
 
+                // 섹션별 미리보기 개수 설정
+                const PREVIEW_LIMITS: Record<typeof section.key, number> = {
+                  'errors': 6,
+                  'prompts': 5,
+                  'getting-started': 6,
+                  'implementation': 6,
+                  'concepts': 10,
+                }
+                const PREVIEW_LIMIT = PREVIEW_LIMITS[section.key]
+                const previewDocs = sectionDocs.slice(0, PREVIEW_LIMIT)
+                const hasMore = sectionDocs.length > PREVIEW_LIMIT
+
                 return (
                   <section key={section.key}>
                     {/* 섹션 헤더 */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={`w-2 h-6 ${section.accentColor} rounded-full`} />
-                      <h2 className="text-2xl font-bold text-white">{section.title}</h2>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-6 ${section.accentColor} rounded-full`} />
+                        <h2 className="text-2xl font-bold text-white">{section.title}</h2>
+                      </div>
+
+                      {/* 전체보기 버튼 */}
+                      {hasMore && (
+                        <button
+                          onClick={() => handleCategoryChange(section.key)}
+                          className="group flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors"
+                        >
+                          <span>{sectionDocs.length}개 전체보기</span>
+                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                      )}
                     </div>
                     <p className="text-zinc-400 text-sm mb-6">{section.description}</p>
 
                     {/* 섹션 그리드 */}
                     <div className={`grid ${section.gridCols} gap-6`}>
-                      {sectionDocs.map((doc, index) => {
+                      {previewDocs.map((doc, index) => {
                         const difficultyInfo = getDifficultyLabel(doc.difficulty)
                         const categoryConfig = CATEGORY_CONFIG[doc.category]
                         const isGlossaryStyle = !!doc.termCategory
@@ -386,17 +477,17 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                           )
                         }
 
-                        // === 프롬프트 카드 (챗 스타일) ===
+                        // === 프롬프트 카드 (챗 스타일 - Bento Grid) ===
                         if (section.key === 'prompts') {
                           const isFirstPrompt = index === 0
 
                           if (isFirstPrompt) {
-                            // Highlighted Card (2x1)
+                            // Highlighted Card (2x2 - spans 2 columns and 2 rows)
                             return (
                               <Link
                                 key={doc.id}
                                 href={`/docs/${doc.slug}`}
-                                className="group col-span-1 md:col-span-2 bg-gradient-to-br from-indigo-900/20 to-zinc-900 border border-indigo-500/30 rounded-xl p-6 hover:border-indigo-500 transition-all relative overflow-hidden"
+                                className="group col-span-1 md:col-span-2 md:row-span-2 bg-gradient-to-br from-indigo-900/20 to-zinc-900 border border-indigo-500/30 rounded-xl p-6 hover:border-indigo-500 transition-all relative overflow-hidden flex flex-col justify-between"
                               >
                                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                   <div className="text-8xl text-indigo-400">🤖</div>
@@ -406,35 +497,35 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                                     MUST READ
                                   </span>
                                   <h3 className="text-xl font-bold text-white mb-2">{doc.title}</h3>
-                                  <p className="text-zinc-400 text-sm mb-6 max-w-sm line-clamp-2">
+                                  <p className="text-zinc-400 text-sm mb-6 max-w-sm line-clamp-3">
                                     {doc.description}
                                   </p>
-                                  <div className="flex items-center gap-3">
-                                    <div className="flex -space-x-2">
-                                      <div className="w-6 h-6 rounded-full bg-zinc-700 border border-zinc-900"></div>
-                                      <div className="w-6 h-6 rounded-full bg-zinc-600 border border-zinc-900"></div>
-                                    </div>
-                                    <span className="text-xs text-zinc-500">{doc.views} views</span>
+                                </div>
+                                <div className="relative z-10 flex items-center gap-3 mt-auto">
+                                  <div className="flex -space-x-2">
+                                    <div className="w-6 h-6 rounded-full bg-zinc-700 border border-zinc-900"></div>
+                                    <div className="w-6 h-6 rounded-full bg-zinc-600 border border-zinc-900"></div>
                                   </div>
+                                  <span className="text-xs text-zinc-500">{doc.views} views</span>
                                 </div>
                               </Link>
                             )
                           } else {
-                            // Standard Prompt Card
+                            // Standard Prompt Card (1x1)
                             return (
                               <Link
                                 key={doc.id}
                                 href={`/docs/${doc.slug}`}
-                                className="group bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-zinc-600 transition-all flex flex-col justify-between"
+                                className="group bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-zinc-600 transition-all flex flex-col justify-between h-full"
                               >
                                 <div>
-                                  <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 mb-4 group-hover:bg-zinc-700 group-hover:text-white transition-colors">
+                                  <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 mb-3 group-hover:bg-zinc-700 group-hover:text-white transition-colors">
                                     <categoryConfig.icon className="w-5 h-5" />
                                   </div>
-                                  <h3 className="text-base font-bold text-zinc-100 mb-2 line-clamp-2">{doc.title}</h3>
+                                  <h3 className="text-sm font-bold text-zinc-100 mb-2 line-clamp-2 leading-tight">{doc.title}</h3>
                                   <p className="text-xs text-zinc-500 line-clamp-2">{doc.description}</p>
                                 </div>
-                                <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-between items-center">
+                                <div className="mt-3 pt-3 border-t border-zinc-800 flex justify-between items-center">
                                   <span className="text-[10px] text-zinc-500">{difficultyInfo.label}</span>
                                   <div className="text-zinc-600 text-xs group-hover:translate-x-1 transition-transform">→</div>
                                 </div>
@@ -473,7 +564,84 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                           )
                         }
 
-                        // === 기본 카드 (시작 가이드, 기능 구현) ===
+                        // === 기능 구현 카드 (리스트 스타일) ===
+                        if (section.key === 'implementation') {
+                          return (
+                            <Link
+                              key={doc.id}
+                              href={`/docs/${doc.slug}`}
+                              className="group flex items-center gap-4 bg-zinc-900 border border-zinc-800 p-4 rounded-xl hover:border-purple-500/50 transition-all"
+                            >
+                              {/* Icon Box */}
+                              <TechLogo title={doc.title} />
+
+                              {/* Text */}
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-base font-bold text-white group-hover:text-purple-400 truncate transition-colors">
+                                  {doc.title}
+                                </h3>
+                                <p className="text-xs text-zinc-500 truncate">{doc.description}</p>
+                              </div>
+
+                              {/* Arrow */}
+                              <div className="text-zinc-600 group-hover:text-white transition-colors">
+                                <ChevronRight className="w-5 h-5" />
+                              </div>
+                            </Link>
+                          )
+                        }
+
+                        // === 시작 가이드 카드 (브랜드 로고 사용) ===
+                        if (section.key === 'getting-started') {
+                          return (
+                            <Link
+                              key={doc.id}
+                              href={`/docs/${doc.slug}`}
+                              className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1"
+                            >
+                              {/* 브랜드 로고 섹션 */}
+                              <div className="h-32 bg-zinc-950 relative overflow-hidden flex items-center justify-center">
+                                <div className="scale-125 opacity-80 group-hover:scale-150 group-hover:opacity-100 transition-all duration-300">
+                                  <TechLogo title={doc.title} />
+                                </div>
+                                {doc.isPremium && (
+                                  <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                                    <Lock className="w-3 h-3" /> 프리미엄
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* 컨텐츠 */}
+                              <div className="p-5">
+                                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                  <span className="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400">
+                                    시작 가이드
+                                  </span>
+                                  <span className={`text-xs ${difficultyInfo.color}`}>
+                                    {difficultyInfo.label}
+                                  </span>
+                                </div>
+
+                                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition-colors line-clamp-2">
+                                  {doc.title}
+                                </h3>
+
+                                <p className="text-sm text-zinc-400 line-clamp-2 mb-4">
+                                  {doc.description}
+                                </p>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-zinc-800 text-xs text-zinc-500">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" /> {doc.estimatedTime}분
+                                  </span>
+                                  <span>{doc.views} views</span>
+                                </div>
+                              </div>
+                            </Link>
+                          )
+                        }
+
+                        // === 기본 카드 (기타) ===
                         return (
                           <Link
                             key={doc.id}
