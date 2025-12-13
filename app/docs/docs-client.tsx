@@ -3,8 +3,10 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search, Clock, BookOpen, Lock, ChevronDown, ChevronRight } from 'lucide-react'
-import { FaRocket, FaCode, FaLightbulb, FaBug, FaBook } from 'react-icons/fa'
+import { Search, Clock, BookOpen, Lock, ChevronDown, ChevronRight, Wrench, Sparkles } from 'lucide-react'
+import { FaRocket, FaCode, FaLightbulb, FaBug, FaBook, FaRobot } from 'react-icons/fa'
+import { HiOutlineExclamationCircle } from 'react-icons/hi'
+import { IoSparklesSharp } from 'react-icons/io5'
 import type { IconType } from 'react-icons'
 import { useUser } from '@clerk/nextjs'
 import { UserMenu } from '@/components/layout/user-menu'
@@ -149,37 +151,47 @@ const CATEGORY_CONFIG: Record<'all' | DocCategory, CategoryConfig> = {
 const SECTION_CONFIG = [
   {
     key: 'getting-started' as const,
-    title: '🚀 시작 가이드',
+    title: '시작 가이드',
+    icon: FaRocket,
     description: '처음 시작하는 분들을 위한 필수 가이드',
     accentColor: 'bg-blue-500',
+    iconColor: 'text-blue-400',
     gridCols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   },
   {
     key: 'implementation' as const,
-    title: '🔨 기능 구현 가이드',
+    title: '기능 구현 가이드',
+    icon: Wrench,
     description: '실전 기능 구현 단계별 가이드',
     accentColor: 'bg-purple-500',
+    iconColor: 'text-purple-400',
     gridCols: 'grid-cols-1 md:grid-cols-2',
   },
   {
     key: 'prompts' as const,
-    title: '💬 프롬프트 작성법',
+    title: '프롬프트 작성법',
+    icon: IoSparklesSharp,
     description: 'AI한테 정확하게 말하는 방법',
     accentColor: 'bg-indigo-500',
+    iconColor: 'text-indigo-400',
     gridCols: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-fr',
   },
   {
     key: 'errors' as const,
-    title: '🚨 자주 발생하는 에러 해결',
+    title: '자주 발생하는 에러 해결',
+    icon: HiOutlineExclamationCircle,
     description: '90%가 겪는 에러, 1분 안에 해결하세요',
     accentColor: 'bg-red-500',
+    iconColor: 'text-red-400',
     gridCols: 'grid-cols-1 md:grid-cols-3',
   },
   {
     key: 'concepts' as const,
-    title: '📖 개념 & 용어',
+    title: '개념 & 용어',
+    icon: BookOpen,
     description: '비개발자도 이해하는 쉬운 용어 설명',
     accentColor: 'bg-emerald-500',
+    iconColor: 'text-emerald-400',
     gridCols: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5',
   },
 ]
@@ -419,8 +431,9 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                   <section key={section.key}>
                     {/* 섹션 헤더 */}
                     <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <div className={`w-2 h-6 ${section.accentColor} rounded-full`} />
+                        <section.icon className={`w-6 h-6 ${section.iconColor}`} />
                         <h2 className="text-2xl font-bold text-white">{section.title}</h2>
                       </div>
 
@@ -489,8 +502,8 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                                 href={`/docs/${doc.slug}`}
                                 className="group col-span-1 md:col-span-2 md:row-span-2 bg-gradient-to-br from-indigo-900/20 to-zinc-900 border border-indigo-500/30 rounded-xl p-6 hover:border-indigo-500 transition-all relative overflow-hidden flex flex-col justify-between"
                               >
-                                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                  <div className="text-8xl text-indigo-400">🤖</div>
+                                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                                  <FaRobot className="text-indigo-400 w-24 h-24" />
                                 </div>
                                 <div className="relative z-10">
                                   <span className="inline-block px-2 py-1 bg-indigo-500 text-white text-[10px] font-bold rounded mb-3">
