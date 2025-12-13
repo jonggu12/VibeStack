@@ -348,11 +348,132 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
 
                     {/* 섹션 그리드 */}
                     <div className={`grid ${section.gridCols} gap-6`}>
-                      {sectionDocs.map((doc) => {
+                      {sectionDocs.map((doc, index) => {
                         const difficultyInfo = getDifficultyLabel(doc.difficulty)
                         const categoryConfig = CATEGORY_CONFIG[doc.category]
                         const isGlossaryStyle = !!doc.termCategory
 
+                        // === 에러 해결 카드 (터미널 스타일) ===
+                        if (section.key === 'errors') {
+                          return (
+                            <Link
+                              key={doc.id}
+                              href={`/docs/${doc.slug}`}
+                              className="group relative bg-[#1e1e1e] rounded-xl border border-zinc-800 hover:border-red-500/50 transition-all overflow-hidden shadow-lg"
+                            >
+                              {/* Terminal Header */}
+                              <div className="bg-[#2d2d2d] px-4 py-2 flex items-center gap-2 border-b border-zinc-700">
+                                <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                                <span className="ml-auto text-[10px] text-zinc-500 font-mono">Terminal</span>
+                              </div>
+                              {/* Content */}
+                              <div className="p-5">
+                                {/* Error Message Preview */}
+                                <div className="font-mono text-red-400 text-xs bg-red-500/10 p-2 rounded mb-3 border border-red-500/20 truncate">
+                                  Error: {doc.title.substring(0, 30)}...
+                                </div>
+                                <h3 className="text-lg font-bold text-zinc-100 group-hover:text-red-400 transition-colors mb-2">
+                                  {doc.title}
+                                </h3>
+                                <p className="text-sm text-zinc-400 mb-4 line-clamp-2">{doc.description}</p>
+                                <div className="flex items-center gap-2 text-xs text-zinc-500">
+                                  <Clock className="w-3 h-3" /> {doc.estimatedTime}분 소요
+                                </div>
+                              </div>
+                            </Link>
+                          )
+                        }
+
+                        // === 프롬프트 카드 (챗 스타일) ===
+                        if (section.key === 'prompts') {
+                          const isFirstPrompt = index === 0
+
+                          if (isFirstPrompt) {
+                            // Highlighted Card (2x1)
+                            return (
+                              <Link
+                                key={doc.id}
+                                href={`/docs/${doc.slug}`}
+                                className="group col-span-1 md:col-span-2 bg-gradient-to-br from-indigo-900/20 to-zinc-900 border border-indigo-500/30 rounded-xl p-6 hover:border-indigo-500 transition-all relative overflow-hidden"
+                              >
+                                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                  <div className="text-8xl text-indigo-400">🤖</div>
+                                </div>
+                                <div className="relative z-10">
+                                  <span className="inline-block px-2 py-1 bg-indigo-500 text-white text-[10px] font-bold rounded mb-3">
+                                    MUST READ
+                                  </span>
+                                  <h3 className="text-xl font-bold text-white mb-2">{doc.title}</h3>
+                                  <p className="text-zinc-400 text-sm mb-6 max-w-sm line-clamp-2">
+                                    {doc.description}
+                                  </p>
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex -space-x-2">
+                                      <div className="w-6 h-6 rounded-full bg-zinc-700 border border-zinc-900"></div>
+                                      <div className="w-6 h-6 rounded-full bg-zinc-600 border border-zinc-900"></div>
+                                    </div>
+                                    <span className="text-xs text-zinc-500">{doc.views} views</span>
+                                  </div>
+                                </div>
+                              </Link>
+                            )
+                          } else {
+                            // Standard Prompt Card
+                            return (
+                              <Link
+                                key={doc.id}
+                                href={`/docs/${doc.slug}`}
+                                className="group bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-zinc-600 transition-all flex flex-col justify-between"
+                              >
+                                <div>
+                                  <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 mb-4 group-hover:bg-zinc-700 group-hover:text-white transition-colors">
+                                    <categoryConfig.icon className="w-5 h-5" />
+                                  </div>
+                                  <h3 className="text-base font-bold text-zinc-100 mb-2 line-clamp-2">{doc.title}</h3>
+                                  <p className="text-xs text-zinc-500 line-clamp-2">{doc.description}</p>
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-between items-center">
+                                  <span className="text-[10px] text-zinc-500">{difficultyInfo.label}</span>
+                                  <div className="text-zinc-600 text-xs group-hover:translate-x-1 transition-transform">→</div>
+                                </div>
+                              </Link>
+                            )
+                          }
+                        }
+
+                        // === 개념&용어 카드 (플래시카드 스타일) ===
+                        if (section.key === 'concepts') {
+                          return (
+                            <Link
+                              key={doc.id}
+                              href={`/docs/${doc.slug}`}
+                              className="group bg-zinc-900/50 border border-zinc-800/50 hover:bg-zinc-900 hover:border-emerald-500/50 rounded-xl p-4 transition-all hover:-translate-y-1"
+                            >
+                              {isGlossaryStyle && doc.termCategory && (
+                                <span className="text-[10px] font-bold text-emerald-500 mb-1 block">
+                                  {doc.termCategory}
+                                </span>
+                              )}
+                              <h3 className="text-lg font-bold text-white mb-2">{doc.title}</h3>
+                              <p className="text-xs text-zinc-400 leading-relaxed">
+                                {isGlossaryStyle && doc.analogy ? (
+                                  <>
+                                    "{doc.analogy}"<br />
+                                    <span className="text-zinc-600 text-[10px] block mt-1 line-clamp-2">
+                                      {doc.description}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="line-clamp-3">{doc.description}</span>
+                                )}
+                              </p>
+                            </Link>
+                          )
+                        }
+
+                        // === 기본 카드 (시작 가이드, 기능 구현) ===
                         return (
                           <Link
                             key={doc.id}
