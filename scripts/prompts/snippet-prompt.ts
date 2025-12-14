@@ -1,17 +1,18 @@
 export interface SnippetPromptOptions {
   topic: string
+  category: string // 'Auth', 'Payment', 'Database', 'UI', 'Hook', 'API', 'Storage', 'Validation'
   stack: string[]
   difficulty: 'beginner' | 'intermediate' | 'advanced'
 }
 
 export function buildSnippetPrompt(options: SnippetPromptOptions): string {
-  const { topic, stack, difficulty } = options
+  const { topic, category, stack, difficulty } = options
 
   return `
-당신은 VibeStack에서 **코드 스니펫 문서를 작성하는 전문 기술 문서 작가**입니다.  
+당신은 VibeStack에서 **코드 스니펫 문서를 작성하는 전문 기술 문서 작가**입니다.
 이 문서의 목적은 **바로 복사해서 사용할 수 있는 실용적인 코드 스니펫**을 제공하는 것입니다.
 
-이 문서에서는 **React Icons를 사용하지 않습니다.**  
+이 문서에서는 **React Icons를 사용하지 않습니다.**
 대신 **Callout, Info, Tip, Highlight, Warning 등의 MDX 컴포넌트를 활용**해 섹션을 구조화해주세요.
 
 예시:
@@ -26,9 +27,10 @@ export function buildSnippetPrompt(options: SnippetPromptOptions): string {
 
 # 스니펫 정보
 
-- **주제**: ${topic}  
-- **기술 스택**: ${stack.join(', ')}  
-- **난이도**: ${difficulty}  
+- **주제**: ${topic}
+- **카테고리**: ${category}
+- **기술 스택**: ${stack.join(', ')}
+- **난이도**: ${difficulty}
 
 ---
 
@@ -151,6 +153,28 @@ interface Options {
 
 ---
 
-준비가 되었다면, 위 템플릿을 기반으로 완성된 코드 스니펫 문서를 작성해주세요.
+# 📦 최종 출력 형식
+
+**반드시 유효한 JSON 형식**으로 **3가지를 모두 포함**해서 출력해주세요.
+
+**출력 형식:**
+- 코드 블록 없이 순수 JSON만 출력
+- 모든 문자열 내부의 줄바꿈은 \\n으로 이스케이프
+- 모든 따옴표는 \\"로 이스케이프
+
+**JSON 구조:**
+{
+  "content": "위 MDX 템플릿으로 작성된 완전한 문서 (frontmatter 포함, 모든 줄바꿈은 \\n으로)",
+  "code_snippet": "복사-붙여넣기용 실제 코드만 (주석 포함, import/export 포함, 실행 가능한 완전한 코드, 줄바꿈은 \\n)",
+  "prompt_text": "AI에게 이 스니펫을 생성하도록 요청할 때 사용할 프롬프트 (한국어, 200-300자, 요구사항 명확히, 줄바꿈은 \\n)"
+}
+
+**중요:**
+- code_snippet은 반드시 실행 가능한 완전한 코드여야 합니다 (import, export, 타입 정의 포함)
+- prompt_text는 Cursor나 Copilot에 붙여넣으면 바로 이 코드가 생성되도록 작성
+- content는 위 MDX 템플릿 형식 준수
+- 모든 필드의 문자열은 적절히 이스케이프되어야 합니다
+
+준비가 되었다면, 위 형식의 유효한 JSON을 생성해주세요.
 `
 }
