@@ -12,30 +12,6 @@ interface SnippetsClientProps {
   snippets: Snippet[]
 }
 
-// 카테고리별 키워드 매핑
-const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  auth: ['auth', '로그인', 'login', 'clerk', 'google', 'jwt', '인증', 'oauth', '소셜'],
-  payment: ['결제', 'payment', 'stripe', 'toss', 'checkout', '페이'],
-  'ui-ux': [
-    'ui',
-    'ux',
-    '컴포넌트',
-    'component',
-    'button',
-    'toast',
-    'shadcn',
-    'debounce',
-    '훅',
-    'hook',
-    '버튼',
-    '알림',
-  ],
-  database: ['database', 'supabase', 'db', '데이터베이스', 'sql', 'prisma'],
-  storage: ['s3', 'storage', '스토리지', 'upload', '업로드', '파일'],
-  email: ['email', 'mail', '이메일', 'nodemailer', 'resend', '메일'],
-  validation: ['validation', 'zod', '유효성', '검증', 'form'],
-}
-
 export function SnippetsClient({ snippets }: SnippetsClientProps) {
   const { isSignedIn } = useUser()
   const [searchQuery, setSearchQuery] = useState('')
@@ -43,20 +19,25 @@ export function SnippetsClient({ snippets }: SnippetsClientProps) {
 
   // 필터링 로직
   const filteredSnippets = snippets.filter((snippet) => {
-    // 1. 검색어 필터링
+    // 1. 검색어 필터링 (제목, 설명, 태그에서 검색)
     const matchesSearch =
+      searchQuery === '' ||
       snippet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      snippet.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      snippet.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      snippet.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
 
-    // 2. 카테고리 필터링
+    // 2. 카테고리 필터링 (snippet_category 사용)
     if (activeFilter === 'all') {
       return matchesSearch
     }
 
-    const keywords = CATEGORY_KEYWORDS[activeFilter] || []
-    const searchText = `${snippet.title} ${snippet.description || ''}`.toLowerCase()
+    // UI 필터는 'ui-ux'로 저장되어 있지만 DB에는 'ui'로 저장됨
+    const categoryMap: Record<string, string> = {
+      'ui-ux': 'ui',
+    }
 
-    const matchesCategory = keywords.some((keyword) => searchText.includes(keyword.toLowerCase()))
+    const filterCategory = categoryMap[activeFilter] || activeFilter
+    const matchesCategory = snippet.snippet_category === filterCategory
 
     return matchesSearch && matchesCategory
   })

@@ -3,11 +3,25 @@
 import { supabaseAdmin } from '@/lib/supabase'
 
 // 타입 정의
+export type SnippetCategory =
+  | 'auth'
+  | 'payment'
+  | 'database'
+  | 'storage'
+  | 'email'
+  | 'ui'
+  | 'hooks'
+  | 'api'
+  | 'validation'
+  | 'integration'
+
 export interface Snippet {
   id: string
   slug: string
   title: string
   description: string | null
+  snippet_category: SnippetCategory | null
+  tags: string[] | null
   stack: Record<string, any> | null
   code_snippet: string | null
   prompt_text: string | null
@@ -26,6 +40,8 @@ export async function getSnippets(): Promise<Snippet[]> {
       slug,
       title,
       description,
+      snippet_category,
+      tags,
       stack,
       code_snippet,
       prompt_text,
@@ -58,6 +74,8 @@ export async function getSnippetBySlug(slug: string): Promise<Snippet | null> {
       slug,
       title,
       description,
+      snippet_category,
+      tags,
       stack,
       code_snippet,
       prompt_text,
