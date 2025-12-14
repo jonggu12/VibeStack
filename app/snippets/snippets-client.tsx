@@ -12,19 +12,53 @@ interface SnippetsClientProps {
   snippets: Snippet[]
 }
 
+// 카테고리별 키워드 매핑
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  auth: ['auth', '로그인', 'login', 'clerk', 'google', 'jwt', '인증', 'oauth', '소셜'],
+  payment: ['결제', 'payment', 'stripe', 'toss', 'checkout', '페이'],
+  'ui-ux': [
+    'ui',
+    'ux',
+    '컴포넌트',
+    'component',
+    'button',
+    'toast',
+    'shadcn',
+    'debounce',
+    '훅',
+    'hook',
+    '버튼',
+    '알림',
+  ],
+  database: ['database', 'supabase', 'db', '데이터베이스', 'sql', 'prisma'],
+  storage: ['s3', 'storage', '스토리지', 'upload', '업로드', '파일'],
+  email: ['email', 'mail', '이메일', 'nodemailer', 'resend', '메일'],
+  validation: ['validation', 'zod', '유효성', '검증', 'form'],
+}
+
 export function SnippetsClient({ snippets }: SnippetsClientProps) {
   const { isSignedIn } = useUser()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<string>('all')
 
-  // 검색 필터링
+  // 필터링 로직
   const filteredSnippets = snippets.filter((snippet) => {
+    // 1. 검색어 필터링
     const matchesSearch =
       snippet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       snippet.description?.toLowerCase().includes(searchQuery.toLowerCase())
 
-    // TODO: 카테고리 필터 구현 (현재는 전체 표시)
-    return matchesSearch
+    // 2. 카테고리 필터링
+    if (activeFilter === 'all') {
+      return matchesSearch
+    }
+
+    const keywords = CATEGORY_KEYWORDS[activeFilter] || []
+    const searchText = `${snippet.title} ${snippet.description || ''}`.toLowerCase()
+
+    const matchesCategory = keywords.some((keyword) => searchText.includes(keyword.toLowerCase()))
+
+    return matchesSearch && matchesCategory
   })
 
   return (
@@ -117,11 +151,22 @@ export function SnippetsClient({ snippets }: SnippetsClientProps) {
               </button>
               <button
                 onClick={() => setActiveFilter('payment')}
-                className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-400 text-xs hover:text-white hover:bg-zinc-700 transition-colors border border-zinc-700"
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                  activeFilter === 'payment'
+                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                    : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white hover:bg-zinc-700'
+                }`}
               >
                 #Payment
               </button>
-              <button className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-400 text-xs hover:text-white hover:bg-zinc-700 transition-colors border border-zinc-700">
+              <button
+                onClick={() => setActiveFilter('ui-ux')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                  activeFilter === 'ui-ux'
+                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                    : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white hover:bg-zinc-700'
+                }`}
+              >
                 #UI/UX
               </button>
             </div>
