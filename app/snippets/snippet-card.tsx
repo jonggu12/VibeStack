@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Code, Sparkles, Bookmark } from 'lucide-react'
 import { FaGoogle, FaStripe, FaDatabase } from 'react-icons/fa'
 import type { Snippet } from './actions'
@@ -167,7 +168,10 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
 
   return (
     <>
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/5 transition-all group">
+      <Link
+        href={`/snippets/${snippet.slug}`}
+        className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/5 transition-all group block"
+      >
         {/* Header */}
         <div className="p-4 border-b border-zinc-800 flex justify-between items-start">
           <div className="flex items-center gap-3">
@@ -222,21 +226,27 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
         {/* Actions */}
         <div className="p-4 bg-zinc-900 flex gap-2">
           <button
-            onClick={() => handleCopy('prompt')}
+            onClick={(e) => {
+              e.preventDefault()
+              handleCopy('prompt')
+            }}
             className="flex-1 bg-white text-black text-xs font-bold py-2.5 rounded-lg hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-white/5"
           >
             <Sparkles className="w-3 h-3 text-indigo-600" />
             <span>프롬프트 복사</span>
           </button>
           <button
-            onClick={() => handleCopy('code')}
+            onClick={(e) => {
+              e.preventDefault()
+              handleCopy('code')
+            }}
             className="px-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-lg transition-colors border border-zinc-700"
             title="코드만 복사"
           >
             <Code className="w-4 h-4" />
           </button>
         </div>
-      </div>
+      </Link>
 
       {/* Toast */}
       {toast.show && (

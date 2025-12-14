@@ -48,6 +48,9 @@ export async function getSnippets(): Promise<Snippet[]> {
 
 // 개별 스니펫 가져오기 (slug로)
 export async function getSnippetBySlug(slug: string): Promise<Snippet | null> {
+  // URL에서 오는 slug는 인코딩되어 있을 수 있으므로 디코딩
+  const decodedSlug = decodeURIComponent(slug)
+
   const { data: snippet, error } = await supabaseAdmin
     .from('contents')
     .select(`
@@ -65,7 +68,7 @@ export async function getSnippetBySlug(slug: string): Promise<Snippet | null> {
     `)
     .eq('type', 'snippet')
     .eq('status', 'published')
-    .eq('slug', slug)
+    .eq('slug', decodedSlug)
     .single()
 
   if (error) {
