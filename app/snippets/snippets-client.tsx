@@ -1,8 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, Plus } from 'lucide-react'
+import {
+  Search,
+  Plus,
+  ChevronDown,
+  Folder,
+  Lock,
+  CreditCard,
+  Database,
+  Cloud,
+  Mail,
+  Palette,
+  Zap,
+  Code2,
+  CheckCircle,
+  Link2,
+} from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { UserMenu } from '@/components/layout/user-menu'
 import { SnippetCard } from './snippet-card'
@@ -12,10 +27,39 @@ interface SnippetsClientProps {
   snippets: Snippet[]
 }
 
+// 카테고리 설정
+const CATEGORIES = [
+  { value: 'all', label: '전체 카테고리', icon: Folder },
+  { value: 'auth', label: 'Auth (인증/권한)', icon: Lock },
+  { value: 'payment', label: 'Payment (결제)', icon: CreditCard },
+  { value: 'database', label: 'Database (데이터베이스)', icon: Database },
+  { value: 'storage', label: 'Storage (파일 저장소)', icon: Cloud },
+  { value: 'email', label: 'Email (이메일)', icon: Mail },
+  { value: 'ui', label: 'UI (컴포넌트)', icon: Palette },
+  { value: 'hooks', label: 'Hooks (유틸리티)', icon: Zap },
+  { value: 'api', label: 'API (엔드포인트)', icon: Code2 },
+  { value: 'validation', label: 'Validation (검증)', icon: CheckCircle },
+  { value: 'integration', label: 'Integration (연동)', icon: Link2 },
+]
+
 export function SnippetsClient({ snippets }: SnippetsClientProps) {
   const { isSignedIn } = useUser()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<string>('all')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // 드롭다운 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // 필터링 로직
   const filteredSnippets = snippets.filter((snippet) => {
@@ -85,16 +129,20 @@ export function SnippetsClient({ snippets }: SnippetsClientProps) {
         </header>
 
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
-          {/* HERO: SEARCH & TAGS */}
-          <section className="flex flex-col md:flex-row gap-6 items-end justify-between border-b border-zinc-800 pb-8">
-            <div className="w-full md:w-2/3">
+          {/* HERO: SEARCH & FILTER */}
+          <section className="border-b border-zinc-800 pb-8">
+            <div className="mb-6">
               <h1 className="text-3xl font-bold mb-4">필요한 기능을 골라보세요</h1>
-              <p className="text-zinc-400 mb-6 max-w-xl">
+              <p className="text-zinc-400 max-w-2xl">
                 로그인, 결제, DB 연결 등 복잡한 기능들을 <strong>"복사-붙여넣기"</strong> 한 번으로 끝내세요.
                 AI에게 시킬 프롬프트도 함께 제공됩니다.
               </p>
+            </div>
 
-              <div className="relative group max-w-lg">
+            {/* Search & Filter Row */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Search Input */}
+              <div className="flex-1 relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search className="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors" />
                 </div>
@@ -106,51 +154,68 @@ export function SnippetsClient({ snippets }: SnippetsClientProps) {
                   placeholder="기능 검색 (예: 구글 로그인, Stripe 결제, 버튼 컴포넌트)"
                 />
               </div>
+
+              {/* Category Dropdown */}
+              <div className="sm:w-64 relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="block w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-sm text-white hover:border-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer text-left"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const currentCategory = CATEGORIES.find((cat) => cat.value === activeFilter)
+                        const Icon = currentCategory?.icon || Folder
+                        return (
+                          <>
+                            <Icon className="w-4 h-4 text-zinc-400" />
+                            <span>{currentCategory?.label || '전체 카테고리'}</span>
+                          </>
+                        )
+                      })()}
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 text-zinc-400 transition-transform ${
+                        isDropdownOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-lg z-50 overflow-hidden">
+                    {CATEGORIES.map((category) => {
+                      const Icon = category.icon
+                      return (
+                        <button
+                          key={category.value}
+                          onClick={() => {
+                            setActiveFilter(category.value)
+                            setIsDropdownOpen(false)
+                          }}
+                          className={`w-full px-4 py-3 text-sm text-left flex items-center gap-3 transition-colors ${
+                            activeFilter === category.value
+                              ? 'bg-indigo-500/10 text-indigo-400'
+                              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4 shrink-0" />
+                          <span>{category.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Quick Filter Tags */}
-            <div className="w-full md:w-1/3 flex flex-wrap gap-2 justify-start md:justify-end">
-              <button
-                onClick={() => setActiveFilter('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-                  activeFilter === 'all'
-                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white hover:bg-zinc-700'
-                }`}
-              >
-                전체
-              </button>
-              <button
-                onClick={() => setActiveFilter('auth')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-                  activeFilter === 'auth'
-                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white hover:bg-zinc-700'
-                }`}
-              >
-                #Auth
-              </button>
-              <button
-                onClick={() => setActiveFilter('payment')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-                  activeFilter === 'payment'
-                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white hover:bg-zinc-700'
-                }`}
-              >
-                #Payment
-              </button>
-              <button
-                onClick={() => setActiveFilter('ui-ux')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-                  activeFilter === 'ui-ux'
-                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-white hover:bg-zinc-700'
-                }`}
-              >
-                #UI/UX
-              </button>
-            </div>
+            {/* Results Count */}
+            {(searchQuery || activeFilter !== 'all') && (
+              <div className="mt-4 text-sm text-zinc-400">
+                {filteredSnippets.length}개의 스니펫 찾음
+              </div>
+            )}
           </section>
 
           {/* MAIN GRID */}
