@@ -15,21 +15,13 @@ interface DocPageProps {
   params: Promise<{ slug: string }>
 }
 
-// Tags 기반 카테고리 결정 헬퍼
-function getCategoryFromTags(tags: string[]): string {
-  if (tags.some(t => ['cursor', 'nextjs', 'react', 'getting-started', 'start'].includes(t))) return 'getting-started'
-  if (tags.some(t => ['error', 'troubleshooting', 'debug', 'fix'].includes(t))) return 'error-solving'
-  if (tags.some(t => ['concept', 'glossary', 'dictionary', 'basic'].includes(t))) return 'concept'
-  if (tags.some(t => ['clerk', 'supabase', 'stripe', 'database', 'development'].includes(t))) return 'development'
-  return 'development'
-}
-
 // 카테고리 이름 매핑
 const categoryNames: Record<string, string> = {
-  'getting-started': '시작하기 (Start)',
-  'error-solving': '에러 해결 (Troubleshoot)',
-  'concept': '개념 사전 (Dictionary)',
-  'development': '개발 가이드 (Development)',
+  'getting-started': '시작 가이드',
+  'implementation': '개발 가이드',
+  'prompts': 'AI 프롬프트',
+  'errors': '에러 해결',
+  'concepts': '개념 사전',
 }
 
 export default async function DocsDetailPage({ params }: DocPageProps) {
@@ -52,8 +44,7 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
   const docsByCategory: Record<string, Array<{ title: string; slug: string }>> = {}
 
   allDocs.forEach((doc: any) => {
-    const tags = doc.tags || []
-    const category = getCategoryFromTags(tags)
+    const category = doc.category || 'implementation' // 기본값: implementation
 
     if (!docsByCategory[category]) {
       docsByCategory[category] = []
@@ -94,9 +85,21 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
   const readingTime = content.estimated_time_mins || calculateReadingTime(content.content)
 
   // 현재 문서의 카테고리 찾기
-  const contentTags = (content as any).tags || []
-  const currentCategoryId = getCategoryFromTags(contentTags)
-  const categoryName = categoryNames[currentCategoryId]?.split(' ')[0] || '문서'
+  const currentCategoryId = (content as any).category || 'implementation'
+  const categoryName = categoryNames[currentCategoryId] || '문서'
+
+  // 현재 카테고리의 문서들만 필터링
+  const currentCategoryDocs = docCategories
+    .filter(cat => cat.categoryId === currentCategoryId)
+    .map(cat => ({
+      ...cat,
+      items: [
+        // 현재 문서를 맨 위로
+        ...cat.items.filter(item => item.slug === slug),
+        // 나머지 문서들
+        ...cat.items.filter(item => item.slug !== slug)
+      ]
+    }))
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col font-sans text-zinc-100 selection:bg-indigo-500/30">
@@ -142,7 +145,7 @@ export default async function DocsDetailPage({ params }: DocPageProps) {
         {/* LEFT SIDEBAR (Category Navigation) */}
         <aside className="hidden lg:block w-64 shrink-0 border-r border-zinc-800 h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto py-8 pr-6 pl-4">
           <div className="space-y-8">
-            {docCategories.map((category) => (
+            {currentCategoryDocs.map((category) => (
               <div key={category.title}>
                 <h5 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4 px-2">
                   {category.title}
