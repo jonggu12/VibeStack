@@ -29,13 +29,13 @@ export default async function DocsPage({ searchParams }: DocsPageProps) {
   const params = await searchParams
   const selectedCategory = params.category as DocCategory | undefined
 
-  // Fetch all published docs
+  // Fetch all published docs (sorted by views DESC)
   const { data: docsData, error } = await supabase
     .from('contents')
     .select('*')
     .eq('type', 'doc')
     .eq('status', 'published')
-    .order('created_at', { ascending: false })
+    .order('views', { ascending: false })
 
   if (error) {
     console.error('Error fetching docs:', error)

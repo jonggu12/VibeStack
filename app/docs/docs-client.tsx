@@ -4,15 +4,34 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, Clock, BookOpen, Lock, ChevronDown, ChevronRight, Wrench, Sparkles } from 'lucide-react'
-import { FaRocket, FaCode, FaLightbulb, FaBug, FaBook, FaRobot } from 'react-icons/fa'
+import { FaRocket, FaCode, FaLightbulb, FaBug, FaBook, FaRobot, FaAws } from 'react-icons/fa'
 import { HiOutlineExclamationCircle } from 'react-icons/hi'
 import { IoSparklesSharp } from 'react-icons/io5'
+import {
+  SiNextdotjs,
+  SiSupabase,
+  SiStripe,
+  SiTailwindcss,
+  SiVercel,
+  SiReact,
+  SiTypescript,
+  SiPrisma,
+  SiPostgresql,
+  SiMongodb,
+  SiRedis,
+  SiFirebase,
+  SiCloudinary,
+  SiGithub,
+  SiDocker
+} from 'react-icons/si'
+import { MdEmail } from 'react-icons/md'
+import { RiShieldKeyholeFill } from 'react-icons/ri'
 import type { IconType } from 'react-icons'
 import { useUser } from '@clerk/nextjs'
 import { UserMenu } from '@/components/layout/user-menu'
 import type { Doc, DocCategory } from './page'
 
-// 브랜드 로고 컴포넌트
+// 브랜드 로고 컴포넌트 (react-icons 사용)
 function TechLogo({ title }: { title: string }) {
   const titleLower = title.toLowerCase()
 
@@ -20,7 +39,7 @@ function TechLogo({ title }: { title: string }) {
   if (titleLower.includes('next')) {
     return (
       <div className="w-12 h-12 rounded-lg bg-black border border-zinc-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-        <span className="text-white font-bold text-xl">N</span>
+        <SiNextdotjs className="text-white text-2xl" />
       </div>
     )
   }
@@ -29,43 +48,160 @@ function TechLogo({ title }: { title: string }) {
   if (titleLower.includes('supabase')) {
     return (
       <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-        <span className="text-emerald-400 font-bold text-xl">S</span>
+        <SiSupabase className="text-emerald-400 text-2xl" />
       </div>
     )
   }
 
-  // Clerk
-  if (titleLower.includes('clerk')) {
+  // Clerk (인증 관련)
+  if (titleLower.includes('clerk') || (titleLower.includes('인증') && titleLower.includes('설정'))) {
     return (
       <div className="w-12 h-12 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-        <span className="text-purple-400 font-bold text-xl">C</span>
+        <RiShieldKeyholeFill className="text-purple-400 text-2xl" />
       </div>
     )
   }
 
   // Stripe
-  if (titleLower.includes('stripe')) {
+  if (titleLower.includes('stripe') || titleLower.includes('결제')) {
     return (
       <div className="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-        <span className="text-indigo-400 font-bold text-xl">$</span>
+        <SiStripe className="text-indigo-400 text-2xl" />
       </div>
     )
   }
 
-  // Resend
-  if (titleLower.includes('resend') || titleLower.includes('이메일')) {
+  // Resend / Email
+  if (titleLower.includes('resend') || titleLower.includes('이메일') || titleLower.includes('email')) {
     return (
       <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-        <span className="text-blue-400 font-bold text-xl">✉</span>
+        <MdEmail className="text-blue-400 text-2xl" />
       </div>
     )
   }
 
-  // Cursor
+  // Cursor (AI 코딩 도구)
   if (titleLower.includes('cursor')) {
     return (
       <div className="w-12 h-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-        <span className="text-zinc-300 font-bold text-xl">⌘</span>
+        <FaCode className="text-zinc-300 text-xl" />
+      </div>
+    )
+  }
+
+  // Vercel
+  if (titleLower.includes('vercel') || titleLower.includes('배포')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-black border border-zinc-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiVercel className="text-white text-2xl" />
+      </div>
+    )
+  }
+
+  // Tailwind
+  if (titleLower.includes('tailwind')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiTailwindcss className="text-sky-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // React
+  if (titleLower.includes('react')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiReact className="text-cyan-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // TypeScript
+  if (titleLower.includes('typescript')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-blue-600/10 border border-blue-600/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiTypescript className="text-blue-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // Prisma
+  if (titleLower.includes('prisma')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-slate-500/10 border border-slate-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiPrisma className="text-slate-300 text-2xl" />
+      </div>
+    )
+  }
+
+  // PostgreSQL
+  if (titleLower.includes('postgresql') || titleLower.includes('postgres')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiPostgresql className="text-blue-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // MongoDB
+  if (titleLower.includes('mongodb') || titleLower.includes('mongo')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiMongodb className="text-green-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // Redis
+  if (titleLower.includes('redis')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiRedis className="text-red-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // Firebase
+  if (titleLower.includes('firebase')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiFirebase className="text-amber-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // AWS / S3
+  if (titleLower.includes('aws') || titleLower.includes('s3')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <FaAws className="text-orange-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // Cloudinary
+  if (titleLower.includes('cloudinary')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiCloudinary className="text-blue-400 text-2xl" />
+      </div>
+    )
+  }
+
+  // GitHub
+  if (titleLower.includes('github')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiGithub className="text-zinc-300 text-2xl" />
+      </div>
+    )
+  }
+
+  // Docker
+  if (titleLower.includes('docker')) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <SiDocker className="text-blue-400 text-2xl" />
       </div>
     )
   }
@@ -76,6 +212,53 @@ function TechLogo({ title }: { title: string }) {
       <FaRocket className="text-zinc-400 text-xl" />
     </div>
   )
+}
+
+// 기술 스택별 배경색 함수
+function getTechBackground(title: string) {
+  const titleLower = title.toLowerCase()
+
+  if (titleLower.includes('next'))
+    return 'bg-black'
+  if (titleLower.includes('supabase'))
+    return 'bg-emerald-950'
+  if (titleLower.includes('clerk') || (titleLower.includes('인증') && titleLower.includes('설정')))
+    return 'bg-purple-950'
+  if (titleLower.includes('stripe') || titleLower.includes('결제'))
+    return 'bg-indigo-950'
+  if (titleLower.includes('resend') || titleLower.includes('이메일') || titleLower.includes('email'))
+    return 'bg-blue-950'
+  if (titleLower.includes('vercel') || titleLower.includes('배포'))
+    return 'bg-black'
+  if (titleLower.includes('tailwind'))
+    return 'bg-sky-950'
+  if (titleLower.includes('react'))
+    return 'bg-cyan-950'
+  if (titleLower.includes('typescript'))
+    return 'bg-blue-950'
+  if (titleLower.includes('cursor'))
+    return 'bg-zinc-900'
+  if (titleLower.includes('prisma'))
+    return 'bg-slate-950'
+  if (titleLower.includes('postgresql') || titleLower.includes('postgres'))
+    return 'bg-blue-900'
+  if (titleLower.includes('mongodb') || titleLower.includes('mongo'))
+    return 'bg-green-950'
+  if (titleLower.includes('redis'))
+    return 'bg-red-950'
+  if (titleLower.includes('firebase'))
+    return 'bg-amber-950'
+  if (titleLower.includes('aws') || titleLower.includes('s3'))
+    return 'bg-orange-950'
+  if (titleLower.includes('cloudinary'))
+    return 'bg-blue-900'
+  if (titleLower.includes('github'))
+    return 'bg-zinc-950'
+  if (titleLower.includes('docker'))
+    return 'bg-blue-900'
+
+  // 기본 배경색
+  return 'bg-zinc-900'
 }
 
 interface DocsClientProps {
@@ -613,7 +796,7 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                               className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1"
                             >
                               {/* 브랜드 로고 섹션 */}
-                              <div className="h-32 bg-zinc-950 relative overflow-hidden flex items-center justify-center">
+                              <div className={`h-32 ${getTechBackground(doc.title)} relative overflow-hidden flex items-center justify-center`}>
                                 <div className="scale-125 opacity-80 group-hover:scale-150 group-hover:opacity-100 transition-all duration-300">
                                   <TechLogo title={doc.title} />
                                 </div>
@@ -647,7 +830,13 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                                   <span className="flex items-center gap-1">
                                     <Clock className="w-3 h-3" /> {doc.estimatedTime}분
                                   </span>
-                                  <span>{doc.views} views</span>
+                                  {doc.views >= 10 ? (
+                                    <span>{doc.views.toLocaleString()} views</span>
+                                  ) : (
+                                    <span className={`${difficultyInfo.color} font-medium`}>
+                                      {difficultyInfo.label}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </Link>
@@ -662,7 +851,7 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                             className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
                           >
                             {/* 카테고리 아이콘 섹션 */}
-                            <div className={`h-32 ${categoryConfig.bgColor} relative overflow-hidden flex items-center justify-center`}>
+                            <div className={`h-32 ${getTechBackground(doc.title)} relative overflow-hidden flex items-center justify-center`}>
                               <categoryConfig.icon className={`w-16 h-16 ${categoryConfig.color} opacity-30 group-hover:opacity-50 transition-opacity`} />
                               {doc.isPremium && (
                                 <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
@@ -716,7 +905,13 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" /> {doc.estimatedTime}분
                                 </span>
-                                <span>{doc.views} views</span>
+                                {doc.views >= 10 ? (
+                                  <span>{doc.views.toLocaleString()} views</span>
+                                ) : (
+                                  <span className={`${difficultyInfo.color} font-medium`}>
+                                    {difficultyInfo.label}
+                                  </span>
+                                )}
                               </div>
 
                               {isGlossaryStyle && doc.relatedTerms && doc.relatedTerms.length > 0 && (
@@ -759,7 +954,7 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                     href={`/docs/${doc.slug}`}
                     className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
                   >
-                    <div className={`h-32 ${categoryConfig.bgColor} relative overflow-hidden flex items-center justify-center`}>
+                    <div className={`h-32 ${getTechBackground(doc.title)} relative overflow-hidden flex items-center justify-center`}>
                       <categoryConfig.icon className={`w-16 h-16 ${categoryConfig.color} opacity-30 group-hover:opacity-50 transition-opacity`} />
                       {doc.isPremium && (
                         <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
@@ -812,7 +1007,13 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" /> {doc.estimatedTime}분
                         </span>
-                        <span>{doc.views} views</span>
+                        {doc.views >= 10 ? (
+                          <span>{doc.views.toLocaleString()} views</span>
+                        ) : (
+                          <span className={`${difficultyInfo.color} font-medium`}>
+                            {difficultyInfo.label}
+                          </span>
+                        )}
                       </div>
 
                       {isGlossaryStyle && doc.relatedTerms && doc.relatedTerms.length > 0 && (
