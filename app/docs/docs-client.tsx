@@ -32,7 +32,7 @@ import { UserMenu } from '@/components/layout/user-menu'
 import type { Doc, DocCategory } from './page'
 
 // 브랜드 로고 컴포넌트 (react-icons 사용)
-function TechLogo({ title }: { title: string }) {
+function TechLogo({ title, category }: { title: string; category?: DocCategory }) {
   const titleLower = title.toLowerCase()
 
   // Next.js
@@ -206,6 +206,47 @@ function TechLogo({ title }: { title: string }) {
     )
   }
 
+  // 카테고리별 기본 아이콘 (기술 스택 매칭 안될 때)
+  if (category === 'prompts') {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <IoSparklesSharp className="text-purple-400 text-2xl" />
+      </div>
+    )
+  }
+
+  if (category === 'errors') {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <FaBug className="text-red-400 text-2xl" />
+      </div>
+    )
+  }
+
+  if (category === 'concepts') {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <FaLightbulb className="text-yellow-400 text-2xl" />
+      </div>
+    )
+  }
+
+  if (category === 'implementation') {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <FaCode className="text-blue-400 text-2xl" />
+      </div>
+    )
+  }
+
+  if (category === 'getting-started') {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+        <FaRocket className="text-green-400 text-2xl" />
+      </div>
+    )
+  }
+
   // Default
   return (
     <div className="w-12 h-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
@@ -215,7 +256,7 @@ function TechLogo({ title }: { title: string }) {
 }
 
 // 기술 스택별 배경색 함수
-function getTechBackground(title: string) {
+function getTechBackground(title: string, category?: DocCategory) {
   const titleLower = title.toLowerCase()
 
   if (titleLower.includes('next'))
@@ -256,6 +297,18 @@ function getTechBackground(title: string) {
     return 'bg-zinc-950'
   if (titleLower.includes('docker'))
     return 'bg-blue-900'
+
+  // 카테고리별 배경색 (기술 스택 매칭 안될 때)
+  if (category === 'prompts')
+    return 'bg-purple-950'
+  if (category === 'errors')
+    return 'bg-red-950'
+  if (category === 'concepts')
+    return 'bg-yellow-950'
+  if (category === 'implementation')
+    return 'bg-blue-950'
+  if (category === 'getting-started')
+    return 'bg-green-950'
 
   // 기본 배경색
   return 'bg-zinc-900'
@@ -796,9 +849,9 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                               className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1"
                             >
                               {/* 브랜드 로고 섹션 */}
-                              <div className={`h-32 ${getTechBackground(doc.title)} relative overflow-hidden flex items-center justify-center`}>
+                              <div className={`h-32 ${getTechBackground(doc.title, doc.category)} relative overflow-hidden flex items-center justify-center`}>
                                 <div className="scale-125 opacity-80 group-hover:scale-150 group-hover:opacity-100 transition-all duration-300">
-                                  <TechLogo title={doc.title} />
+                                  <TechLogo title={doc.title} category={doc.category} />
                                 </div>
                                 {doc.isPremium && (
                                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
@@ -850,9 +903,11 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                             href={`/docs/${doc.slug}`}
                             className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
                           >
-                            {/* 카테고리 아이콘 섹션 */}
-                            <div className={`h-32 ${getTechBackground(doc.title)} relative overflow-hidden flex items-center justify-center`}>
-                              <categoryConfig.icon className={`w-16 h-16 ${categoryConfig.color} opacity-30 group-hover:opacity-50 transition-opacity`} />
+                            {/* 기술 스택 아이콘 섹션 */}
+                            <div className={`h-32 ${getTechBackground(doc.title, doc.category)} relative overflow-hidden flex items-center justify-center`}>
+                              <div className="scale-125 opacity-80 group-hover:scale-150 group-hover:opacity-100 transition-all duration-300">
+                                <TechLogo title={doc.title} category={doc.category} />
+                              </div>
                               {doc.isPremium && (
                                 <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
                                   <Lock className="w-3 h-3" /> 프리미엄
@@ -954,8 +1009,10 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                     href={`/docs/${doc.slug}`}
                     className="group block bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1"
                   >
-                    <div className={`h-32 ${getTechBackground(doc.title)} relative overflow-hidden flex items-center justify-center`}>
-                      <categoryConfig.icon className={`w-16 h-16 ${categoryConfig.color} opacity-30 group-hover:opacity-50 transition-opacity`} />
+                    <div className={`h-32 ${getTechBackground(doc.title, doc.category)} relative overflow-hidden flex items-center justify-center`}>
+                      <div className="scale-125 opacity-80 group-hover:scale-150 group-hover:opacity-100 transition-all duration-300">
+                        <TechLogo title={doc.title} category={doc.category} />
+                      </div>
                       {doc.isPremium && (
                         <div className="absolute top-3 right-3 bg-black/80 backdrop-blur text-purple-400 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
                           <Lock className="w-3 h-3" /> 프리미엄
