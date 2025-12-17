@@ -42,6 +42,8 @@ export function ContentList({ contents }: ContentListProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 50
 
   const filteredContents = useMemo(() => {
     return contents.filter((content) => {
@@ -53,6 +55,18 @@ export function ContentList({ contents }: ContentListProps) {
       return matchSearch && matchType && matchStatus
     })
   }, [contents, searchTerm, filterType, filterStatus])
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredContents.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedContents = filteredContents.slice(startIndex, endIndex)
+
+  // 필터 변경 시 첫 페이지로 이동
+  const handleFilterChange = (setter: (value: string) => void, value: string) => {
+    setter(value)
+    setCurrentPage(1)
+  }
 
   return (
     <div className="p-8">
@@ -67,7 +81,7 @@ export function ContentList({ contents }: ContentListProps) {
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
               className="block w-full pl-10 pr-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-sm placeholder-zinc-500 focus:outline-none focus:border-indigo-500 text-white transition-colors"
               placeholder="제목, 슬러그 검색..."
             />
@@ -76,7 +90,7 @@ export function ContentList({ contents }: ContentListProps) {
           {/* Filter: Type */}
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
+            onChange={(e) => handleFilterChange(setFilterType, e.target.value)}
             className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
           >
             <option value="all">모든 타입</option>
@@ -90,7 +104,7 @@ export function ContentList({ contents }: ContentListProps) {
           {/* Filter: Status */}
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => handleFilterChange(setFilterStatus, e.target.value)}
             className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5"
           >
             <option value="all">모든 상태</option>
@@ -134,7 +148,7 @@ export function ContentList({ contents }: ContentListProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
-            {filteredContents.length === 0 ? (
+            {paginatedContents.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
                   {searchTerm || filterType !== 'all' || filterStatus !== 'all'
@@ -143,7 +157,7 @@ export function ContentList({ contents }: ContentListProps) {
                 </td>
               </tr>
             ) : (
-              filteredContents.map((content) => {
+              paginatedContents.map((content) => {
                 // 타입별 URL 경로 생성
                 const getContentPath = () => {
                   if (content.status !== 'published') return null
@@ -240,17 +254,28 @@ export function ContentList({ contents }: ContentListProps) {
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-zinc-800 flex justify-between items-center bg-zinc-950/30">
           <span className="text-xs text-zinc-500">
-            Showing <span className="text-white font-bold">1-{filteredContents.length}</span> of{' '}
-            <span className="text-white font-bold">{contents.length}</span>
+            Showing <span className="text-white font-bold">{startIndex + 1}-{Math.min(endIndex, filteredContents.length)}</span> of{' '}
+            <span className="text-white font-bold">{filteredContents.length}</span>
+            {filteredContents.length !== contents.length && (
+              <span className="text-zinc-600"> (전체 {contents.length}개 중 필터링)</span>
+            )}
           </span>
           <div className="flex gap-2">
             <button
-              disabled
-              className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-xs text-zinc-300 disabled:opacity-50"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-xs text-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               이전
             </button>
-            <button className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-xs text-zinc-300">
+            <span className="px-3 py-1 text-xs text-zinc-400">
+              {currentPage} / {totalPages || 1}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage >= totalPages}
+              className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-xs text-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
               다음
             </button>
           </div>

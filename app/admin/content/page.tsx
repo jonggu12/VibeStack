@@ -10,11 +10,16 @@ export default async function AdminContentPage() {
   // Require admin access (redirects if not admin)
   await requireAdmin()
 
-  // 모든 콘텐츠 조회 (모든 상태 포함, RLS 우회)
-  const published = await getContents({ status: 'published', limit: 50, bypassRLS: true })
-  const drafts = await getContents({ status: 'draft', limit: 50, bypassRLS: true })
-  const archived = await getContents({ status: 'archived', limit: 50, bypassRLS: true })
-  const allContents = [...drafts, ...published, ...archived]
+  // 모든 콘텐츠 조회 (모든 상태 포함, RLS 우회, limit 없음)
+  const published = await getContents({ status: 'published', limit: 9999, bypassRLS: true })
+  const drafts = await getContents({ status: 'draft', limit: 9999, bypassRLS: true })
+  const archived = await getContents({ status: 'archived', limit: 9999, bypassRLS: true })
+
+  // term_category가 있는 doc을 glossary 타입으로 변환
+  const allContents = [...drafts, ...published, ...archived].map((content: any) => ({
+    ...content,
+    type: content.type === 'doc' && content.term_category ? 'glossary' : content.type
+  }))
 
   return (
     <>
