@@ -10,16 +10,33 @@ export function buildGlossaryPrompt(options: GlossaryPromptOptions): string {
 당신은 VibeStack에서 **용어사전 항목을 작성하는 전문 기술 작가**입니다.  
 이 문서의 목표는 개발 용어를 처음 접하는 사람도 쉽게 이해할 수 있도록 **부드럽고 명확하게 설명하는 것**입니다.
 
-이번 문서에서는 **React Icons를 사용하지 않습니다.**  
-대신 **Callout, Tip, Info, Warning, Highlight 등의 MDX 컴포넌트를 적극적으로 활용**해  
-섹션 구조를 시각적으로 구분해주세요.
+이번 문서에서는 **React Icons를 사용하지 않습니다.**
+대신 **MDX 커스텀 컴포넌트를 적극적으로 활용**해 섹션 구조를 시각적으로 구분해주세요.
+
+**사용 가능한 주요 컴포넌트:**
+- \`Callout\`, \`Tip\`, \`Warning\`, \`Info\`, \`Highlight\` - 정보 박스
+- \`Tabs\`, \`Tab\` - 코드/설명 전환
+- \`StackBadge\` - 기술 스택 표시
+- \`Do\`, \`Dont\` - 베스트 프랙티스 강조
+- \`Terminal\` - 터미널 출력
 
 예시:
 
 \`\`\`mdx
+<StackBadge stack={["React", "TypeScript"]} />
+
 <Callout type="info">
 이 문서는 초보자에게도 이해하기 쉬운 설명을 제공합니다.
 </Callout>
+
+<Tabs>
+  <Tab label="설명">
+    개념 설명
+  </Tab>
+  <Tab label="예제">
+    코드 예제
+  </Tab>
+</Tabs>
 \`\`\`
 
 ---

@@ -13,14 +13,27 @@ export function buildSnippetPrompt(options: SnippetPromptOptions): string {
 이 문서의 목적은 **바로 복사해서 사용할 수 있는 실용적인 코드 스니펫**을 제공하는 것입니다.
 
 이 문서에서는 **React Icons를 사용하지 않습니다.**
-대신 **Callout, Info, Tip, Highlight, Warning 등의 MDX 컴포넌트를 활용**해 섹션을 구조화해주세요.
+대신 **MDX 커스텀 컴포넌트를 활용**해 섹션을 구조화해주세요.
+
+**사용 가능한 주요 컴포넌트:**
+- \`Callout\`, \`Tip\`, \`Warning\`, \`Info\`, \`Highlight\` - 정보 박스
+- \`Tabs\`, \`Tab\` - 코드/설명 전환
+- \`StackBadge\` - 기술 스택 표시
+- \`Do\`, \`Dont\` - 베스트 프랙티스 강조
+- \`Terminal\` - 터미널 출력
 
 예시:
 
 \`\`\`mdx
+<StackBadge stack={["Next.js", "TypeScript"]} />
+
 <Callout type="info">
 이 스니펫은 바로 실행 가능한 형태로 작성되었습니다.
 </Callout>
+
+<Do>
+환경변수는 서버 컴포넌트에서 사용하세요
+</Do>
 \`\`\`
 
 ---
@@ -46,6 +59,8 @@ description: "이 스니펫이 어떤 상황에서 유용한지 한 줄로 요�
 ---
 
 # ${topic}
+
+<StackBadge stack={${JSON.stringify(stack)}} />
 
 ## 설명
 

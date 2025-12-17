@@ -11,15 +11,46 @@ export function buildDocPrompt(options: DocPromptOptions): string {
 당신은 VibeStack에서 기술 문서를 작성하는 전문 작가입니다.  
 초심자도 이해할 수 있고, 실무에서도 바로 참고할 수 있는 친절한 문서를 만들어주세요.
 
-이번 문서에서는 **React Icons를 사용하지 않습니다.**  
-대신 **Callout, Tip, Warning, Info, Highlight 등 MDX 컴포넌트를 적극적으로 사용**해 주세요.
+이번 문서에서는 **React Icons를 사용하지 않습니다.**
+대신 **MDX 커스텀 컴포넌트를 적극적으로 사용**해 주세요.
+
+**사용 가능한 주요 컴포넌트:**
+- \`Callout\`, \`Tip\`, \`Warning\`, \`Info\`, \`Highlight\` - 정보 박스
+- \`Tabs\`, \`Tab\` - 코드/설명 전환
+- \`StackBadge\` - 기술 스택 표시
+- \`Do\`, \`Dont\` - 베스트 프랙티스 강조
+- \`Terminal\` - 터미널 출력
+- \`PromptBlock\` - AI 프롬프트 복사
 
 예)
 
 \`\`\`mdx
+<StackBadge stack={["Next.js 14", "Supabase", "TypeScript"]} />
+
 <Callout type="info">
 이 문서는 실무 개발자를 위한 핵심 개념과 예제를 제공합니다.
 </Callout>
+
+<Tabs>
+  <Tab label="TypeScript">
+    \`\`\`typescript
+    const hello: string = "world"
+    \`\`\`
+  </Tab>
+  <Tab label="JavaScript">
+    \`\`\`javascript
+    const hello = "world"
+    \`\`\`
+  </Tab>
+</Tabs>
+
+<Do>
+환경변수는 서버에서만 접근하세요
+</Do>
+
+<Dont>
+클라이언트에 API KEY를 노출하지 마세요
+</Dont>
 \`\`\`
 
 ---
@@ -46,16 +77,18 @@ description: "이 문서에서 다루는 내용을 100자 이내로 요약"
 
 # ${topic}
 
+<StackBadge stack={${JSON.stringify(stack)}} />
+
 ## 개요
 
 <Callout type="info">
-${topic}는 [간단한 정의]입니다.  
+${topic}는 [간단한 정의]입니다.
 이 문서는 다음 내용을 중심으로 설명합니다.
 </Callout>
 
-- 핵심 개념 1  
-- 핵심 개념 2  
-- 실무 활용 패턴  
+- 핵심 개념 1
+- 핵심 개념 2
+- 실무 활용 패턴
 
 읽기 시간: 약 7분
 
@@ -120,15 +153,17 @@ ${topic}는 [간단한 정의]입니다.
 
 ### 실수 1: [제목]
 
-잘못된 예제  
+<Dont title="잘못된 방법">
 \`\`\`typescript
 // 좋지 않은 코드
 \`\`\`
+</Dont>
 
-올바른 예제  
+<Do title="올바른 방법">
 \`\`\`typescript
 // 개선된 코드
 \`\`\`
+</Do>
 
 ### 실수 2: [제목]
 [설명]

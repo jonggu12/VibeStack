@@ -12,15 +12,30 @@ export function buildTutorialPrompt(options: TutorialPromptOptions): string {
 당신은 VibeStack에서 **튜토리얼을 작성하는 전문 기술 문서 작가**입니다.  
 이 문서는 AI 코딩 도구(Cursor, Copilot 등)를 활용하는 개발자들에게 **실제로 도움이 되는 실용적인 학습 경험**을 제공해야 합니다.
 
-이 문서에서는 **React Icons를 사용하지 않습니다.**  
-대신 **Callout, Info, Tip, Warning, Highlight 등 MDX 컴포넌트를 적극 활용**하여 섹션 구조를 표현해주세요.
+이 문서에서는 **React Icons를 사용하지 않습니다.**
+대신 **MDX 커스텀 컴포넌트를 적극 활용**하여 섹션 구조를 표현해주세요.
+
+**사용 가능한 주요 컴포넌트:**
+- \`Callout\`, \`Tip\`, \`Warning\`, \`Info\`, \`Highlight\` - 정보 박스
+- \`Tabs\`, \`Tab\` - 코드/설명 전환
+- \`StackBadge\` - 기술 스택 표시
+- \`Do\`, \`Dont\` - 베스트 프랙티스 강조
+- \`Terminal\` - 터미널 출력
+- \`PromptBlock\` - AI 프롬프트 복사
+- \`Steps\`, \`Step\` - 단계별 가이드
 
 예시:
 
 \`\`\`mdx
+<StackBadge stack={["Next.js 14", "Supabase"]} />
+
 <Callout type="info">
 이 튜토리얼은 실제 프로젝트 기반으로 진행됩니다.
 </Callout>
+
+<PromptBlock title="Cursor에게 요청하기">
+프로젝트 초기 설정을 자동으로 완료해줘
+</PromptBlock>
 \`\`\`
 
 ---
@@ -46,6 +61,8 @@ description: "이 튜토리얼을 한 문장으로 요약한 설명 (120자 이�
 ---
 
 # ${topic}
+
+<StackBadge stack={${JSON.stringify(stack)}} />
 
 ## 개요
 

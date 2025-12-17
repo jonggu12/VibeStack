@@ -11,6 +11,9 @@ export { CopyButton } from './copy-button'
 export { Terminal } from './terminal'
 export { PromptBlock } from './prompt-block'
 export { Feedback } from './feedback'
+export { Tabs, Tab } from './tabs'
+export { StackBadge } from './stack-badge'
+export { Do, Dont } from './do-dont'
 
 // Tutorial 컴포넌트들
 export { PromptCopy } from '../tutorial/prompt-copy'
@@ -26,6 +29,9 @@ import { PreBlock } from './pre-block'
 import { Terminal } from './terminal'
 import { PromptBlock } from './prompt-block'
 import { Feedback } from './feedback'
+import { Tabs, Tab } from './tabs'
+import { StackBadge } from './stack-badge'
+import { Do, Dont } from './do-dont'
 import { PromptCopy } from '../tutorial/prompt-copy'
 import { Checklist } from '../tutorial/checklist'
 
@@ -184,6 +190,11 @@ export const mdxComponents = {
     Terminal,
     PromptBlock,
     Feedback,
+    Tabs,
+    Tab,
+    StackBadge,
+    Do,
+    Dont,
     // Tutorial 컴포넌트들
     PromptCopy,
     Checklist,
