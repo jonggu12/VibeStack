@@ -28,6 +28,7 @@ export interface Snippet {
   snippet_language: string | null
   is_premium: boolean
   thumbnail_url?: string | null
+  views: number
   created_at?: string
 }
 
@@ -48,6 +49,7 @@ export async function getSnippets(): Promise<Snippet[]> {
       snippet_language,
       is_premium,
       thumbnail_url,
+      views,
       created_at
     `)
     .eq('type', 'snippet')
@@ -82,6 +84,7 @@ export async function getSnippetBySlug(slug: string): Promise<Snippet | null> {
       snippet_language,
       is_premium,
       thumbnail_url,
+      views,
       created_at
     `)
     .eq('type', 'snippet')

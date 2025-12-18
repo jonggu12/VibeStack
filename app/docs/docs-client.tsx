@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search, Clock, BookOpen, Lock, ChevronDown, ChevronRight, Wrench, Sparkles } from 'lucide-react'
+import { Search, Clock, BookOpen, Lock, ChevronDown, ChevronRight, Wrench, Sparkles, Eye } from 'lucide-react'
 import { FaRocket, FaCode, FaLightbulb, FaBug, FaBook, FaRobot, FaAws } from 'react-icons/fa'
 import { HiOutlineExclamationCircle } from 'react-icons/hi'
 import { IoSparklesSharp } from 'react-icons/io5'
@@ -755,7 +755,10 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                                     <div className="w-6 h-6 rounded-full bg-zinc-700 border border-zinc-900"></div>
                                     <div className="w-6 h-6 rounded-full bg-zinc-600 border border-zinc-900"></div>
                                   </div>
-                                  <span className="text-xs text-zinc-500">{doc.views} views</span>
+                                  <div className="flex items-center gap-1 text-xs text-zinc-500">
+                                    <Eye className="w-3 h-3" />
+                                    <span>{doc.views}</span>
+                                  </div>
                                 </div>
                               </Link>
                             )
@@ -884,7 +887,10 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                                     <Clock className="w-3 h-3" /> {doc.estimatedTime}분
                                   </span>
                                   {doc.views >= 10 ? (
-                                    <span>{doc.views.toLocaleString()} views</span>
+                                    <span className="flex items-center gap-1">
+                                      <Eye className="w-3 h-3" />
+                                      {doc.views.toLocaleString()}
+                                    </span>
                                   ) : (
                                     <span className={`${difficultyInfo.color} font-medium`}>
                                       {difficultyInfo.label}
@@ -961,7 +967,10 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                                   <Clock className="w-3 h-3" /> {doc.estimatedTime}분
                                 </span>
                                 {doc.views >= 10 ? (
-                                  <span>{doc.views.toLocaleString()} views</span>
+                                  <span className="flex items-center gap-1">
+                                    <Eye className="w-3 h-3" />
+                                    {doc.views.toLocaleString()}
+                                  </span>
                                 ) : (
                                   <span className={`${difficultyInfo.color} font-medium`}>
                                     {difficultyInfo.label}
@@ -1065,7 +1074,10 @@ export function DocsClient({ docs, categoryCounts, selectedCategory }: DocsClien
                           <Clock className="w-3 h-3" /> {doc.estimatedTime}분
                         </span>
                         {doc.views >= 10 ? (
-                          <span>{doc.views.toLocaleString()} views</span>
+                          <span className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            {doc.views.toLocaleString()}
+                          </span>
                         ) : (
                           <span className={`${difficultyInfo.color} font-medium`}>
                             {difficultyInfo.label}

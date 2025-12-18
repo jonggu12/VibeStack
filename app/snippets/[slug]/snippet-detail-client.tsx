@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Bookmark, Share, Copy, Check, Wand2, Code, Lightbulb, ChevronRight } from 'lucide-react'
 import { FaGoogle, FaReact } from 'react-icons/fa'
+import { ViewTracker } from '@/components/content/view-tracker'
 import type { Snippet } from '../actions'
 
 interface SnippetDetailClientProps {
@@ -37,6 +38,8 @@ export function SnippetDetailClient({ snippet }: SnippetDetailClientProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-950">
+      <ViewTracker contentId={snippet.id} />
+
       {/* Header */}
       <header className="sticky top-0 z-50 glass-header border-b border-zinc-800 h-16 bg-zinc-950/85 backdrop-blur-xl">
         <div className="w-full max-w-[1440px] mx-auto px-4 h-full flex items-center justify-between">

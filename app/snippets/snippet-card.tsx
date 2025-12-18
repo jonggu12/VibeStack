@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Code, Sparkles, Bookmark } from 'lucide-react'
+import { Code, Sparkles, Bookmark, Eye } from 'lucide-react'
 import { FaGoogle, FaStripe, FaDatabase } from 'react-icons/fa'
 import type { Snippet } from './actions'
 
@@ -200,9 +200,17 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               </div>
             </div>
           </div>
-          <button className="text-zinc-500 hover:text-white">
-            <Bookmark className="w-4 h-4" />
-          </button>
+          <div className="flex flex-col items-center gap-1">
+            <button className="text-zinc-500 hover:text-white">
+              <Bookmark className="w-4 h-4" />
+            </button>
+            {snippet.views >= 10 && (
+              <div className="flex items-center gap-1 text-zinc-500 text-[10px]">
+                <Eye className="w-3 h-3" />
+                <span>{snippet.views.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Code Preview with Syntax Highlighting */}
