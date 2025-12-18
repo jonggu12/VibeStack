@@ -13,7 +13,8 @@
     "test:coverage": "jest --coverage",
     "generate": "tsx scripts/generate-content.ts",
     "seed:batch": "tsx scripts/seed-batch.ts",
-    "glossary:update": "tsx scripts/batch-update-glossary.ts"
+    "glossary:update": "tsx scripts/batch-update-glossary.ts",
+    "migrate:tutorials": "tsx scripts/migrate-tutorials.ts"
   },
   "dependencies": {
     "@algolia/autocomplete-js": "^1.19.4",

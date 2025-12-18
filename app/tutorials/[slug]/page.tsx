@@ -7,29 +7,19 @@ import { ViewTracker } from '@/components/content/view-tracker'
 import { StepTimeline, type TutorialStep } from '@/components/tutorial/step-timeline'
 import { ProgressCard } from '@/components/tutorial/progress-card'
 import { CopyButton } from '@/components/tutorial/copy-button'
+import {
+  getTutorialBySlug,
+  getTutorialSteps,
+  getTutorialTechStack,
+  getUserTutorialProgress,
+} from '@/app/tutorials/actions'
+import { auth } from '@clerk/nextjs/server'
 
 export const dynamic = 'force-dynamic'
 
 interface TutorialPageProps {
   params: Promise<{ slug: string }>
 }
-
-// Mock steps (실제로는 DB나 MDX frontmatter에서 가져옴)
-const mockSteps: TutorialStep[] = [
-  { id: 'step-1', number: 1, title: '프로젝트 셋팅', duration: '5분 소요', status: 'completed' },
-  { id: 'step-2', number: 2, title: 'DB 연결 (Supabase)', duration: '10분 소요', status: 'active' },
-  { id: 'step-3', number: 3, title: '로그인 구현 (Clerk)', duration: '15분 소요', status: 'pending' },
-  { id: 'step-4', number: 4, title: 'Todo 기능 구현', duration: '15분 소요', status: 'pending' },
-]
-
-const mockTechStack = [
-  {
-    name: 'Supabase',
-    description: 'Database & Auth',
-    icon: 'https://pbs.twimg.com/profile_images/1397471927778390018/KLK4c1XW_400x400.png',
-    url: 'https://supabase.com',
-  },
-]
 
 export default async function TutorialDetailPage({ params }: TutorialPageProps) {
   const { slug: rawSlug } = await params
@@ -55,15 +45,46 @@ export default async function TutorialDetailPage({ params }: TutorialPageProps) 
     )
   }
 
+  // 튜토리얼 단계 가져오기
+  const tutorialSteps = await getTutorialSteps(content.id)
+  const techStack = await getTutorialTechStack(content.id)
+
+  // 사용자 진행 상황 가져오기
+  const { userId } = await auth()
+  const userProgress = userId ? await getUserTutorialProgress(userId, content.id) : null
+
+  // 진행률 계산
+  const progress = userProgress?.progress_pct || 0
+  const completedSteps = userProgress?.completed_step_numbers || []
+  const currentStepNumber = userProgress?.current_step_number || 1
+
+  // TutorialStep 타입으로 변환
+  const steps: TutorialStep[] = tutorialSteps.map((step) => {
+    const isCompleted = completedSteps.includes(step.step_number)
+    const isActive = step.step_number === currentStepNumber
+
+    return {
+      id: step.id,
+      number: step.step_number,
+      title: step.title,
+      duration: `${step.estimated_duration_mins}분 소요`,
+      status: isCompleted ? 'completed' : isActive ? 'active' : 'pending',
+    }
+  })
+
+  // Tech stack 포맷 변환
+  const formattedTechStack = techStack.map((tech) => ({
+    name: tech.name,
+    description: tech.category,
+    icon: tech.icon_url || '',
+    url: tech.url || '#',
+  }))
+
   // MDX 컴파일
   const { content: mdxContent } = await compileMDXContent(content.content)
 
   // 읽기 시간
   const readingTime = content.estimated_time_mins || calculateReadingTime(content.content)
-
-  // 진행률 계산 (active step 기준)
-  const activeStepIndex = mockSteps.findIndex((s) => s.status === 'active')
-  const progress = Math.round(((activeStepIndex + 1) / mockSteps.length) * 100)
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col font-sans text-zinc-100 selection:bg-indigo-500/30">
@@ -163,7 +184,7 @@ export default async function TutorialDetailPage({ params }: TutorialPageProps) 
       {/* MAIN LAYOUT (3-Column) */}
       <div className="flex-1 w-full max-w-[1600px] mx-auto flex items-start">
         {/* LEFT SIDEBAR: STEP TIMELINE */}
-        <StepTimeline steps={mockSteps} />
+        <StepTimeline steps={steps} />
 
         {/* CENTER CONTENT */}
         <main className="flex-1 min-w-0 py-10 px-4 md:px-12 border-r border-zinc-800">
@@ -230,8 +251,16 @@ export default async function TutorialDetailPage({ params }: TutorialPageProps) 
         {/* RIGHT SIDEBAR: PROGRESS */}
         <ProgressCard
           progress={progress}
-          message="잘하고 있어요! 이제 가장 중요한 DB 연결 단계입니다."
-          techStack={mockTechStack}
+          message={
+            progress === 0
+              ? '튜토리얼을 시작해보세요!'
+              : progress < 50
+              ? '잘하고 있어요! 계속 진행하세요.'
+              : progress < 100
+              ? '거의 다 왔어요! 조금만 더!'
+              : '완료했습니다! 🎉'
+          }
+          techStack={formattedTechStack}
         />
       </div>
     </div>
