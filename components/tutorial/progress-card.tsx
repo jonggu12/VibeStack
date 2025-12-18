@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { ExternalLink, ArrowRight, CheckCircle2 } from 'lucide-react'
-import { toggleStepCompletion } from '@/app/tutorials/actions'
 
 type TechStack = {
   name: string
@@ -31,12 +30,38 @@ export function ProgressCard({
   const [isCompleted, setIsCompleted] = useState(isCurrentStepCompleted)
   const [isLoading, setIsLoading] = useState(false)
 
+  const toggleStepCompletionRequest = async () => {
+    if (!tutorialId || !currentStepNumber) {
+      return { success: false, completed: false, error: 'Invalid tutorial data' }
+    }
+
+    const response = await fetch('/api/tutorials/toggle-step', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tutorialId,
+        stepNumber: currentStepNumber,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      return {
+        success: false,
+        completed: false,
+        error: errorData?.error || '서버 오류가 발생했습니다.',
+      }
+    }
+
+    return response.json()
+  }
+
   const handleToggleCompletion = async () => {
     if (!tutorialId || !currentStepNumber) return
 
     setIsLoading(true)
     try {
-      const result = await toggleStepCompletion(tutorialId, currentStepNumber)
+      const result = await toggleStepCompletionRequest()
       if (result.success) {
         setIsCompleted(result.completed)
         // 페이지 새로고침으로 진행률 업데이트

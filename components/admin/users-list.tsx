@@ -18,7 +18,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { BanUserDialog } from './BanUserDialog'
-import { toggleUserBan, toggleUserRole } from '@/app/actions/user'
 import { useRouter } from 'next/navigation'
 
 type User = {
@@ -44,6 +43,24 @@ type UsersListProps = {
   users: User[]
   totalCount: number
   hasError?: boolean
+}
+
+async function callAdminAction(
+  endpoint: string,
+  payload: Record<string, unknown>
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error(`Error calling ${endpoint}:`, error)
+    return { success: false, error: '네트워크 오류가 발생했습니다.' }
+  }
 }
 
 export function UsersList({ users, totalCount, hasError = false }: UsersListProps) {
@@ -109,7 +126,9 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
       const confirmed = confirm('이 사용자의 계정 정지를 해제하시겠습니까?')
       if (!confirmed) return
 
-      const result = await toggleUserBan(user.id)
+      const result = await callAdminAction('/api/admin/users/toggle-ban', {
+        userId: user.id,
+      })
       if (result.success) {
         router.refresh()
       } else {
@@ -135,7 +154,11 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
     }
 
     const durationDays = durationMap[duration]
-    const result = await toggleUserBan(userToBan.id, reason, durationDays)
+    const result = await callAdminAction('/api/admin/users/toggle-ban', {
+      userId: userToBan.id,
+      reason,
+      durationDays,
+    })
 
     if (result.success) {
       setIsBanDialogOpen(false)
@@ -148,7 +171,9 @@ export function UsersList({ users, totalCount, hasError = false }: UsersListProp
 
   // 사용자 권한 변경
   const handleToggleRole = async (userId: string) => {
-    const result = await toggleUserRole(userId)
+    const result = await callAdminAction('/api/admin/users/toggle-role', {
+      userId,
+    })
     if (result.success) {
       router.refresh()
     } else {
