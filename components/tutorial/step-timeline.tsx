@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Check } from 'lucide-react'
 
 export type TutorialStep = {
@@ -12,9 +13,12 @@ export type TutorialStep = {
 
 type StepTimelineProps = {
   steps: TutorialStep[]
+  tutorialSlug?: string
 }
 
-export function StepTimeline({ steps }: StepTimelineProps) {
+export function StepTimeline({ steps, tutorialSlug }: StepTimelineProps) {
+  const StepLink = tutorialSlug ? Link : 'a'
+
   return (
     <aside className="hidden lg:block w-72 shrink-0 h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto py-8 pl-4 pr-6 border-r border-zinc-800 scrollbar-thin scrollbar-thumb-zinc-800 hover:scrollbar-thumb-zinc-700">
       <h5 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-6 px-2">
@@ -32,7 +36,10 @@ export function StepTimeline({ steps }: StepTimelineProps) {
                   : ''
               }`}
           >
-            <a href={`#${step.id}`} className="flex items-start gap-3 py-2 group">
+            <StepLink
+              href={tutorialSlug ? `/tutorials/${tutorialSlug}/${step.number}` : `#${step.id}`}
+              className="flex items-start gap-3 py-2 group"
+            >
               {/* Circle */}
               <div
                 className={`w-6 h-6 rounded-full border-2 text-[10px] flex items-center justify-center shrink-0 z-10 step-circle transition-colors font-bold ${step.status === 'completed'
@@ -64,7 +71,7 @@ export function StepTimeline({ steps }: StepTimelineProps) {
                   {step.duration}
                 </p>
               </div>
-            </a>
+            </StepLink>
 
             {/* Connector Line */}
             {index < steps.length - 1 && (

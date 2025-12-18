@@ -1,11 +1,13 @@
 'use client'
 
-import { ExternalLink, ArrowRight } from 'lucide-react'
+import { useState } from 'react'
+import { ExternalLink, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { toggleStepCompletion } from '@/app/tutorials/actions'
 
 type TechStack = {
   name: string
   description: string
-  icon: string
+  icon: string | null
   url?: string
 }
 
@@ -13,9 +15,40 @@ type ProgressCardProps = {
   progress: number
   message: string
   techStack?: TechStack[]
+  tutorialId?: string
+  currentStepNumber?: number
+  isCurrentStepCompleted?: boolean
 }
 
-export function ProgressCard({ progress, message, techStack = [] }: ProgressCardProps) {
+export function ProgressCard({
+  progress,
+  message,
+  techStack = [],
+  tutorialId,
+  currentStepNumber,
+  isCurrentStepCompleted = false,
+}: ProgressCardProps) {
+  const [isCompleted, setIsCompleted] = useState(isCurrentStepCompleted)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleToggleCompletion = async () => {
+    if (!tutorialId || !currentStepNumber) return
+
+    setIsLoading(true)
+    try {
+      const result = await toggleStepCompletion(tutorialId, currentStepNumber)
+      if (result.success) {
+        setIsCompleted(result.completed)
+        // 페이지 새로고침으로 진행률 업데이트
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Failed to toggle step completion:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <aside className="hidden xl:block w-80 shrink-0 h-[calc(100vh-4rem)] sticky top-16 py-8 px-6">
       {/* Progress Card */}
@@ -31,9 +64,29 @@ export function ProgressCard({ progress, message, techStack = [] }: ProgressCard
           />
         </div>
         <p className="text-xs text-zinc-400 mb-4">{message}</p>
-        <button className="w-full bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold py-2.5 rounded-lg transition-colors border border-zinc-700">
-          진행상황 저장하기
-        </button>
+
+        {tutorialId && currentStepNumber && (
+          <button
+            onClick={handleToggleCompletion}
+            disabled={isLoading}
+            className={`w-full text-xs font-bold py-2.5 rounded-lg transition-colors border flex items-center justify-center gap-2 ${
+              isCompleted
+                ? 'bg-green-600 hover:bg-green-700 text-white border-green-600'
+                : 'bg-zinc-800 hover:bg-zinc-700 text-white border-zinc-700'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {isLoading ? (
+              '저장 중...'
+            ) : isCompleted ? (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                이 단계 완료됨
+              </>
+            ) : (
+              '이 단계 완료하기'
+            )}
+          </button>
+        )}
       </div>
 
       {/* Tech Stack */}
@@ -51,7 +104,13 @@ export function ProgressCard({ progress, message, techStack = [] }: ProgressCard
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-2 rounded hover:bg-zinc-900 transition-colors group"
               >
-                <img src={tech.icon} className="w-8 h-8 rounded-lg" alt={tech.name} />
+                {tech.icon ? (
+                  <img src={tech.icon} className="w-8 h-8 rounded-lg" alt={tech.name} />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500">
+                    {tech.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div className="flex-1">
                   <div className="text-sm font-bold text-zinc-300 group-hover:text-white">
                     {tech.name}
